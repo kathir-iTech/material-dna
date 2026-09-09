@@ -27,7 +27,11 @@ function lexicalSimilarity(a: string, b: string): number {
   const union = new Set([...ta, ...tb]);
   // Weight by rarity: tokens appearing in both descriptions matter more.
   const weight = common.size * 1.5;
-  return Math.round((common.size / Math.max(union.size, 1)) * 100) + Math.min(weight * 4, 20);
+  const base = Math.round((common.size / Math.max(union.size, 1)) * 100);
+  const bonus = Math.min(weight * 4, 20);
+  // Bounded to 100: the raw score would otherwise exceed 100% for near-identical
+  // text (identical descriptions hit 120), which reads as broken math in the UI.
+  return Math.min(100, base + bonus);
 }
 
 /** Character-level similarity (Dice on bigrams). */

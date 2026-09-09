@@ -84,7 +84,7 @@ export function StatusGlyph({ status }: { status: "PASS" | "WARNING" | "CONFLICT
   );
 }
 
-export function RiskBadge({ risk }: { risk: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" }) {
+export function RiskBadge({ risk, label }: { risk: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"; label?: string }) {
   const meta = {
     LOW: { tone: "border-dna-green/40 text-dna-green bg-dna-green/10" as const, icon: STATUS_ICONS.green },
     MEDIUM: { tone: "border-dna-blue/40 text-dna-blue bg-dna-blue/10" as const, icon: STATUS_ICONS.amber },
@@ -94,7 +94,7 @@ export function RiskBadge({ risk }: { risk: "LOW" | "MEDIUM" | "HIGH" | "CRITICA
   return (
     <span className={cn("inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[11px]", meta.tone)}>
       {meta.icon}
-      {risk}
+      {label ? <>{label}: {risk}</> : risk}
     </span>
   );
 }

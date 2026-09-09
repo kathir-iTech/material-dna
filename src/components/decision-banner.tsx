@@ -39,7 +39,7 @@ export function DecisionBanner({ result }: { result: ResolutionResult }) {
           <div>
             <div className="flex items-center gap-2">
               <DecisionBadge decision={result.decision} size="lg" />
-              <RiskBadge risk={result.risk} />
+              <RiskBadge risk={result.risk} label="Risk" />
             </div>
             <p className="mt-1 max-w-xl text-sm text-dna-muted">{result.reason}</p>
           </div>
