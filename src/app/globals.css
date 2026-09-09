@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0e14;
+  --foreground: #dbe4ee;
+}
+
+@theme inline {
+  --color-dna-bg: #0a0e14;
+  --color-dna-panel: #10161f;
+  --color-dna-panel2: #151d29;
+  --color-dna-border: #1e2937;
+  --color-dna-border2: #2a3a4d;
+  --color-dna-text: #dbe4ee;
+  --color-dna-muted: #8b9cb0;
+  --color-dna-faint: #5c6c80;
+  --color-dna-accent: #38bdf8;
+  --color-dna-cyan: #22d3ee;
+  --color-dna-green: #34d399;
+  --color-dna-red: #f87171;
+  --color-dna-amber: #fbbf24;
+  --color-dna-blue: #60a5fa;
+  --color-dna-purple: #a78bfa;
+}
+
+html {
+  scrollbar-color: #2a3a4d #0a0e14;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.25);
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  outline-offset: 2px;
+}
+
+*:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
