@@ -1,10 +1,28 @@
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { extractMaterialDNA } from "@/lib/material-dna/extraction";
 import { normalizeDescription, canonicalGrade } from "@/lib/material-dna/normalization";
 import { evaluateConstraints, criticalConflicts } from "@/lib/material-dna/constraints";
-import { computeCandidateScore, decide } from "@/lib/material-dna/matching";
+import {
+  computeCandidateScore,
+  decide,
+  semanticSimilarity,
+  buildIdf,
+  documentFrequency,
+  CORPUS_IDF,
+} from "@/lib/material-dna/matching";
+import {
+  generateCanonicalId,
+  canonicalAttributeSet,
+  canonicalHash4,
+} from "@/lib/material-dna/canonical-id";
 import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
-import { materialRecords } from "@/data/demo";
+import { materialRecords, canonicalMaterials } from "@/data/demo";
+import { ExplanationPanel } from "@/components/explanation-panel";
+import { CandidateTable } from "@/components/candidate-table";
+import { DecisionBanner } from "@/components/decision-banner";
+import { SimilarityWarning } from "@/components/similarity-warning";
 
 function resolve(desc: string) {
   const input = buildInputRecord(desc);
@@ -224,5 +242,205 @@ describe("Determinism", () => {
     const r2 = resolve("HEX BOLT M12 X 60 8.8 ZP DIN 931");
     expect(r1.decision).toBe(r2.decision);
     expect(r1.candidates[0].targetRecord.id).toBe(r2.candidates[0].targetRecord.id);
+  });
+});
+
+describe("TF-IDF (real corpus statistics)", () => {
+  it("weights a term appearing in every document lower than a term appearing in only one document", () => {
+    // Real slice of the demo corpus: every valve record contains "valve",
+    // while "bore" occurs in exactly one of them.
+    const docs = materialRecords
+      .filter((r) => /valve/i.test(r.rawDescription))
+      .map((r) => r.normalizedDescription);
+    expect(docs.length).toBeGreaterThan(1);
+
+    const df = documentFrequency(docs);
+    expect(df.get("valve")).toBe(docs.length); // present in EVERY document
+    expect(df.get("bore")).toBe(1); // present in exactly ONE document
+
+    const idf = buildIdf(docs);
+    const universal = idf.idf.get("valve")!;
+    const rare = idf.idf.get("bore")!;
+    expect(universal).toBeLessThan(rare);
+    // A term found in every document carries the minimum weight in the table.
+    expect(universal).toBe(Math.min(...idf.idf.values()));
+  });
+
+  it("builds the production IDF index from the actual demo corpus", () => {
+    expect(CORPUS_IDF.docCount).toBe(materialRecords.length);
+
+    const df = documentFrequency(materialRecords.map((r) => r.normalizedDescription));
+    // Rarest first: as document frequency rises, IDF must never rise.
+    const byDf = [...df.entries()].sort((a, b) => a[1] - b[1]);
+    const rarest = byDf[0];
+    const mostCommon = byDf[byDf.length - 1];
+    expect(mostCommon[1]).toBeGreaterThan(1);
+    expect(rarest[1]).toBe(1);
+
+    expect(CORPUS_IDF.idf.get(mostCommon[0])!).toBeLessThan(
+      CORPUS_IDF.idf.get(rarest[0])!
+    );
+
+    // IDF must be non-increasing as document frequency rises: it is a function
+    // of corpus statistics, not of the pair being compared.
+    let previous = Infinity;
+    for (const [term, count] of byDf) {
+      const weight = CORPUS_IDF.idf.get(term)!;
+      expect(count).toBeGreaterThan(0);
+      expect(weight).toBeLessThanOrEqual(previous);
+      previous = weight;
+    }  });
+
+  it("returns TF-IDF as its own named component of the score breakdown", () => {
+    const a = "HEX BOLT M12 X 60 8.8 ZP DIN 931";
+    const b = "HEXAGON HEAD BOLT M12 X 60 CLASS 8.8 ZINC PLATED DIN 931";
+    const score = computeCandidateScore(
+      extractMaterialDNA(normalizeDescription(a)),
+      extractMaterialDNA(normalizeDescription(b)),
+      a,
+      b
+    );
+
+    expect(score).toHaveProperty("tfidfSimilarity");
+    expect(score.tfidfSimilarity).toBeGreaterThanOrEqual(0);
+    expect(score.tfidfSimilarity).toBeLessThanOrEqual(100);
+    expect(score.tokenOverlap).toBeGreaterThanOrEqual(0);
+    expect(score.diceSimilarity).toBeGreaterThanOrEqual(0);
+
+    const sem = semanticSimilarity(a, b);
+    expect(score.tokenOverlap).toBe(sem.lexical);
+    expect(score.diceSimilarity).toBe(sem.character);
+    expect(score.tfidfSimilarity).toBe(sem.tfidf);
+
+    // Identical text is a perfect TF-IDF match.
+    expect(semanticSimilarity(a, a).tfidf).toBe(100);
+  });
+});
+
+describe("Canonical national material code", () => {
+  const desc = "HEX BOLT M12 X 60 8.8 ZP DIN 931";
+
+  it("produces an identical code for identical DNA", () => {
+    const a = extractMaterialDNA(normalizeDescription(desc));
+    const b = extractMaterialDNA(normalizeDescription(desc));
+    expect(canonicalAttributeSet(a)).toBe(canonicalAttributeSet(b));
+    expect(generateCanonicalId(a)).toBe(generateCanonicalId(b));
+  });
+
+  it("produces a different code when a critical attribute (grade) differs", () => {
+    const a = extractMaterialDNA(normalizeDescription(desc));
+    const b = extractMaterialDNA(normalizeDescription(desc.replace("8.8", "10.9")));
+    expect(a.grade.value).toBe("8.8");
+    expect(b.grade.value).toBe("10.9");
+
+    expect(canonicalAttributeSet(a)).not.toBe(canonicalAttributeSet(b));
+    expect(canonicalHash4(a)).not.toBe(canonicalHash4(b));
+
+    const codeA = generateCanonicalId(a);
+    const codeB = generateCanonicalId(b);
+    expect(codeA).not.toBe(codeB);
+    // Grade is not a named segment, so only the hash tail may change.
+    expect(codeA.slice(0, codeA.lastIndexOf("-"))).toBe(
+      codeB.slice(0, codeB.lastIndexOf("-"))
+    );
+    expect(codeA.slice(-4)).not.toBe(codeB.slice(-4));
+  });
+
+  it("matches MDNA-{MATERIAL}-{TYPE}-{DIMENSION}-{STANDARD}-{HASH4}", () => {
+    const dna = extractMaterialDNA(normalizeDescription(desc));
+    const code = generateCanonicalId(dna);
+    expect(code).toMatch(/^MDNA-[A-Z0-9]+(?:-[A-Z0-9+]+)*-[0-9A-F]{4}$/);
+    // Segments are compacted, so the hyphens are exactly the five true
+    // separators: MDNA, MATERIAL, TYPE, DIMENSION, STANDARD, HASH4.
+    expect(code.split("-")).toHaveLength(6);
+    expect(code).toContain("HEXBOLT");
+    expect(code).toContain("M12X60MM");
+    expect(code).toContain("DIN931");
+  });
+
+  it("keeps every demo canonical id hyphen-free inside its segments", () => {
+    for (const c of canonicalMaterials) {
+      expect(c.canonicalId.split("-")).toHaveLength(6);
+    }
+  });
+
+  it("derives every demo canonical id from the generator and keeps them unique", () => {
+    expect(canonicalMaterials.length).toBeGreaterThan(0);
+    for (const c of canonicalMaterials) {
+      expect(c.canonicalId).toBe(generateCanonicalId(c.dna));
+      expect(c.canonicalId).toMatch(/^MDNA-/);
+    }
+    const ids = canonicalMaterials.map((c) => c.canonicalId);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe("UI surfaces the named scoring techniques", () => {
+  const result = resolveMaterialRecord(
+    buildInputRecord("HEX BOLT M12 X 60 8.8 ZP DIN 931"),
+    materialRecords
+  );
+
+  it("renders labelled sub-scores in the explanation panel", () => {
+    const html = renderToStaticMarkup(createElement(ExplanationPanel, { result }));
+    expect(html).toContain("Token overlap:");
+    expect(html).toContain("Dice similarity:");
+    expect(html).toContain("TF-IDF:");
+    expect(html).toContain("Attribute agreement:");
+    expect(html).toContain("Final score:");
+  });
+
+  it("explains each technique with a one-line definition", () => {
+    const html = renderToStaticMarkup(createElement(ExplanationPanel, { result }));
+    expect(html).toContain("Shared words between the two descriptions");
+    expect(html).toContain("Shared character patterns");
+    expect(html).toContain(
+      "Weighted by how distinctive each word is across the whole material catalogue"
+    );
+    expect(html).toContain("Structured engineering attributes that agree");
+  });
+
+  it("renders labelled sub-scores in the candidate table, each with a tooltip", () => {
+    const html = renderToStaticMarkup(
+      createElement(CandidateTable, {
+        candidates: result.candidates.slice(0, 5),
+        selectedId: result.selectedCandidate?.targetRecord.sourceCode ?? null,
+        onSelect: () => {},
+        onInspect: () => {},
+      })
+    );
+    expect(html).toContain("Token overlap:");
+    expect(html).toContain("Dice similarity:");
+    expect(html).toContain("TF-IDF:");
+    expect(html).toContain("Attribute agreement");
+    expect(html).toContain('title="Shared words between the two descriptions"');
+    expect(html).toContain('title="Shared character patterns"');
+    expect(html).toContain(
+      'title="Weighted by how distinctive each word is across the whole material catalogue"'
+    );
+  });
+
+  it("shows the same named breakdown in the decision banner (resolve page)", () => {
+    const html = renderToStaticMarkup(createElement(DecisionBanner, { result }));
+    expect(html).toContain("Token overlap");
+    expect(html).toContain("Dice similarity");
+    expect(html).toContain("TF-IDF");
+    expect(html).toContain("Attribute agreement");
+    expect(html).not.toContain("Top similarity");
+  });
+
+  it("shows the same named breakdown in the similarity warning", () => {
+    const candidate = result.selectedCandidate!;
+    const html = renderToStaticMarkup(
+      createElement(SimilarityWarning, {
+        similarity: candidate.similarityScore,
+        score: candidate.scoreDetails,
+        constraint: candidate.criticalConflicts[0] ?? null,
+      })
+    );
+    expect(html).toContain("Token overlap");
+    expect(html).toContain("Dice similarity");
+    expect(html).toContain("TF-IDF");
+    expect(html).toContain("Attribute agreement");
   });
 });

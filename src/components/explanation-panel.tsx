@@ -1,8 +1,9 @@
-import { Check, X, HelpCircle, ArrowRight } from "lucide-react";
+import { Check, X, HelpCircle, ArrowRight, Activity } from "lucide-react";
 import type { ResolutionResult } from "@/types/domain";
 import type { ScoredCandidate } from "@/lib/material-dna/matching";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { DecisionBadge } from "@/components/ui/status";
+import { SubScoreList, SubScoreHelp } from "@/components/score-breakdown";
 
 export function ExplanationPanel({
   result,
@@ -94,6 +95,14 @@ export function ExplanationPanel({
               </li>
             ))}
           </ul>
+        </div>
+
+        <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
+          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-cyan">
+            <Activity size={12} /> Score breakdown
+          </div>
+          <SubScoreList score={target.scoreDetails} outcome />
+          <SubScoreHelp className="text-dna-faint/80" />
         </div>
 
         <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">

@@ -1,12 +1,15 @@
-import type { ConstraintResult } from "@/types/domain";
+import type { CandidateScore, ConstraintResult } from "@/types/domain";
 import { Card } from "@/components/ui/card";
 import { DecisionBadge } from "@/components/ui/status";
+import { SCORE_DEFINITIONS } from "@/components/score-breakdown";
 
 export function SimilarityWarning({
   similarity,
+  score,
   constraint,
 }: {
   similarity: number;
+  score?: CandidateScore | null;
   constraint: ConstraintResult | null;
 }) {
   return (
@@ -17,6 +20,23 @@ export function SimilarityWarning({
             SEMANTICALLY SIMILAR <span className="text-dna-text">{similarity}%</span>
           </span>
         </div>
+        {score && (
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 font-mono text-xs text-dna-muted">
+            <span title={SCORE_DEFINITIONS.tokenOverlap}>
+              Token overlap <span className="text-dna-text">{score.tokenOverlap}%</span>
+            </span>
+            <span title={SCORE_DEFINITIONS.diceSimilarity}>
+              Dice similarity <span className="text-dna-text">{score.diceSimilarity}%</span>
+            </span>
+            <span title={SCORE_DEFINITIONS.tfidfSimilarity}>
+              TF-IDF <span className="text-dna-text">{score.tfidfSimilarity}%</span>
+            </span>
+            <span title={SCORE_DEFINITIONS.attributeAgreement}>
+              Attribute agreement{" "}
+              <span className="text-dna-text">{score.attributeAgreement}%</span>
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-dna-muted">
           <span>But</span>
           <span className="h-px w-16 bg-dna-border2" />

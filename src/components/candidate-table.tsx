@@ -2,6 +2,7 @@ import { Eye } from "lucide-react";
 import type { ScoredCandidate } from "@/lib/material-dna/matching";
 import { Card } from "@/components/ui/card";
 import { DecisionBadge } from "@/components/ui/status";
+import { SCORE_DEFINITIONS } from "@/components/score-breakdown";
 import { cn } from "@/lib/utils";
 
 export function CandidateTable({
@@ -30,7 +31,9 @@ export function CandidateTable({
               <th className="px-4 py-2 font-medium">Material ID</th>
               <th className="px-2 py-2 font-medium">Description</th>
               <th className="px-2 py-2 font-medium">Similarity</th>
-              <th className="px-2 py-2 font-medium">Attr Match</th>
+              <th className="px-2 py-2 font-medium" title={SCORE_DEFINITIONS.attributeAgreement}>
+                Attribute agreement
+              </th>
               <th className="px-2 py-2 font-medium">Conflicts</th>
               <th className="px-2 py-2 font-medium">Decision</th>
               <th className="px-4 py-2 font-medium" />
@@ -64,8 +67,21 @@ export function CandidateTable({
                   <td className="max-w-72 truncate px-2 py-2 text-dna-text">
                     {c.targetRecord.rawDescription}
                   </td>
-                  <td className="px-2 py-2 font-mono text-dna-text">
-                    {c.similarityScore.toFixed(1)}%
+                  <td className="px-2 py-2 align-top">
+                    <div className="font-mono text-dna-text">
+                      {c.similarityScore.toFixed(1)}%
+                    </div>
+                    <div className="mt-1 space-y-0.5 text-[10px] leading-3 text-dna-faint">
+                      <div title={SCORE_DEFINITIONS.tokenOverlap}>
+                        Token overlap: {c.scoreDetails.tokenOverlap}%
+                      </div>
+                      <div title={SCORE_DEFINITIONS.diceSimilarity}>
+                        Dice similarity: {c.scoreDetails.diceSimilarity}%
+                      </div>
+                      <div title={SCORE_DEFINITIONS.tfidfSimilarity}>
+                        TF-IDF: {c.scoreDetails.tfidfSimilarity}%
+                      </div>
+                    </div>
                   </td>
                   <td className="px-2 py-2 font-mono text-dna-muted">{c.attributeScore}%</td>
                   <td className="px-2 py-2 font-mono">

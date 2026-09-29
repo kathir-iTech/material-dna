@@ -66,6 +66,12 @@ export interface ConstraintResult {
 
 export interface CandidateScore {
   semanticSimilarity: number;
+  /** Token-set overlap sub-score (named algorithm, surfaced in the UI). */
+  tokenOverlap: number;
+  /** Character-bigram Dice similarity sub-score. */
+  diceSimilarity: number;
+  /** Corpus TF-IDF cosine similarity sub-score. */
+  tfidfSimilarity: number;
   attributeAgreement: number;
   conflictPenalty: number;
   evidenceCoverage: number;

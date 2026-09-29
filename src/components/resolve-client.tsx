@@ -128,6 +128,7 @@ export function ResolveClient() {
           {result.decision === "DO_NOT_MERGE" && result.selectedCandidate && (
             <SimilarityWarning
               similarity={result.selectedCandidate.similarityScore}
+              score={result.selectedCandidate.scoreDetails}
               constraint={
                 result.selectedCandidate.criticalConflicts[0] ?? null
               }

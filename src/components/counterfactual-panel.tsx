@@ -4,6 +4,7 @@ import { FlaskConical, ArrowDown } from "lucide-react";
 import type { CounterfactualResult } from "@/types/domain";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { DecisionBadge } from "@/components/ui/status";
+import { SubScoreList } from "@/components/score-breakdown";
 import type { UseResolverReturn } from "@/hooks/use-resolver-types";
 import type { CounterfactualChange } from "@/types/domain";
 
@@ -75,6 +76,12 @@ export function CounterfactualPanel({ resolver }: { resolver: UseResolverReturn 
               <div className="mt-1 font-mono text-xs text-dna-muted">
                 {(output.before.selectedCandidate?.similarityScore ?? 0).toFixed(1)}% similarity
               </div>
+              {output.before.selectedCandidate && (
+                <SubScoreList
+                  score={output.before.selectedCandidate.scoreDetails}
+                  className="mt-1"
+                />
+              )}
             </div>
             <div className="flex items-center justify-center text-dna-faint">
               <ArrowDown size={16} aria-hidden />
@@ -87,6 +94,12 @@ export function CounterfactualPanel({ resolver }: { resolver: UseResolverReturn 
               <div className="mt-1 font-mono text-xs text-dna-muted">
                 {(output.after.selectedCandidate?.similarityScore ?? 0).toFixed(1)}% similarity
               </div>
+              {output.after.selectedCandidate && (
+                <SubScoreList
+                  score={output.after.selectedCandidate.scoreDetails}
+                  className="mt-1"
+                />
+              )}
             </div>
             {output.constraintsActivated.length > 0 && (
               <div className="sm:col-span-3 mt-1 text-center">

@@ -13,6 +13,7 @@ import {
   conflictPenalty,
   vetoesMatch,
 } from "../constraints";
+import { CORPUS_IDF, tfidfSimilarity } from "./tfidf";
 
 // ---------------------------------------------------------------------------
 // Candidate generation + weighted scoring (deterministic, inspectable).
@@ -54,15 +55,19 @@ export interface SemanticScore {
   final: number;
   lexical: number;
   character: number;
+  tfidf: number;
 }
 
 export function semanticSimilarity(a: string, b: string): SemanticScore {
   const lexical = Math.round(lexicalSimilarity(a, b));
   const char = characterSimilarity(a, b);
+  const tfidf = tfidfSimilarity(CORPUS_IDF, a, b);
   const final = Math.round(
-    lexical * CONFIG.SIMILARITY.TOKEN_WEIGHT + char * CONFIG.SIMILARITY.CHARACTER_WEIGHT
+    lexical * CONFIG.SIMILARITY.TOKEN_WEIGHT +
+      char * CONFIG.SIMILARITY.CHARACTER_WEIGHT +
+      tfidf * CONFIG.SIMILARITY.TFIDF_WEIGHT
   );
-  return { final, lexical, character: char };
+  return { final, lexical, character: char, tfidf };
 }
 
 function attrAgreement(left: MaterialDNA, right: MaterialDNA): { score: number; details: Record<string, boolean | "unknown"> } {
@@ -139,6 +144,9 @@ export function computeCandidateScore(
 
   return {
     semanticSimilarity: sem.final,
+    tokenOverlap: sem.lexical,
+    diceSimilarity: sem.character,
+    tfidfSimilarity: sem.tfidf,
     attributeAgreement: attr,
     conflictPenalty: penalty,
     evidenceCoverage: ev,
@@ -360,6 +368,11 @@ export const PrototypeCandidateScorer: CandidateScorer = {
     return computeCandidateScore(a.dna, b.dna, a.rawDescription, b.rawDescription);
   },
 };
+
+// TF-IDF is a separate, named scoring signal; re-exported here so the UI and
+// tests can reach it through the matching entry point.
+export { buildIdf, documentFrequency, tfidfSimilarity, CORPUS_IDF } from "./tfidf";
+export type { IdfIndex } from "./tfidf";
 
 // Prevent unused import lint for vetoesMatch export contract.
 void vetoesMatch;

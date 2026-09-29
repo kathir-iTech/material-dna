@@ -19,10 +19,11 @@ export const CONFIG = {
   MIN_EVIDENCE_COVERAGE: 40,
   MIN_SCORE_TO_RENDER: 10,
 
-  // Similarity blend
+  // Similarity blend: lexical token overlap + character (Dice) + corpus TF-IDF
   SIMILARITY: {
-    TOKEN_WEIGHT: 0.6,
-    CHARACTER_WEIGHT: 0.4,
+    TOKEN_WEIGHT: 0.45,
+    CHARACTER_WEIGHT: 0.3,
+    TFIDF_WEIGHT: 0.25,
   },
 
   DEPLOYMENT_BADGE: "PROTOTYPE",

@@ -5,6 +5,7 @@ import type { ScoredCandidate } from "@/lib/material-dna/matching";
 import { DecisionBadge } from "@/components/ui/status";
 import { Badge } from "@/components/ui/badge";
 import { ATTRIBUTE_META } from "@/lib/material-dna/config";
+import { SCORE_DEFINITIONS, SubScoreHelp } from "@/components/score-breakdown";
 
 export function DiscoveryDrawer({
   candidate,
@@ -102,15 +103,24 @@ export function DiscoveryDrawer({
           <div className="rounded border border-dna-border2 bg-dna-panel2 p-3 text-[11px] text-dna-muted">
             <div className="uppercase tracking-wider text-dna-faint">Scoring breakdown</div>
             <div className="mt-2 grid grid-cols-2 gap-2 font-mono">
-              <span>Similarity</span>
+              <span>Similarity (best variant)</span>
               <span className="text-right text-dna-text">{candidate.similarityScore.toFixed(1)}%</span>
-              <span>Attribute agreement</span>
+              <span title={SCORE_DEFINITIONS.tokenOverlap}>Token overlap</span>
+              <span className="text-right text-dna-text">{candidate.scoreDetails.tokenOverlap}%</span>
+              <span title={SCORE_DEFINITIONS.diceSimilarity}>Dice similarity</span>
+              <span className="text-right text-dna-text">{candidate.scoreDetails.diceSimilarity}%</span>
+              <span title={SCORE_DEFINITIONS.tfidfSimilarity}>TF-IDF</span>
+              <span className="text-right text-dna-text">{candidate.scoreDetails.tfidfSimilarity}%</span>
+              <span title={SCORE_DEFINITIONS.attributeAgreement}>Attribute agreement</span>
               <span className="text-right text-dna-text">{candidate.attributeScore}%</span>
+              <span>Semantic blend</span>
+              <span className="text-right text-dna-text">{candidate.scoreDetails.semanticSimilarity}%</span>
               <span>Conflict penalty</span>
               <span className="text-right text-dna-red">-{candidate.scoreDetails.conflictPenalty}</span>
               <span>Evidence coverage</span>
               <span className="text-right text-dna-text">{candidate.evidenceCoverage}%</span>
             </div>
+            <SubScoreHelp className="text-dna-faint" />
           </div>
 
           <p className="text-[11px] text-dna-faint">

@@ -2,9 +2,10 @@ import { Check, X, AlertTriangle } from "lucide-react";
 import type { ResolutionResult } from "@/types/domain";
 import { DecisionBadge, RiskBadge } from "@/components/ui/status";
 import { Card } from "@/components/ui/card";
+import { SCORE_DEFINITIONS } from "@/components/score-breakdown";
 
 export function DecisionBanner({ result }: { result: ResolutionResult }) {
-  const conf = result.selectedCandidate?.similarityScore ?? 0;
+  const score = result.selectedCandidate?.scoreDetails ?? null;
   const criticals = result.selectedCandidate?.criticalConflicts ?? [];
 
   return (
@@ -54,8 +55,22 @@ export function DecisionBanner({ result }: { result: ResolutionResult }) {
           {criticals.length > 0 && (
             <span className="text-dna-red">{criticals.length} critical conflict(s)</span>
           )}
-          {result.decision === "MATCH" && (
-            <span>Top similarity {conf}%</span>
+          {score && (
+            <span className="flex flex-col items-end gap-0.5">
+              <span title={SCORE_DEFINITIONS.tokenOverlap}>
+                Token overlap <span className="text-dna-text">{score.tokenOverlap}%</span>
+              </span>
+              <span title={SCORE_DEFINITIONS.diceSimilarity}>
+                Dice similarity <span className="text-dna-text">{score.diceSimilarity}%</span>
+              </span>
+              <span title={SCORE_DEFINITIONS.tfidfSimilarity}>
+                TF-IDF <span className="text-dna-text">{score.tfidfSimilarity}%</span>
+              </span>
+              <span title={SCORE_DEFINITIONS.attributeAgreement}>
+                Attribute agreement{" "}
+                <span className="text-dna-text">{score.attributeAgreement}%</span>
+              </span>
+            </span>
           )}
         </div>
       </div>

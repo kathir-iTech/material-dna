@@ -8,6 +8,7 @@ import type {
 } from "@/types/domain";
 import { extractMaterialDNA } from "@/lib/material-dna/extraction";
 import { normalizeDescription } from "@/lib/material-dna/normalization";
+import { generateCanonicalId } from "@/lib/material-dna/canonical-id";
 
 // ---------------------------------------------------------------------------
 // DEMO DATA — synthetic / demonstration records. Not real CPSE production data.
@@ -166,12 +167,10 @@ export const materialRecords: MaterialRecord[] = RAW_RECORDS.map((raw) => {
 // ---------------------------------------------------------------------------
 
 const CANONICAL_SEEDS: Array<{
-  canonicalId: string;
   seedId: string;
   extraCodes: LegacyMapping[];
 }> = [
   {
-    canonicalId: "MAT-DNA-0001842",
     seedId: "REC-001",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "009821", sourceDescription: "HEXAGON HEAD BOLT M12 X 60 CLASS 8.8 ZINC PLATED DIN 931" },
@@ -179,7 +178,6 @@ const CANONICAL_SEEDS: Array<{
     ],
   },
   {
-    canonicalId: "MAT-DNA-0001901",
     seedId: "REC-013",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "014520", sourceDescription: "STAINLESS STEEL 304 SEAMLESS PIPE 50MM X 3MM" },
@@ -187,14 +185,12 @@ const CANONICAL_SEEDS: Array<{
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002102",
     seedId: "REC-026",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "020910", sourceDescription: "MILD STEEL PLATE 12MM IS 2062 E250" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002250",
     seedId: "REC-033",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "024120", sourceDescription: "3 CORE 2.5 SQMM COPPER XLPE CABLE" },
@@ -202,14 +198,12 @@ const CANONICAL_SEEDS: Array<{
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002401",
     seedId: "REC-039",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "026330", sourceDescription: "SS304 FULL PORT BLOWOUT PROOF BALL VALVE 15MM" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002605",
     seedId: "REC-053",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "032100", sourceDescription: "SKF 6205 DEEP GROOVE BALL BEARING 25X52X15" },
@@ -217,84 +211,72 @@ const CANONICAL_SEEDS: Array<{
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002715",
     seedId: "REC-057",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "034010", sourceDescription: "NBR RUBBER GASKET ID 100MM THK 3MM" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002848",
     seedId: "REC-062",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "036910", sourceDescription: "IS 2062 MS EQUAL ANGLE 50X50X5" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002913",
     seedId: "REC-068",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "039410", sourceDescription: "GRADE 12.9 SOCKET HEAD CAP SCREW M8 X 30" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003011",
     seedId: "REC-073",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "043300", sourceDescription: "DOL STARTER 7.5 HP AC3 CATEGORY" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003052",
     seedId: "REC-076",
     extraCodes: [
       { source: "Legacy ERP", legacyCode: "DRV-380-10H", sourceDescription: "3 PHASE 10HP VFD 380V" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003113",
     seedId: "REC-079",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "047200", sourceDescription: "LITHIUM BASED INDUSTRIAL GREASE NLGI 2" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003150",
     seedId: "REC-081",
     extraCodes: [
       { source: "Supplier Catalog", legacyCode: "WR-E7018", sourceDescription: "E7018 Welding Electrode 3.15mm 5 Kg" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003209",
     seedId: "REC-084",
     extraCodes: [
       { source: "CPSE-B", legacyCode: "049810", sourceDescription: "WHITE PTFE TEFLON SHEET 5MM THICK" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003384",
     seedId: "REC-092",
     extraCodes: [
       { source: "Legacy ERP", legacyCode: "GAUGE-100B", sourceDescription: "SS304 PRESSURE GAUGE 0-100 BAR 100MM DIAL" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0003419",
     seedId: "REC-095",
     extraCodes: [
       { source: "Legacy ERP", legacyCode: "CYL-63-300", sourceDescription: "300MM STROKE PNEUMATIC CYLINDER 63MM BORE" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002210",
     seedId: "REC-020",
     extraCodes: [
       { source: "CPSE-C", legacyCode: "PIPE-106-2S", sourceDescription: "CARBON STEEL PIPE 2 IN SCH 40 ASTM A106" },
     ],
   },
   {
-    canonicalId: "MAT-DNA-0002280",
     seedId: "REC-022",
     extraCodes: [
       { source: "Supplier Catalog", legacyCode: "GP-C-2IN", sourceDescription: "GI Pipe Class C 2 inch IS 1239" },
@@ -329,7 +311,7 @@ export const canonicalMaterials: CanonicalMaterial[] = CANONICAL_SEEDS.map((seed
   if (stds.length) dnaParts.push(stds.join(", "));
 
   return {
-    canonicalId: seed.canonicalId,
+    canonicalId: generateCanonicalId(record.dna),
     materialType: String(record.dna.materialType.value ?? "UNKNOWN"),
     normalizedIdentity: dnaParts.join(" | "),
     normalizedDescription: record.normalizedDescription,
