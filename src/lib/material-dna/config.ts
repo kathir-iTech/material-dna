@@ -24,6 +24,12 @@ export const CONFIG = {
     TOKEN_WEIGHT: 0.45,
     CHARACTER_WEIGHT: 0.3,
     TFIDF_WEIGHT: 0.25,
+    // Dense-retrieval signal (transformers.js cosine), FUSED into the blend
+    // only when a caller supplies one — never a decision input. When active,
+    // the three weights above are scaled by (1 - EMBEDDING_WEIGHT) so the
+    // blend still sums to 1.0. The veto (decide() critical-conflict branch)
+    // runs after scoring and is unaffected by any weight.
+    EMBEDDING_WEIGHT: 0.15,
   },
 
   DEPLOYMENT_BADGE: "PROTOTYPE",

@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { DemoBadge } from "@/components/ui/badge";
+import { SimilarityWarning } from "@/components/similarity-warning";
+import type { CandidateScore, ConstraintResult } from "@/types/domain";
 import {
   FlaskConical,
   Percent,
@@ -9,6 +11,7 @@ import {
   Goal,
   Network,
   Table2,
+  TrendingUp,
 } from "lucide-react";
 
 const EXPERIMENTAL: Record<string, "EXPERIMENTAL" | "PROTOTYPE" | "PROPOSED" | "FUTURE"> = {
@@ -38,6 +41,103 @@ const CAPABILITY_TABLE: Array<{ capability: string; status: string }> = [
   { capability: "National-scale deployment", status: "Future" },
   { capability: "Learned production model", status: "Future" },
 ];
+
+// ---------------------------------------------------------------------------
+// Measured 200-pair benchmark results.
+// Source: bench-verify.txt (harness re-run against the current engine,
+// post Phases 1-2 fixes). Numbers below are transcribed verbatim from that
+// run — do not edit by hand without re-running the harness.
+// ---------------------------------------------------------------------------
+
+const BENCHMARK_RUN_DATE = "30 Sep 2026";
+
+const BENCHMARK_HEADLINE = {
+  f1: 0.813,
+  precision: 0.8,
+  recall: 0.825,
+  abstainPct: 35.0,
+  abstainCount: 70,
+  total: 200,
+  decided: 130,
+  tp: 52,
+  fp: 13,
+  fn: 11,
+  tn: 54,
+  accuracyDecided: 81.5,
+  vetoPrecisionPct: 84.4,
+  vetoCorrect: 54,
+  vetoTotal: 64,
+  falseVetoes: 10,
+  decisions: { MATCH: 65, DO_NOT_MERGE: 64, NO_MATCH: 1, REVIEW: 70 },
+};
+
+const BENCHMARK_CATEGORIES: Array<{
+  category: string;
+  n: number;
+  pos: number;
+  match: number;
+  dnm: number;
+  review: number;
+  noMatch: number;
+}> = [
+  { category: "abbreviated_vs_full", n: 23, pos: 23, match: 7, dnm: 6, review: 10, noMatch: 0 },
+  { category: "actuator_difference", n: 2, pos: 0, match: 1, dnm: 0, review: 1, noMatch: 0 },
+  { category: "angle_difference", n: 1, pos: 0, match: 1, dnm: 0, review: 0, noMatch: 0 },
+  { category: "capacitance_difference", n: 1, pos: 0, match: 0, dnm: 1, review: 0, noMatch: 0 },
+  { category: "capacity_difference", n: 3, pos: 0, match: 0, dnm: 1, review: 2, noMatch: 0 },
+  { category: "coating_difference", n: 1, pos: 0, match: 0, dnm: 0, review: 1, noMatch: 0 },
+  { category: "current_difference", n: 2, pos: 0, match: 0, dnm: 2, review: 0, noMatch: 0 },
+  { category: "drive_size_difference", n: 1, pos: 0, match: 0, dnm: 0, review: 1, noMatch: 0 },
+  { category: "electrode_difference", n: 1, pos: 0, match: 0, dnm: 1, review: 0, noMatch: 0 },
+  { category: "filtration_difference", n: 1, pos: 0, match: 0, dnm: 0, review: 1, noMatch: 0 },
+  { category: "grade_difference", n: 11, pos: 0, match: 0, dnm: 10, review: 1, noMatch: 0 },
+  { category: "grit_difference", n: 1, pos: 0, match: 0, dnm: 0, review: 1, noMatch: 0 },
+  { category: "hardness_difference", n: 1, pos: 0, match: 1, dnm: 0, review: 0, noMatch: 0 },
+  { category: "manufacturer_variation", n: 1, pos: 1, match: 0, dnm: 0, review: 1, noMatch: 0 },
+  { category: "material_difference", n: 3, pos: 0, match: 2, dnm: 1, review: 0, noMatch: 0 },
+  { category: "mesh_size_difference", n: 1, pos: 0, match: 1, dnm: 0, review: 0, noMatch: 0 },
+  { category: "pressure_difference", n: 3, pos: 0, match: 2, dnm: 1, review: 0, noMatch: 0 },
+  { category: "range_difference", n: 1, pos: 0, match: 1, dnm: 0, review: 0, noMatch: 0 },
+  { category: "section_difference", n: 1, pos: 0, match: 0, dnm: 0, review: 1, noMatch: 0 },
+  { category: "sensing_distance", n: 1, pos: 0, match: 0, dnm: 1, review: 0, noMatch: 0 },
+  { category: "size_difference", n: 52, pos: 0, match: 0, dnm: 34, review: 18, noMatch: 0 },
+  { category: "standard_mapping", n: 2, pos: 2, match: 0, dnm: 1, review: 0, noMatch: 1 },
+  { category: "type_difference", n: 7, pos: 0, match: 4, dnm: 1, review: 2, noMatch: 0 },
+  { category: "unit_normalization", n: 13, pos: 13, match: 7, dnm: 2, review: 4, noMatch: 0 },
+  { category: "viscosity_difference", n: 2, pos: 0, match: 0, dnm: 0, review: 2, noMatch: 0 },
+  { category: "voltage_difference", n: 2, pos: 0, match: 0, dnm: 0, review: 2, noMatch: 0 },
+  { category: "wattage_difference", n: 1, pos: 0, match: 0, dnm: 1, review: 0, noMatch: 0 },
+  { category: "word_reorder", n: 61, pos: 61, match: 38, dnm: 1, review: 22, noMatch: 0 },
+];
+
+// Pair #2 — SS304 vs SS316L, measured by the harness (identical engine path
+// as the Resolve page's SimilarityWarning moment).
+const PAIR_2_EXAMPLE = {
+  a: "SS304 stainless steel pipe 50mm OD x 3mm wall",
+  b: "SS316L stainless steel pipe 50mm OD x 3mm wall",
+  similarity: 95,
+  finalScore: 34,
+  score: {
+    semanticSimilarity: 94,
+    tokenOverlap: 100,
+    diceSimilarity: 89,
+    tfidfSimilarity: 89,
+    attributeAgreement: 76,
+    conflictPenalty: 55,
+    evidenceCoverage: 100,
+    finalScore: 34,
+  } satisfies CandidateScore,
+  constraint: {
+    attributes: ["grade"],
+    severity: "CRITICAL",
+    status: "CONFLICT",
+    leftValue: "304",
+    rightValue: "316L",
+    rule: "critical-grade-mismatch",
+    explanation: "Material property class differs: 304 vs 316L.",
+    attributeLabel: "Grade",
+  } satisfies ConstraintResult,
+};
 
 export default function ResearchClient() {
   return (
@@ -137,6 +237,184 @@ export default function ResearchClient() {
           </CardBody>
         </Card>
       </div>
+
+      {/* ============================================================
+          MEASURED 200-PAIR BENCHMARK RESULTS (post-Phase 1-2 engine)
+          Deliberately its own section — never blended with the
+          Abt-Buy academic baseline shown above.
+          ============================================================ */}
+      <Card>
+        <CardHeader
+          title="Measured Results — Our 200-Pair Benchmark"
+          subtitle={`Measured on our own 200-pair benchmark, run ${BENCHMARK_RUN_DATE}.`}
+          right={<TrendingUp size={15} className="text-dna-green" />}
+        />
+        <CardBody className="space-y-4">
+          <div className="rounded border border-dna-green/40 bg-dna-green/5 px-4 py-3">
+            <p className="font-mono text-xs font-semibold text-dna-green">
+              Measured on our own 200-pair benchmark, run {BENCHMARK_RUN_DATE}
+            </p>
+            <p className="mt-1 text-xs text-dna-muted">
+              Team-created labelled pairs (100 match / 100 non-match, 28 categories), scored
+              pairwise by the current engine: pair (A, B) with A as input and B as the sole
+              candidate; the confusion matrix covers decided pairs only (REVIEW = abstention).
+            </p>
+            <p className="mt-1 text-[11px] text-dna-faint">
+              Separate benchmark from the academic Abt-Buy baseline shown under &ldquo;Prototype
+              Experiments&rdquo; above — different dataset, different task. The two sets of
+              numbers are never combined into one table.
+            </p>
+          </div>
+
+          {/* Headline metrics */}
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {[
+              { label: "F1", value: BENCHMARK_HEADLINE.f1.toFixed(3), tone: "text-dna-green" },
+              { label: "Precision (MATCH)", value: BENCHMARK_HEADLINE.precision.toFixed(3), tone: "text-dna-text" },
+              { label: "Recall (MATCH)", value: BENCHMARK_HEADLINE.recall.toFixed(3), tone: "text-dna-text" },
+              { label: "Abstain (REVIEW)", value: `${BENCHMARK_HEADLINE.abstainPct.toFixed(1)}%`, tone: "text-dna-amber" },
+            ].map((m) => (
+              <div key={m.label} className="rounded border border-dna-border bg-dna-panel2 p-3 text-center">
+                <div className={`font-mono text-2xl font-bold ${m.tone}`}>{m.value}</div>
+                <div className="mt-1 text-[11px] uppercase tracking-wider text-dna-faint">{m.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Confusion / decisions detail */}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded border border-dna-border bg-dna-panel2 p-3 text-xs text-dna-muted">
+              <p className="mb-1 font-mono text-[11px] uppercase tracking-wider text-dna-faint">
+                Decision distribution (n = {BENCHMARK_HEADLINE.total})
+              </p>
+              <p className="font-mono">
+                <span className="text-dna-green">MATCH {BENCHMARK_HEADLINE.decisions.MATCH}</span>
+                {" · "}
+                <span className="text-dna-red">DO_NOT_MERGE {BENCHMARK_HEADLINE.decisions.DO_NOT_MERGE}</span>
+                {" · "}
+                <span className="text-dna-faint">NO_MATCH {BENCHMARK_HEADLINE.decisions.NO_MATCH}</span>
+                {" · "}
+                <span className="text-dna-amber">REVIEW {BENCHMARK_HEADLINE.decisions.REVIEW}</span>
+              </p>
+              <p className="mt-1 font-mono">
+                TP={BENCHMARK_HEADLINE.tp} FP={BENCHMARK_HEADLINE.fp} FN={BENCHMARK_HEADLINE.fn} TN={BENCHMARK_HEADLINE.tn}
+                <span className="text-dna-faint"> (decided = {BENCHMARK_HEADLINE.decided})</span>
+              </p>
+              <p className="mt-1 text-[11px] text-dna-faint">
+                Accuracy on decided pairs: {BENCHMARK_HEADLINE.accuracyDecided.toFixed(1)}%
+              </p>
+            </div>
+            <div className="rounded border border-dna-border bg-dna-panel2 p-3 text-xs text-dna-muted">
+              <p className="mb-1 font-mono text-[11px] uppercase tracking-wider text-dna-faint">
+                Constraint-veto quality
+              </p>
+              <p className="font-mono">
+                veto precision{" "}
+                <span className="text-dna-text">{BENCHMARK_HEADLINE.vetoPrecisionPct.toFixed(1)}%</span>{" "}
+                <span className="text-dna-faint">
+                  ({BENCHMARK_HEADLINE.vetoCorrect}/{BENCHMARK_HEADLINE.vetoTotal} DO_NOT_MERGE correct)
+                </span>
+              </p>
+              <p className="mt-1 font-mono">
+                false vetoes (true matches blocked):{" "}
+                <span className="text-dna-text">{BENCHMARK_HEADLINE.falseVetoes}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Worked example — same confrontation moment as the Resolve page */}
+          <div>
+            <h4 className="text-sm font-semibold text-dna-text">
+              Worked example — SS304 vs SS316L (benchmark pair #2)
+            </h4>
+            <p className="mt-1 font-mono text-xs text-dna-muted">
+              A: <span className="text-dna-text">{PAIR_2_EXAMPLE.a}</span>
+            </p>
+            <p className="font-mono text-xs text-dna-muted">
+              B: <span className="text-dna-text">{PAIR_2_EXAMPLE.b}</span>
+            </p>
+            <div className="mt-2">
+              <SimilarityWarning
+                similarity={PAIR_2_EXAMPLE.similarity}
+                score={PAIR_2_EXAMPLE.score}
+                constraint={PAIR_2_EXAMPLE.constraint}
+              />
+            </div>
+            <p className="mt-2 text-xs text-dna-muted">
+              <span className="text-dna-faint">Aggregate backing:</span> final score{" "}
+              <span className="font-mono text-dna-text">{PAIR_2_EXAMPLE.finalScore}</span> with one
+              CRITICAL grade conflict — and this is not a cherry-picked anecdote: across the whole
+              benchmark the veto fired{" "}
+              <span className="font-mono text-dna-text">{BENCHMARK_HEADLINE.vetoTotal}</span> times,{" "}
+              <span className="font-mono text-dna-green">{BENCHMARK_HEADLINE.vetoCorrect}</span> of
+              them correct (
+              <span className="font-mono">{BENCHMARK_HEADLINE.vetoPrecisionPct.toFixed(1)}%</span>{" "}
+              precision), with only{" "}
+              <span className="font-mono">{BENCHMARK_HEADLINE.falseVetoes}</span> false vetoes. In
+              the <span className="font-mono">grade_difference</span> category that produced this
+              pair:{" "}
+              <span className="font-mono text-dna-text">
+                10 DO_NOT_MERGE / 1 REVIEW / 0 false MATCH
+              </span>{" "}
+              over 11 non-match pairs.
+            </p>
+          </div>
+
+          {/* Per-category table */}
+          <div>
+            <h4 className="text-sm font-semibold text-dna-text">
+              Per-category decisions — 200 pairs, 28 categories
+            </h4>
+            <p className="mt-1 text-[11px] text-dna-faint">
+              pos = ground-truth match pairs in the category; MATCH / DNM / REVIEW / NO_MATCH are
+              engine decisions. Engine error modes: MATCH on pos=0 rows, DNM on pos=n rows.
+            </p>
+            <div className="mt-2 overflow-x-auto rounded border border-dna-border">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-dna-border bg-dna-panel2 font-mono text-[10px] uppercase tracking-wider text-dna-faint">
+                    <th className="px-3 py-2 font-medium">Category</th>
+                    <th className="px-3 py-2 text-right font-medium">n</th>
+                    <th className="px-3 py-2 text-right font-medium">pos</th>
+                    <th className="px-3 py-2 text-right font-medium text-dna-green">MATCH</th>
+                    <th className="px-3 py-2 text-right font-medium text-dna-red">DNM</th>
+                    <th className="px-3 py-2 text-right font-medium text-dna-amber">REVIEW</th>
+                    <th className="px-3 py-2 text-right font-medium">NO_MATCH</th>
+                  </tr>
+                </thead>
+                <tbody className="font-mono">
+                  {BENCHMARK_CATEGORIES.map((row) => (
+                    <tr key={row.category} className="border-b border-dna-border/50">
+                      <td className="px-3 py-1.5 text-dna-text">{row.category}</td>
+                      <td className="px-3 py-1.5 text-right text-dna-muted">{row.n}</td>
+                      <td className="px-3 py-1.5 text-right text-dna-muted">{row.pos}</td>
+                      <td className="px-3 py-1.5 text-right text-dna-text">{row.match}</td>
+                      <td className="px-3 py-1.5 text-right text-dna-text">{row.dnm}</td>
+                      <td className="px-3 py-1.5 text-right text-dna-text">{row.review}</td>
+                      <td className="px-3 py-1.5 text-right text-dna-muted">{row.noMatch}</td>
+                    </tr>
+                  ))}
+                  <tr className="bg-dna-panel2 font-medium">
+                    <td className="px-3 py-1.5 text-dna-faint">total</td>
+                    <td className="px-3 py-1.5 text-right text-dna-text">200</td>
+                    <td className="px-3 py-1.5 text-right text-dna-text">100</td>
+                    <td className="px-3 py-1.5 text-right text-dna-green">65</td>
+                    <td className="px-3 py-1.5 text-right text-dna-red">64</td>
+                    <td className="px-3 py-1.5 text-right text-dna-amber">70</td>
+                    <td className="px-3 py-1.5 text-right text-dna-text">1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-2 text-[11px] text-dna-faint">
+              Known weaknesses visible in this table: 13 false MATCHes total — type_difference 4,
+              material_difference 2, pressure_difference 2, and one each in actuator, angle,
+              hardness, mesh_size and range. standard_mapping is 0 correct decisions out of 2.
+              Reported as measured — no category was excluded.
+            </p>
+          </div>
+        </CardBody>
+      </Card>
 
       {/* What remains to be validated */}
       <Card>

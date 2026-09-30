@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 const NAV = [
   { href: "/", label: "Resolve", exact: true },
   { href: "/review", label: "Review Queue" },
+  { href: "/migrate", label: "Bulk Migration" },
   { href: "/materials", label: "Materials" },
   { href: "/graph", label: "Identity Graph" },
   { href: "/research", label: "Research" },

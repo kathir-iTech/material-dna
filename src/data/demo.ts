@@ -432,15 +432,9 @@ export const seededReviewCases: ReviewCase[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Dataset statistics (computed from the actual local data)
+// Dataset statistics moved to src/lib/material-dna/dataset-stats.ts.
+//
+// They are computed from this corpus, so they must NOT live in this module:
+// the matcher (matching/tfidf.ts) imports materialRecords at module init, and
+// a stats function here that imports the matcher would close a require cycle.
 // ---------------------------------------------------------------------------
-
-export function datasetStats() {
-  return {
-    recordCount: materialRecords.length,
-    candidateLinks: Math.round(materialRecords.length * 1.6),
-    reviewsPending: seededReviewCases.filter((r) => r.status === "PENDING").length,
-    criticalConflicts: 12,
-    canonicalCount: canonicalMaterials.length,
-  };
-}

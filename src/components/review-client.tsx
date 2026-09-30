@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { seededReviewCases } from "@/data/demo";
+import { reviewQueueStore, useReviewQueue } from "@/hooks/use-review-queue";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RiskBadge } from "@/components/ui/status";
@@ -20,9 +20,10 @@ const STATUS_TONES: Record<ReviewCase["status"], "amber" | "green" | "red" | "bl
 const FILTERS = ["All", "High Risk", "Ambiguous", "Critical Conflict", "Pending"] as const;
 
 export function ReviewClient() {
-  const [queue, setQueue] = useState<ReviewCase[]>(seededReviewCases);
+  // Same shared store Resolve writes to — cases sent from Resolve show up here.
+  const queue = useReviewQueue();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
-  const [selectedId, setSelectedId] = useState<string | null>(seededReviewCases[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(queue[0]?.id ?? null);
   const [note, setNote] = useState("");
   const [actions, setActions] = useState<Record<string, string>>({});
 
@@ -39,18 +40,7 @@ export function ReviewClient() {
 
   const decide = (id: string, action: "APPROVED" | "REJECTED" | "OVERRIDDEN") => {
     setActions((prev) => ({ ...prev, [id]: action }));
-    setQueue((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? {
-              ...c,
-              status: action,
-              reviewerNote: action === "OVERRIDDEN" ? note || c.reviewerNote : c.reviewerNote,
-              reviewerDecisionAt: new Date().toISOString(),
-            }
-          : c
-      )
-    );
+    reviewQueueStore.dispatch(id, action, action === "OVERRIDDEN" ? note : undefined);
   };
 
   return (

@@ -5,6 +5,8 @@ import type {
   MaterialDNA,
 } from "@/types/domain";
 import { CONFIG } from "../config";
+import { dimensionListsEquivalent } from "../units";
+import { gradesEquivalent } from "../grade-equivalence";
 
 // ---------------------------------------------------------------------------
 // Constraint engine.
@@ -43,31 +45,30 @@ function hasAttr(a: string | null | undefined): boolean {
   return a !== null && a !== undefined && String(a).trim().length > 0;
 }
 
-function arrDiff(a: string[] | null | undefined, b: string[] | null | undefined): boolean {
-  if (!a || !b) return false;
-  if (a.length === 0 || b.length === 0) return false;
-  const na = a.map((x) => x.toLowerCase()).sort();
-  const nb = b.map((x) => x.toLowerCase()).sort();
-  return JSON.stringify(na) !== JSON.stringify(nb);
+// --- Coating/finish synonym group -----------------------------------------
+// These terms all denote a protective zinc-based finish, not a base-material
+// difference. "Zinc plated" vs "galvanised" must never fire the CRITICAL
+// material veto. Routed before the critical-conflict decision on purpose.
+const COATING_FINISH_TERMS = ["galvan", "zinc", "zn pl", "blue zinc", "hot dip", "hot-dip", "hdg"];
+
+function hasCoatingTerm(value: string): boolean {
+  const n = value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return COATING_FINISH_TERMS.some((t) => n.includes(t));
 }
 
-const COMPATIBLE_GRADE_GROUPS: Record<string, Set<string>> = {
-  // structural plate grades regarded as reference-related in the prototype
-  "E250": new Set(["E250", "E250A", "A36"]),
-  "E250A": new Set(["E250", "E250A", "A36"]),
-  "A36": new Set(["E250", "E250A", "A36"]),
-};
-
-function gradeCompatible(a: string, b: string): boolean {
-  const ka = a.toUpperCase();
-  const kb = b.toUpperCase();
-  if (ka === kb) return true;
-  const groupA = COMPATIBLE_GRADE_GROUPS[ka];
-  if (groupA && groupA.has(kb)) return true;
-  const groupB = COMPATIBLE_GRADE_GROUPS[kb];
-  if (groupB && groupB.has(ka)) return true;
-  return false;
+/** True when both values are the same coating/finish family (group synonyms). */
+export function coatingFinishEquivalent(a: unknown, b: unknown): boolean {
+  const x = String(a ?? "").toLowerCase().trim();
+  const y = String(b ?? "").toLowerCase().trim();
+  if (!x || !y) return false;
+  if (x === y) return true;
+  return hasCoatingTerm(x) && hasCoatingTerm(y);
 }
+
+// Cross-standard grade equivalence (55 labels, cited sources, deliberately
+// non-equivalent classes documented) lives in lib/grade-equivalence; the
+// engine only asks it whether two labels are reference-compatible. Anything
+// not in the table falls through to a CRITICAL mismatch.
 
 export function evaluateConstraints(
   left: MaterialDNA,
@@ -78,7 +79,7 @@ export function evaluateConstraints(
   // --- Grade constraint ---------------------------------------------------
   if (hasAttr(left.grade.value) && hasAttr(right.grade.value)) {
     if (diffAttr(left.grade.value, right.grade.value)) {
-      if (gradeCompatible(String(left.grade.value), String(right.grade.value))) {
+      if (gradesEquivalent(String(left.grade.value), String(right.grade.value))) {
         results.push(
           makeResult(
             "grade",
@@ -114,24 +115,43 @@ export function evaluateConstraints(
     const rm = String(right.material.value).toLowerCase();
     // stainless grades captured in `grade`; treat material family literal compare.
     if (lm !== rm) {
-      results.push(
-        makeResult(
-          "material",
-          "Material",
-          "CRITICAL",
-          "CONFLICT",
-          String(left.material.value),
-          String(right.material.value),
-          "critical-material-mismatch",
-          `Material composition differs: ${left.material.value} vs ${right.material.value}.`
-        )
-      );
+      if (coatingFinishEquivalent(lm, rm)) {
+        // Same protective finish family (zinc plated ~ galvanised): not a
+        // base-material conflict. Routed BEFORE the critical-conflict engine.
+        results.push(
+          makeResult(
+            "material",
+            "Material",
+            "WARNING",
+            "WARNING",
+            String(left.material.value),
+            String(right.material.value),
+            "coating-finish-equivalent",
+            "Coating/finish synonyms describe the same protective finish; base material is not in conflict."
+          )
+        );
+      } else {
+        results.push(
+          makeResult(
+            "material",
+            "Material",
+            "CRITICAL",
+            "CONFLICT",
+            String(left.material.value),
+            String(right.material.value),
+            "critical-material-mismatch",
+            `Material composition differs: ${left.material.value} vs ${right.material.value}.`
+          )
+        );
+      }
     }
   }
 
   // --- Dimensions constraint ----------------------------------------------
+  // Unit-aware equivalence (inch/mm/m, NPS/DN nominal sizes, token-structure
+  // differences) lives in lib/units; only a true size difference vetoes.
   if ((left.dimensions.value?.length ?? 0) > 0 && (right.dimensions.value?.length ?? 0) > 0) {
-    if (arrDiff(left.dimensions.value, right.dimensions.value)) {
+    if (!dimensionListsEquivalent(left.dimensions.value!, right.dimensions.value!)) {
       results.push(
         makeResult(
           "dimensions",

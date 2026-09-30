@@ -72,6 +72,12 @@ export interface CandidateScore {
   diceSimilarity: number;
   /** Corpus TF-IDF cosine similarity sub-score. */
   tfidfSimilarity: number;
+  /**
+   * Dense-retrieval sub-score (transformers.js cosine, 0-100), when a caller
+   * supplies an embedding signal. Ranking feature only — the decision comes
+   * from decide(), whose critical-conflict veto ignores scores entirely.
+   */
+  embeddingSimilarity?: number | null;
   attributeAgreement: number;
   conflictPenalty: number;
   evidenceCoverage: number;
@@ -213,4 +219,66 @@ export interface DemoScenario {
     grade?: string[];
     excludeSourceCodes?: string[];
   };
+}
+
+// ---------------------------------------------------------------------------
+// Bulk migration: CSV/XLSX upload -> batch resolve -> approve at scale.
+// ---------------------------------------------------------------------------
+
+export type MigrationRowStatus =
+  | "UNRESOLVED"
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED";
+
+export interface MigrationParseError {
+  row: number;
+  error: string;
+}
+
+export interface MigrationRow {
+  /** Stable id: `<batchId>-R<rowNumber>` (row number is 1-based in the file). */
+  id: string;
+  row: number;
+  source: string;
+  description: string;
+  status: MigrationRowStatus;
+  decision?: DecisionStatus;
+  reason?: string;
+  risk?: ResolutionResult["risk"];
+  confidence?: number;
+  candidateCode?: string | null;
+}
+
+/** One bulk approve/reject action. Undoable via rollback (LIFO op log). */
+export interface MigrationOp {
+  id: string;
+  at: string;
+  action: "APPROVED" | "REJECTED";
+  rowIds: string[];
+  /** Status of every affected row before the op was applied. */
+  prev: Record<string, MigrationRowStatus>;
+  note?: string;
+  rolledBack: boolean;
+}
+
+export interface MigrationBatch {
+  id: string;
+  fileName: string;
+  createdAt: string;
+  status: "IMPORTED" | "RESOLVED";
+  rows: MigrationRow[];
+  errors: MigrationParseError[];
+  ops: MigrationOp[];
+  auditEvents: AuditEvent[];
+}
+
+/** Slim per-row outcome returned by the batch resolve API. */
+export interface MigrationResolveResult {
+  rowId: string;
+  decision: DecisionStatus;
+  reason: string;
+  risk: ResolutionResult["risk"];
+  confidence: number;
+  candidateCode: string | null;
 }

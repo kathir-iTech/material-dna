@@ -8,8 +8,8 @@ import type {
   ResolutionResult,
 } from "@/types/domain";
 import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
-import { materialRecords, demoScenarios, seededReviewCases } from "@/data/demo";
-import type { ReviewCase } from "@/types/domain";
+import { materialRecords, demoScenarios } from "@/data/demo";
+import { buildReviewCase, reviewQueueStore, useReviewQueue } from "@/hooks/use-review-queue";
 import { evaluateConstraints } from "@/lib/material-dna/constraints";
 
 const STEPS: Omit<ExtractionStep, "status">[] = [
@@ -34,7 +34,8 @@ export function useResolver() {
   );
   const [result, setResult] = useState<ResolutionResult | null>(null);
   const [counterfactual, setCounterfactual] = useState<CounterfactualResult | null>(null);
-  const [reviewQueue, setReviewQueue] = useState<ReviewCase[]>(seededReviewCases);
+  // Shared with the Review page via use-review-queue — not a private copy.
+  const reviewQueue = useReviewQueue();
   const timersRef = useRef<number[]>([]);
 
   const clearTimers = useCallback(() => {
@@ -118,36 +119,12 @@ export function useResolver() {
 
   const sendToReview = useCallback(() => {
     if (!result) return;
-    const input = buildInputRecord(result.input.rawDescription);
-    const candidate = result.selectedCandidate?.targetRecord ?? null;
-    const reviewCase: ReviewCase = {
-      id: `REVIEW-${1041 + Math.floor(Math.random() * 8999)}`,
-      materialA: input,
-      materialB: candidate ?? input,
-      risk: result.risk,
-      systemRecommendation: result.decision,
-      reason: result.reason,
-      status: "PENDING",
-      confidence: result.evidenceCoverage,
-      createdAt: new Date().toISOString(),
-    };
-    setReviewQueue((prev) => [reviewCase, ...prev]);
+    reviewQueueStore.enqueue(buildReviewCase(result));
   }, [result]);
 
   const dispatchReview = useCallback(
     (id: string, action: "APPROVED" | "REJECTED" | "OVERRIDDEN", note?: string) => {
-      setReviewQueue((prev) =>
-        prev.map((r) =>
-          r.id === id
-            ? {
-                ...r,
-                status: action,
-                reviewerNote: note ?? r.reviewerNote,
-                reviewerDecisionAt: new Date().toISOString(),
-              }
-            : r
-        )
-      );
+      reviewQueueStore.dispatch(id, action, note);
     },
     []
   );

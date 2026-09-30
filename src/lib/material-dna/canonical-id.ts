@@ -66,28 +66,72 @@ export function canonicalHash4(dna: MaterialDNA): string {
     .slice(-4);
 }
 
+/** Code for an attribute that is missing — explicit, never silently empty. */
+export const UNKNOWN_SEGMENT = "UNK";
+
+/**
+ * Coating / finish words that must never appear inside the MATERIAL segment.
+ * They describe HOW a material is finished, not WHAT it is (a "Zinc Plated"
+ * bolt is not made of zinc), and they also arrive via the material-family
+ * dictionary in extraction (e.g. "zinc": "Zinc" at extraction/index.ts:139).
+ */
+const COATING_FINISH_WORDS = new Set([
+  "GALVANIZED",
+  "GALVANISED",
+  "ZINC",
+  "PLATED",
+  "COATED",
+  "COATING",
+  "HDG",
+  "ZP",
+  "ZN",
+  "PAINTED",
+  "POLISHED",
+  "PASSIVATED",
+  "PICKLED",
+  "OILED",
+  "ANODIZED",
+  "FINISH",
+]);
+
+/** Remove coating/finish words from the raw value before segmenting it. */
+function stripCoatingWords(value: unknown): unknown {
+  if (value === null || value === undefined) return value;
+  const words = String(value)
+    .split(/[\s-]+/)
+    .filter((w) => w.length > 0 && !COATING_FINISH_WORDS.has(w.toUpperCase()));
+  return words.join(" ");
+}
+
 function cleanPart(value: unknown): string {
   if (value === null || value === undefined) return "";
-  return String(value)
-    .trim()
-    .toUpperCase()
+  const upper = String(value).trim().toUpperCase();
+  // "1/2″ (12.7 mm)" -> "12.7MM" and "2″ (50.8 mm)" -> "50.8MM".
+  // The old compaction stripped the prime and parentheses, fusing the nominal
+  // with the derived value: "1/2" + "12.7" became "12127MM", "2" + "50.8"
+  // became "2508MM" — unreadable, and it also ate the decimal point.
+  const inch = /^(\d+(?:\s*\/\s*\d+)?(?:\.\d+)?)\s*″\s*\((\d+(?:\.\d+)?)\s*MM\)$/.exec(upper);
+  if (inch) return `${inch[2]}MM`;
+  return upper
     // "M12 × 60 mm" -> "M12X60MM": the multiplication sign is a letter-like
     // separator inside the value, not a segment boundary.
     .replace(/[×✕]/g, "X")
     // Compact the field's own value: no spaces, no internal hyphens, so the
     // only hyphens in the final code are the five true segment separators.
-    .replace(/[^A-Z0-9]/g, "");
+    // Decimal points ARE kept — "3.15 mm" must stay "3.15MM", not "315MM".
+    .replace(/[^A-Z0-9.]/g, "");
 }
 
 /**
  * One segment of the code: internal word breaks are stripped ("HEX BOLT" ->
  * "HEXBOLT", "DIN 931" -> "DIN931"). Multiple values inside one attribute are
  * joined with "+" so they stay distinguishable without introducing a hyphen.
+ * A missing/empty attribute becomes an explicit UNK segment.
  */
 function segment(value: unknown): string {
   const parts = Array.isArray(value) ? value : [value];
   const cleaned = parts.map(cleanPart).filter((p) => p.length > 0);
-  return cleaned.length > 0 ? cleaned.join("+") : "NA";
+  return cleaned.length > 0 ? cleaned.join("+") : UNKNOWN_SEGMENT;
 }
 
 /**
@@ -95,7 +139,7 @@ function segment(value: unknown): string {
  * Pure and stable: identical DNA in -> identical code out.
  */
 export function generateCanonicalId(dna: MaterialDNA): string {
-  const material = segment(attributeValue(dna, "material"));
+  const material = segment(stripCoatingWords(attributeValue(dna, "material")));
   const materialType = segment(attributeValue(dna, "materialType"));
   const dimensions = segment(attributeValue(dna, "dimensions"));
   const standard = segment(attributeValue(dna, "standard"));

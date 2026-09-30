@@ -11,13 +11,23 @@ import {
   evaluateConstraints,
   criticalConflicts,
   conflictPenalty,
+  coatingFinishEquivalent,
   vetoesMatch,
 } from "../constraints";
+import { dimensionMatchRatio } from "../units";
 import { CORPUS_IDF, tfidfSimilarity } from "./tfidf";
 
 // ---------------------------------------------------------------------------
 // Candidate generation + weighted scoring (deterministic, inspectable).
 // ---------------------------------------------------------------------------
+
+/**
+ * Dense-retrieval similarity signal (transformers.js cosine, scaled 0-100).
+ * Returns null when unavailable (model absent, pair not embedded, offline).
+ * PURE RANKING INPUT: it can move scores but never bypasses decide()'s
+ * critical-conflict veto — that branch runs before any threshold check.
+ */
+export type EmbeddingSignal = (a: string, b: string) => number | null;
 
 /** Order-independent token set similarity over normalized terms. */
 function lexicalSimilarity(a: string, b: string): number {
@@ -56,18 +66,40 @@ export interface SemanticScore {
   lexical: number;
   character: number;
   tfidf: number;
+  /** Dense-retrieval cosine (0-100) when a signal is supplied, else null. */
+  embedding: number | null;
 }
 
-export function semanticSimilarity(a: string, b: string): SemanticScore {
+export function semanticSimilarity(
+  a: string,
+  b: string,
+  signal?: EmbeddingSignal | null
+): SemanticScore {
   const lexical = Math.round(lexicalSimilarity(a, b));
   const char = characterSimilarity(a, b);
   const tfidf = tfidfSimilarity(CORPUS_IDF, a, b);
-  const final = Math.round(
-    lexical * CONFIG.SIMILARITY.TOKEN_WEIGHT +
-      char * CONFIG.SIMILARITY.CHARACTER_WEIGHT +
-      tfidf * CONFIG.SIMILARITY.TFIDF_WEIGHT
-  );
-  return { final, lexical, character: char, tfidf };
+  const embedding = signal ? signal(a, b) : null;
+
+  const final =
+    embedding === null
+      ? Math.round(
+          lexical * CONFIG.SIMILARITY.TOKEN_WEIGHT +
+            char * CONFIG.SIMILARITY.CHARACTER_WEIGHT +
+            tfidf * CONFIG.SIMILARITY.TFIDF_WEIGHT
+        )
+      : // Fused blend: existing weights scaled down so the blend sums to 1.0.
+        (() => {
+          const w = CONFIG.SIMILARITY.EMBEDDING_WEIGHT;
+          const k = 1 - w;
+          return Math.round(
+            lexical * CONFIG.SIMILARITY.TOKEN_WEIGHT * k +
+              char * CONFIG.SIMILARITY.CHARACTER_WEIGHT * k +
+              tfidf * CONFIG.SIMILARITY.TFIDF_WEIGHT * k +
+              embedding * w
+          );
+        })();
+
+  return { final, lexical, character: char, tfidf, embedding };
 }
 
 function attrAgreement(left: MaterialDNA, right: MaterialDNA): { score: number; details: Record<string, boolean | "unknown"> } {
@@ -107,23 +139,44 @@ function valuesEqual(a: unknown, b: unknown, key: string): boolean {
     Array.isArray(x) ? x.map((v) => normalizeTerm(String(v)).toLowerCase()) : [];
   const scalar = (x: unknown): string => normalizeTerm(String(x ?? "")).toLowerCase();
 
-  if (key === "standard" || key === "dimensions" || key === "electrical") {
+  if (key === "dimensions") {
+    const la = arr(a);
+    const ra = arr(b);
+    if (la.length === 0 || ra.length === 0) return false;
+    // Unit-aware (inch/mm/m, NPS/DN) equivalence, not string equality.
+    return dimensionMatchRatio(la, ra) >= 0.5;
+  }
+  if (key === "standard" || key === "electrical") {
     const la = arr(a);
     const ra = arr(b);
     const inter = la.filter((x) => ra.includes(x)).length;
     if (la.length === 0 || ra.length === 0) return false;
     return inter / Math.max(la.length, ra.length) >= 0.5;
   }
+  // Coating/finish synonyms agree for scoring as well as for the veto.
+  if (key === "material" || key === "coating") {
+    if (coatingFinishEquivalent(scalar(a), scalar(b))) return true;
+  }
   return scalar(a) === scalar(b);
 }
 
-export function computeCandidateScore(
+/**
+ * Full evaluation for one candidate pair: the score PLUS the constraints it
+ * was scored against. Callers that also need the constraint list (e.g. corpus
+ * statistics) use this to avoid evaluating constraints twice.
+ */
+export interface CandidateEvaluation extends CandidateScore {
+  constraints: ReturnType<typeof evaluateConstraints>;
+}
+
+export function computeCandidateEvaluation(
   left: MaterialDNA,
   right: MaterialDNA,
   leftDesc: string,
-  rightDesc: string
-): CandidateScore {
-  const sem = semanticSimilarity(leftDesc, rightDesc);
+  rightDesc: string,
+  signal?: EmbeddingSignal | null
+): CandidateEvaluation {
+  const sem = semanticSimilarity(leftDesc, rightDesc, signal);
   const attr = attrAgreement(left, right).score;
   const constraints = evaluateConstraints(left, right);
   const penalty = conflictPenalty(constraints);
@@ -147,10 +200,33 @@ export function computeCandidateScore(
     tokenOverlap: sem.lexical,
     diceSimilarity: sem.character,
     tfidfSimilarity: sem.tfidf,
+    embeddingSimilarity: sem.embedding,
     attributeAgreement: attr,
     conflictPenalty: penalty,
     evidenceCoverage: ev,
     finalScore: Math.round(final),
+    constraints,
+  };
+}
+
+export function computeCandidateScore(
+  left: MaterialDNA,
+  right: MaterialDNA,
+  leftDesc: string,
+  rightDesc: string,
+  signal?: EmbeddingSignal | null
+): CandidateScore {
+  const e = computeCandidateEvaluation(left, right, leftDesc, rightDesc, signal);
+  return {
+    semanticSimilarity: e.semanticSimilarity,
+    tokenOverlap: e.tokenOverlap,
+    diceSimilarity: e.diceSimilarity,
+    tfidfSimilarity: e.tfidfSimilarity,
+    embeddingSimilarity: e.embeddingSimilarity,
+    attributeAgreement: e.attributeAgreement,
+    conflictPenalty: e.conflictPenalty,
+    evidenceCoverage: e.evidenceCoverage,
+    finalScore: e.finalScore,
   };
 }
 
@@ -252,7 +328,8 @@ export type { ScoredCandidate } from "@/types/domain";
 
 export function generateCandidates(
   input: MaterialRecord,
-  corpus: MaterialRecord[]
+  corpus: MaterialRecord[],
+  signal?: EmbeddingSignal | null
 ): ScoredCandidate[] {
   const explosion = (r: MaterialRecord): string[] => [
     r.rawDescription,
@@ -268,13 +345,19 @@ export function generateCandidates(
       let best = 0;
       for (const a of inputExploded) {
         for (const b of candExploded) {
-          const s = semanticSimilarity(a, b).final;
+          const s = semanticSimilarity(a, b, signal).final;
           if (s > best) best = s;
         }
       }
 
       const constraints = evaluateConstraints(input.dna, rec.dna);
-      const score = computeCandidateScore(input.dna, rec.dna, input.rawDescription, rec.rawDescription);
+      const score = computeCandidateScore(
+        input.dna,
+        rec.dna,
+        input.rawDescription,
+        rec.rawDescription,
+        signal
+      );
       const decisionInfo = decide(score, constraints, input.dna);
 
       const criticals = criticalConflicts(constraints);

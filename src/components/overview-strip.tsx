@@ -1,4 +1,4 @@
-import { datasetStats } from "@/data/demo";
+import { datasetStats } from "@/lib/material-dna/dataset-stats";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -8,7 +8,7 @@ export function OverviewStrip() {
     { label: "Material records in demo", value: stats.recordCount },
     { label: "Candidate matches", value: stats.candidateLinks },
     { label: "Reviews pending", value: stats.reviewsPending },
-    { label: "Critical conflicts", value: stats.criticalConflicts },
+    { label: "Critical conflicts among candidates", value: stats.criticalConflicts },
     { label: "Canonical identities", value: stats.canonicalCount },
   ];
   return (

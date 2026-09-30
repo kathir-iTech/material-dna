@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
 import { materialRecords } from "@/data/demo";
+import { corpusTexts, createEmbeddingSignal } from "@/lib/material-dna/matching/embeddings";
+
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +25,14 @@ export async function POST(request: NextRequest) {
     }
 
     const input = buildInputRecord(description);
-    const result = resolveMaterialRecord(input, materialRecords);
+    // Dense-retrieval signal: fused ranking input under the existing scoring.
+    // If the model is unavailable this is null and the pipeline is unchanged.
+    const signal = await createEmbeddingSignal([
+      description,
+      input.normalizedDescription,
+      ...corpusTexts(materialRecords),
+    ]);
+    const result = resolveMaterialRecord(input, materialRecords, signal);
 
     return NextResponse.json(result);
   } catch {

@@ -159,6 +159,46 @@ const GRADE_STEEL: Record<string, string> = {
   "430": "430",
   "201": "201",
   "202": "202",
+  // Cross-system designations recognized so the grade-equivalence table in
+  // lib/grade-equivalence can see them (see that module for sources).
+  // JIS G3101 structural grades (SS400, SM490) and JIS G4404 tool steel
+  // (SKD11):
+  ss400: "SS400",
+  sm490: "SM490",
+  skd11: "SKD11",
+  // EN 10025-2 / EN 10088-2 designation-system forms:
+  s235: "S235",
+  s235jr: "S235JR",
+  s275: "S275",
+  s275jr: "S275JR",
+  s355: "S355",
+  s355jr: "S355JR",
+  // DIN 17100 legacy structural designations (hyphenated tokens stay whole):
+  "st37-2": "St37-2",
+  "st52-3": "St52-3",
+  // GB/T 700 / GB/T 1591:
+  q235: "Q235",
+  q345: "Q345",
+  // Old EN 10025 pre-2004 designations:
+  fe360: "Fe360",
+  fe510: "Fe510",
+  // EN material numbers (Werkstoff numbers) for stainless/tool grades:
+  "1.4301": "1.4301",
+  "1.4307": "1.4307",
+  "1.4401": "1.4401",
+  "1.4404": "1.4404",
+  "1.2379": "1.2379",
+  "1.2080": "1.2080",
+  // EN chemical designations (same materials as the numbers above):
+  "x5crni18-10": "X5CrNi18-10",
+  "x5crnimo17-12-2": "X5CrNiMo17-12-2",
+  "x155crvmo12-1": "X155CrVMo12-1",
+  "x210cr12": "X210Cr12",
+  // UNS numbers (SAE) for austenitic stainless grades:
+  s30400: "S30400",
+  s30403: "S30403",
+  s31600: "S31600",
+  s31603: "S31603",
 };
 
 // Normalized forms of materials referencing stainless grade
@@ -166,7 +206,7 @@ const SS_ALIASES: Record<string, string> = {
   ss304: "304",
   "304ss": "304",
   "ss 304": "304",
-  "ss304l": "304L",
+  ss304l: "304L",
   "304l ss": "304L",
   "ss 304l": "304L",
   ss316: "316",
@@ -177,6 +217,17 @@ const SS_ALIASES: Record<string, string> = {
   "ss 316l": "316L",
   "316l": "316L",
   stainless316l: "316L",
+  // JIS G4304 forms (kept distinct from AISI/ASTM labels so the
+  // grade-equivalence table surfaces the cross-standard relationship as a
+  // reviewable WARNING instead of silently collapsing it).
+  sus304: "SUS304",
+  "sus 304": "SUS304",
+  sus304l: "SUS304L",
+  "sus 304l": "SUS304L",
+  sus316: "SUS316",
+  "sus 316": "SUS316",
+  sus316l: "SUS316L",
+  "sus 316l": "SUS316L",
 };
 
 const COATINGS: Record<string, string> = {
@@ -193,14 +244,55 @@ const COATINGS: Record<string, string> = {
   "" : "",
 };
 
+// IS 2062:2011 (BIS) clause 5: nine grades E250, E275, E300, E350, E410,
+// E450, E550, E600, E650. Sub-qualities A, BR, B0, C for E250-E410 and
+// A, BR for E450-E650 (A: no impact test; BR: optional room-temp impact;
+// B0: mandatory 0 C impact; C: mandatory -20 C impact). Compact market forms
+// "E250B" / "E250BO" denote sub-quality B0 and map to the same label.
 const GRADE_STRUCTURAL: Record<string, string> = {
   e250: "E250",
   e250a: "E250A",
   e250br: "E250BR",
+  e250b: "E250B0",
+  e250b0: "E250B0",
+  e250bo: "E250B0",
+  e250c: "E250C",
+  e275: "E275",
+  e275a: "E275A",
+  e275br: "E275BR",
+  e275b: "E275B0",
+  e275b0: "E275B0",
+  e275c: "E275C",
+  e300: "E300",
+  e300a: "E300A",
+  e300br: "E300BR",
+  e300b: "E300B0",
+  e300b0: "E300B0",
+  e300c: "E300C",
   e350: "E350",
   e350a: "E350A",
   e350br: "E350BR",
+  e350b: "E350B0",
+  e350b0: "E350B0",
+  e350c: "E350C",
   e410: "E410",
+  e410a: "E410A",
+  e410br: "E410BR",
+  e410b: "E410B0",
+  e410b0: "E410B0",
+  e410c: "E410C",
+  e450: "E450",
+  e450a: "E450A",
+  e450br: "E450BR",
+  e550: "E550",
+  e550a: "E550A",
+  e550br: "E550BR",
+  e600: "E600",
+  e600a: "E600A",
+  e600br: "E600BR",
+  e650: "E650",
+  e650a: "E650A",
+  e650br: "E650BR",
   e7018: "E7018",
   e6013: "E6013",
   a36: "A36",
@@ -261,10 +353,15 @@ const CLASSES: Record<string, string> = {
   "600#": "Class 600",
   "900#": "Class 900",
   "1500#": "Class 1500",
-  "pn10": "PN10",
-  "pn16": "PN16",
-  "pn25": "PN25",
-  "pn40": "PN40",
+  // IS 1239 pipe wall-thickness classes (Class A / B / C) — distinct class
+  // means a different pipe, so it must reach the pressure-class constraint.
+  "class a": "Class A",
+  "class b": "Class B",
+  "class c": "Class C",
+  pn10: "PN10",
+  pn16: "PN16",
+  pn25: "PN25",
+  pn40: "PN40",
 };
 
 const SCHEDULES: Record<string, string> = {
@@ -299,6 +396,9 @@ function extractQuantityTokens(desc: string): string[] {
 function extractDimensions(desc: string): Attribute<string[]> {
   const spans: string[] = [];
   const normalized: string[] = [];
+  // Character ranges already claimed by compound captures (thread / x-mm),
+  // so a plain "50 mm" inside "M10 x 50mm" is not recorded a second time.
+  const claimed: [number, number][] = [];
 
   // Metric thread sizes like M12 X 60, M12x60, M8 x 30
   const threadRe =
@@ -311,7 +411,27 @@ function extractDimensions(desc: string): Attribute<string[]> {
     const extra = m[3];
     const dim = extra ? `${dia} × ${len} × ${extra} mm` : `${dia} × ${len} mm`;
     spans.push(span);
+    claimed.push([m.index, m.index + span.length]);
     normalized.push(dim);
+  }
+
+  // Nominal pipe designations: "DN 100" / "DN100" (ISO 6708-1) and
+  // "NPS 4" / "NPS 1/2" (ASME inch nominal). Claimed before the mm/inch
+  // loops so "DN 100 mm" or "NPS 4 inch" does not double-capture; emitted
+  // as "DN n" / "NPS x" tokens that lib/units parses back through the
+  // NPS/DN equivalence table.
+  const dnRe = /\bDN\s*(\d+)(?:\s*mm)?\b/g;
+  while ((m = dnRe.exec(desc)) !== null) {
+    spans.push(m[0]);
+    claimed.push([m.index, m.index + m[0].length]);
+    normalized.push(`DN ${m[1]}`);
+  }
+
+  const npsRe = /\bNPS\s*([0-9]+(?:\.[0-9]+)?(?:\s?\/\s?[0-9]+)?)\b(?:\s*(?:inch|inches|"))?/g;
+  while ((m = npsRe.exec(desc)) !== null) {
+    spans.push(m[0]);
+    claimed.push([m.index, m.index + m[0].length]);
+    normalized.push(`NPS ${m[1].replace(/\s+/g, "")}`);
   }
 
   // mm dimensions like 100 x 50 x 5 mm, 50 X 50 X 3, 600x600
@@ -326,13 +446,16 @@ function extractDimensions(desc: string): Attribute<string[]> {
     const c = m[3];
     const dim = c ? `${a} × ${b} × ${c} mm` : `${a} × ${b} mm`;
     spans.push(span);
+    claimed.push([m.index, m.index + span.length]);
     normalized.push(dim);
   }
 
   // Single length + mm like "cable tray 300mm" (skips thread components)
   const singleMmRe = /(?<![A-Z0-9])(\d+(?:\.\d+)?)\s*mm/g;
   while ((m = singleMmRe.exec(desc)) !== null) {
-    // Skip dimensions that are part of a "×" expression (e.g. "M12 × 60 mm").
+    // Skip dimensions that are part of a compound capture (e.g. "M10 x 50mm"
+    // already contributes 50 mm via the thread token above).
+    if (claimed.some(([s, e]) => m!.index >= s && m!.index + m![0].length <= e)) continue;
     if (desc.slice(Math.max(0, m.index - 2), m.index).includes("×")) continue;
     spans.push(m[0]);
     normalized.push(`${m[1]} mm`);
@@ -342,6 +465,8 @@ function extractDimensions(desc: string): Attribute<string[]> {
   const inchRe = /(?<![A-Z0-9])(\d+(?:\s?[/-]\s?\d+)?|\d+(?:\.\d+)?)\s*(inch|inches|")/gi;
   while ((m = inchRe.exec(desc)) !== null) {
     const span = m[0];
+    // Skip sizes already claimed (e.g. "NPS 4 inch" claims the whole span).
+    if (claimed.some(([s, e]) => m!.index >= s && m!.index + m![0].length <= e)) continue;
     const inches = parseFraction(m[1]);
     if (inches === null) continue;
     const mm = inches * 25.4;

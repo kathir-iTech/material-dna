@@ -245,6 +245,29 @@ describe("Determinism", () => {
   });
 });
 
+describe("B3 regression: snapshotId collisions (leading -> trailing hash digits)", () => {
+  // Both pairs below hashed to the SAME snapshotId with the old leading-digit
+  // snapshotId (slice(0, 6)), so generateCandidates filtered the other side
+  // out (rec.id === input.id) and the pair silently lost its candidate.
+  it("benchmark pair 164 — Socket head cap screw grade 12.9 vs 10.9 — keeps distinct record ids and its candidate", () => {
+    const a = buildInputRecord("Socket head cap screw M8x30 grade 12.9");
+    const b = buildInputRecord("Socket head cap screw M8x30 grade 10.9");
+    expect(a.id).not.toBe(b.id);
+
+    const result = resolveMaterialRecord(a, [a, b]);
+    expect(result.candidates.map((c) => c.targetRecord.id)).toContain(b.id);
+  });
+
+  it("benchmark pair 198 — Conduit bending spring 20mm vs 25mm — keeps distinct record ids and its candidate", () => {
+    const a = buildInputRecord("Conduit bending spring 20mm");
+    const b = buildInputRecord("Conduit bending spring 25mm");
+    expect(a.id).not.toBe(b.id);
+
+    const result = resolveMaterialRecord(a, [a, b]);
+    expect(result.candidates.map((c) => c.targetRecord.id)).toContain(b.id);
+  });
+});
+
 describe("TF-IDF (real corpus statistics)", () => {
   it("weights a term appearing in every document lower than a term appearing in only one document", () => {
     // Real slice of the demo corpus: every valve record contains "valve",
@@ -349,9 +372,10 @@ describe("Canonical national material code", () => {
   it("matches MDNA-{MATERIAL}-{TYPE}-{DIMENSION}-{STANDARD}-{HASH4}", () => {
     const dna = extractMaterialDNA(normalizeDescription(desc));
     const code = generateCanonicalId(dna);
-    expect(code).toMatch(/^MDNA-[A-Z0-9]+(?:-[A-Z0-9+]+)*-[0-9A-F]{4}$/);
-    // Segments are compacted, so the hyphens are exactly the five true
-    // separators: MDNA, MATERIAL, TYPE, DIMENSION, STANDARD, HASH4.
+    // Segments may contain decimal points (e.g. 50.8MM) but never hyphens,
+    // so the hyphens are exactly the five true separators: MDNA, MATERIAL,
+    // TYPE, DIMENSION, STANDARD, HASH4.
+    expect(code).toMatch(/^MDNA-[A-Z0-9.]+(?:-[A-Z0-9+.]+)*-[0-9A-F]{4}$/);
     expect(code.split("-")).toHaveLength(6);
     expect(code).toContain("HEXBOLT");
     expect(code).toContain("M12X60MM");
@@ -372,6 +396,61 @@ describe("Canonical national material code", () => {
     }
     const ids = canonicalMaterials.map((c) => c.canonicalId);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe("B4 regression: canonical id legibility", () => {
+  const ids = canonicalMaterials.map((c) => c.canonicalId);
+  const MATERIAL = 1;
+  const DIMENSION = 3;
+  const STANDARD = 4;
+
+  it("uses an explicit UNK segment for missing attributes, never a silent NA", () => {
+    expect(ids.some((id) => id.split("-").includes("UNK"))).toBe(true);
+    for (const id of ids) {
+      expect(id.split("-")).not.toContain("NA");
+    }
+  });
+
+  it("strips coating/finish words from the MATERIAL segment", () => {
+    const forbidden = /GALVANIZED|GALVANISED|ZINC|PLATED|COATED/;
+    for (const id of ids) {
+      expect(forbidden.test(id.split("-")[MATERIAL])).toBe(false);
+    }
+    // "HEX BOLT ... ZP ..." extracts material as "Zinc" (a coating) — the
+    // segment must be UNK, not ZINC.
+    const hexBolt = canonicalMaterials.find((c) =>
+      c.normalizedDescription.startsWith("HEX BOLT M12")
+    );
+    expect(hexBolt?.canonicalId.split("-")[MATERIAL]).toBe("UNK");
+    // "GI PIPE ..." extracts "Galvanised Iron" — coating word stripped.
+    const giPipe = canonicalMaterials.find((c) => c.normalizedDescription.includes("GI PIPE"));
+    expect(giPipe?.canonicalId.split("-")[MATERIAL]).toBe("IRON");
+  });
+
+  it("encodes 2 INCH as 50.8MM, not the fused 2508MM", () => {
+    const pipe = canonicalMaterials.find((c) => c.normalizedDescription.includes("ASTM A106"));
+    expect(pipe?.canonicalId.split("-")[DIMENSION]).toBe("50.8MM");
+    expect(pipe?.canonicalId).not.toContain("2508MM");
+  });
+
+  it("encodes 1/2 INCH as 12.7MM, not the fused 12127MM", () => {
+    const valve = canonicalMaterials.find((c) => c.normalizedDescription.includes("BALL VALVE"));
+    expect(valve?.canonicalId.split("-")[DIMENSION]).toBe("12.7MM");
+    expect(valve?.canonicalId).not.toContain("12127MM");
+  });
+
+  it("keeps decimal points inside segments (3.15 mm must not compact to 315)", () => {
+    const rod = canonicalMaterials.find((c) => c.normalizedDescription.includes("WELDING ROD"));
+    expect(rod?.canonicalId.split("-")[DIMENSION]).toBe("3.15MM");
+  });
+
+  it("still yields exactly six hyphen-separated parts with a HEX4 tail", () => {
+    for (const id of ids) {
+      expect(id.split("-")).toHaveLength(6);
+      expect(id).toMatch(/-[0-9A-F]{4}$/);
+      expect(id.split("-")[STANDARD]).toMatch(/^[A-Z0-9.+]+$/);
+    }
   });
 });
 

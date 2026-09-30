@@ -16,7 +16,7 @@ import {
 } from "../config";
 import { extractMaterialDNA, listUnknownAttributes } from "../extraction";
 import { normalizeDescription } from "../normalization";
-import { generateCandidates, type ScoredCandidate } from "../matching";
+import { generateCandidates, type ScoredCandidate, type EmbeddingSignal } from "../matching";
 import { evaluateConstraints, criticalConflicts } from "../constraints";
 
 function nowStamp(): string {
@@ -46,10 +46,18 @@ function snapshotId(desc: string): string {
     h = (h << 5) - h + desc.charCodeAt(i);
     h |= 0;
   }
-  return String(Math.abs(h)).padStart(12, "0").slice(0, 6);
+  // Trailing digits, not leading: leading digits of |h| collide far more
+  // often (small hashes pad with zeros up front, so 122/400 benchmark
+  // descriptions shared an id and 2/200 pairs lost their candidate because
+  // both sides hashed to the same snapshot).
+  return String(Math.abs(h)).padStart(12, "0").slice(-6);
 }
 
-export function resolveMaterialRecord(input: MaterialRecord, corpus: MaterialRecord[]): ResolutionResult {
+export function resolveMaterialRecord(
+  input: MaterialRecord,
+  corpus: MaterialRecord[],
+  signal?: EmbeddingSignal | null
+): ResolutionResult {
   const audit: AuditEvent[] = [];
   audit.push(makeAudit("Resolution started", input.sourceCode));
 
@@ -60,8 +68,17 @@ export function resolveMaterialRecord(input: MaterialRecord, corpus: MaterialRec
   }).length;
   audit.push(makeAudit("Attributes extracted", `${definedFields} fields scored`));
 
-  const scored = generateCandidates(input, corpus);
+  const activeSignal = signal ?? undefined;
+  const scored = generateCandidates(input, corpus, activeSignal);
   audit.push(makeAudit("Candidates generated", `${scored.length} candidates scored`));
+  if (activeSignal) {
+    audit.push(
+      makeAudit(
+        "Dense retrieval signal fused",
+        "transformers.js cosine - ranking only; critical-conflict veto unaffected"
+      )
+    );
+  }
 
   const selected = scored[0] ?? null;
 
