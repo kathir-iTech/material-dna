@@ -47,7 +47,7 @@ export function CounterfactualPanel({ resolver }: { resolver: UseResolverReturn 
       <CardHeader
         title="Counterfactual Test — Test the Decision"
         subtitle="Mutate one engineering-critical attribute and recompute the decision with the real constraint engine."
-        right={<FlaskConical size={15} className="text-dna-cyan" />}
+        right={<FlaskConical size={15} className="text-dna-cyan" aria-hidden="true" />}
       />
       <CardBody className="space-y-4">
         <div className="flex flex-wrap gap-2">
@@ -60,7 +60,7 @@ export function CounterfactualPanel({ resolver }: { resolver: UseResolverReturn 
               className="inline-flex items-center gap-2 rounded border border-dna-border2 px-3 py-1.5 text-xs text-dna-muted transition-colors hover:border-dna-cyan/50 hover:text-dna-text"
               aria-label={`Change ${change.label} from ${change.original} to ${change.modified}`}
             >
-              <FlaskConical size={12} className="text-dna-cyan" />
+              <FlaskConical size={12} className="text-dna-cyan" aria-hidden="true" />
               Change {change.label}: {change.original} → {change.modified}
             </button>
           ))}

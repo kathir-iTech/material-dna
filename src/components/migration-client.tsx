@@ -8,6 +8,7 @@ import {
   Play,
   Undo2,
   Upload,
+  TriangleAlert,
 } from "lucide-react";
 import {
   countDecisions,
@@ -20,7 +21,7 @@ import { DecisionBadge, RiskBadge } from "@/components/ui/status";
 import { AuditTimeline } from "@/components/audit-timeline";
 import { CONSTRAINTS_VERSION, ENGINE_VERSION_NUMBER, PARSER_VERSION } from "@/lib/material-dna/config";
 import type { MigrationBatch, MigrationRow } from "@/types/domain";
-import { cn } from "@/lib/utils";
+import { cn, formatTimestampUtc } from "@/lib/utils";
 
 const FILTERS = ["All", "MATCH", "REVIEW", "DO_NOT_MERGE", "Pending"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -174,13 +175,18 @@ export function MigrationClient() {
           resolution pipeline, then approve at scale — each bulk action is
           recorded in an audit trail and can be rolled back.
         </p>
+        <p className="mt-2 inline-flex items-center gap-1.5 rounded border border-dna-amber/40 bg-dna-amber/10 px-2 py-1 text-xs text-dna-amber">
+          <TriangleAlert size={12} aria-hidden="true" />
+          Demo state is held in memory only — uploaded batches and their audit trail are lost on
+          page refresh.
+        </p>
       </div>
 
       <Card>
         <CardHeader
           title="1 · Upload source file"
           subtitle="CSV or XLSX. First row must be a header with a 'description' column; an optional 'source' column is honoured."
-          right={<FileSpreadsheet size={15} className="text-dna-cyan" />}
+          right={<FileSpreadsheet size={15} className="text-dna-cyan" aria-hidden="true" />}
         />
         <CardBody>
           <label
@@ -190,9 +196,9 @@ export function MigrationClient() {
             )}
           >
             {busy === "parse" ? (
-              <Loader2 size={18} className="animate-spin text-dna-cyan" />
+              <Loader2 size={18} className="animate-spin text-dna-cyan" aria-hidden="true" />
             ) : (
-              <Upload size={18} className="text-dna-faint" />
+              <Upload size={18} className="text-dna-faint" aria-hidden="true" />
             )}
             <span className="text-xs text-dna-muted">
               {busy === "parse" ? "Parsing file…" : "Choose a .csv or .xlsx file (max 5 MB, 1000 rows)"}
@@ -211,7 +217,7 @@ export function MigrationClient() {
           </label>
           {error && (
             <div className="mt-3 flex items-start gap-2 rounded border border-dna-red/40 bg-dna-red/10 px-3 py-2 text-xs text-dna-red">
-              <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+              <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
@@ -222,7 +228,7 @@ export function MigrationClient() {
         <Card>
           <CardHeader
             title={`2 · Batch ${active.id} — ${active.fileName}`}
-            subtitle={`${active.rows.length} rows · imported ${new Date(active.createdAt).toLocaleString()} · ${active.status === "IMPORTED" ? "awaiting resolve" : "resolved"}`}
+            subtitle={`${active.rows.length} rows · imported ${formatTimestampUtc(active.createdAt)} · ${active.status === "IMPORTED" ? "awaiting resolve" : "resolved"}`}
             right={
               active.status === "IMPORTED" ? (
                 <button
@@ -231,9 +237,9 @@ export function MigrationClient() {
                   className="flex items-center gap-1.5 rounded border border-dna-cyan/50 bg-dna-cyan/10 px-3 py-1.5 text-xs font-medium text-dna-cyan transition-colors hover:bg-dna-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {busy === "resolve" ? (
-                    <Loader2 size={13} className="animate-spin" />
+                    <Loader2 size={13} className="animate-spin" aria-hidden="true" />
                   ) : (
-                    <Play size={13} />
+                    <Play size={13} aria-hidden="true" />
                   )}
                   Run batch resolve ({active.rows.length} rows)
                 </button>
@@ -299,7 +305,7 @@ export function MigrationClient() {
                   key={f}
                   onClick={() => setFilter(f)}
                   className={cn(
-                    "rounded border px-2.5 py-1.5 text-xs transition-colors",
+                    "inline-flex min-h-9 items-center rounded border px-2.5 text-xs transition-colors",
                     filter === f
                       ? "border-dna-cyan/60 bg-dna-cyan/10 text-dna-cyan"
                       : "border-dna-border2 text-dna-muted hover:text-dna-text"
@@ -466,7 +472,7 @@ export function MigrationClient() {
                           className="flex items-center gap-1.5 rounded border border-dna-amber/50 bg-dna-amber/10 px-2.5 py-1 text-[11px] font-medium text-dna-amber transition-colors hover:bg-dna-amber/20 disabled:cursor-not-allowed disabled:opacity-30"
                           aria-label={`Rollback last bulk action on ${b.id}`}
                         >
-                          <Undo2 size={12} />
+                          <Undo2 size={12} aria-hidden="true" />
                           Rollback last action
                         </button>
                       </div>

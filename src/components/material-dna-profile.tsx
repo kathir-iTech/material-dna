@@ -107,7 +107,7 @@ export function MaterialDNAProfile({ dna }: { dna: MaterialDNA }) {
         </table>
         <div className="flex items-center justify-between border-t border-dna-border px-4 py-2 text-xs text-dna-muted">
           <span className="inline-flex items-center gap-1.5">
-            <ListChecks size={13} className="text-dna-cyan" />
+            <ListChecks size={13} className="text-dna-cyan" aria-hidden="true" />
             Overall extraction confidence
           </span>
           <span className="font-mono text-dna-text">{dna.confidence}%</span>

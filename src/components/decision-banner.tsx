@@ -30,11 +30,11 @@ export function DecisionBanner({ result }: { result: ResolutionResult }) {
             }`}
           >
             {result.decision === "MATCH" ? (
-              <Check size={17} />
+              <Check size={17} aria-hidden="true" />
             ) : result.decision === "DO_NOT_MERGE" ? (
-              <X size={17} />
+              <X size={17} aria-hidden="true" />
             ) : (
-              <AlertTriangle size={17} />
+              <AlertTriangle size={17} aria-hidden="true" />
             )}
           </span>
           <div>

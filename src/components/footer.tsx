@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="border-t border-dna-border bg-dna-panel/50">
       <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-2 px-4 py-4 text-xs text-dna-muted sm:flex-row sm:items-center">
         <div className="flex items-center gap-2">
-          <Dna size={13} className="text-dna-cyan" />
+          <Dna size={13} className="text-dna-cyan" aria-hidden="true" />
           <span className="font-medium text-dna-text">Material DNA</span>
           <span>— SIH26099 Demonstrator</span>
         </div>

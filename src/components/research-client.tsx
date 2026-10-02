@@ -163,7 +163,7 @@ export default function ResearchClient() {
           <CardHeader
             title="Prototype Experiments"
             subtitle="Baseline evidence, not CPSE production accuracy."
-            right={<FlaskConical size={15} className="text-dna-cyan" />}
+            right={<FlaskConical size={15} className="text-dna-cyan" aria-hidden="true" />}
           />
           <CardBody className="space-y-3">
             <div className="rounded border border-dna-border bg-dna-panel2 p-3">
@@ -190,7 +190,7 @@ export default function ResearchClient() {
                 <p><span className="text-dna-faint">Dataset:</span> Prototype local material descriptions</p>
                 <p><span className="text-dna-faint">Purpose:</span> Measure unit-aware quantity detection coverage.</p>
                 <p>
-                  <Percent size={11} className="inline text-dna-cyan" />{" "}
+                  <Percent size={11} className="inline text-dna-cyan" aria-hidden="true" />{" "}
                   <span className="font-mono text-dna-text">102 / 109</span>{" "}
                   <span className="font-mono text-dna-cyan">93.6%</span>
                   <span className="text-[11px] text-dna-faint"> — prototype local quantity-detection coverage</span>
@@ -208,7 +208,7 @@ export default function ResearchClient() {
           <CardHeader
             title="Adversarial Material Benchmark"
             subtitle="200 team-created labelled demonstration pairs."
-            right={<Target size={15} className="text-dna-cyan" />}
+            right={<Target size={15} className="text-dna-cyan" aria-hidden="true" />}
           />
           <CardBody className="space-y-3">
             <div className="flex flex-wrap gap-1.5">
@@ -248,7 +248,7 @@ export default function ResearchClient() {
         <CardHeader
           title="Measured Results — Our 200-Pair Benchmark"
           subtitle={`Measured on our own 200-pair benchmark, run ${BENCHMARK_RUN_DATE}.`}
-          right={<TrendingUp size={15} className="text-dna-green" />}
+          right={<TrendingUp size={15} className="text-dna-green" aria-hidden="true" />}
         />
         <CardBody className="space-y-4">
           <div className="rounded border border-dna-green/40 bg-dna-green/5 px-4 py-3">
@@ -422,7 +422,7 @@ export default function ResearchClient() {
         <CardHeader
           title="What remains to be validated?"
           subtitle="A serious engineering team knows what remains unproven."
-          right={<TriangleAlert size={15} className="text-dna-amber" />}
+          right={<TriangleAlert size={15} className="text-dna-amber" aria-hidden="true" />}
         />
         <CardBody>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -450,7 +450,7 @@ export default function ResearchClient() {
         <CardHeader
           title="What Makes Material DNA Different?"
           subtitle="Engineering-aware identity."
-          right={<Goal size={15} className="text-dna-cyan" />}
+          right={<Goal size={15} className="text-dna-cyan" aria-hidden="true" />}
         />
         <CardBody className="space-y-3">
           <h3 className="text-base font-semibold text-dna-text">
@@ -485,7 +485,7 @@ export default function ResearchClient() {
         <CardHeader
           title="Constraint-Aware Material Identity Graph"
           subtitle="Proposed next-generation architecture — not deployed at national scale."
-          right={<Network size={15} className="text-dna-purple" />}
+          right={<Network size={15} className="text-dna-purple" aria-hidden="true" />}
         />
         <CardBody>
           <div className="flex flex-wrap items-center justify-center gap-1.5 py-2 font-mono text-[11px]">
@@ -519,7 +519,7 @@ export default function ResearchClient() {
         <CardHeader
           title="Implemented vs Proposed vs Future"
           subtitle="Explicit capability status for reviewers."
-          right={<Table2 size={15} className="text-dna-cyan" />}
+          right={<Table2 size={15} className="text-dna-cyan" aria-hidden="true" />}
         />
         <CardBody className="p-0">
           <table className="w-full text-left text-xs">

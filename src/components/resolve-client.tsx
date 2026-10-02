@@ -71,7 +71,7 @@ export function ResolveClient() {
                 disabled={resolver.phase === "processing" || resolver.description.trim().length === 0}
                 className="inline-flex items-center justify-center gap-2 rounded border border-dna-cyan/50 bg-dna-cyan/10 px-4 py-2.5 text-sm font-semibold text-dna-cyan transition-colors hover:bg-dna-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
               >
-                <Play size={15} />
+                <Play size={15} aria-hidden="true" />
                 Resolve Material
               </button>
               {resolver.result && (
@@ -79,7 +79,7 @@ export function ResolveClient() {
                   onClick={resolver.sendToReview}
                   className="inline-flex items-center justify-center gap-2 rounded border border-dna-amber/40 bg-dna-amber/10 px-4 py-2 text-xs font-medium text-dna-amber transition-colors hover:bg-dna-amber/20"
                 >
-                  <Send size={13} />
+                  <Send size={13} aria-hidden="true" />
                   Send to Review Queue
                 </button>
               )}
@@ -101,14 +101,14 @@ export function ResolveClient() {
               onClick={resolver.reset}
               className="ml-auto inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs text-dna-faint transition-colors hover:text-dna-text"
             >
-              <RotateCcw size={12} /> Reset
+              <RotateCcw size={12} aria-hidden="true" /> Reset
             </button>
             <button
               onClick={() => setShowHelp(true)}
               className="inline-flex items-center gap-1.5 rounded border border-dna-border2 px-2.5 py-1.5 text-xs text-dna-muted hover:text-dna-text"
               aria-label="Open suggested demo script"
             >
-              <ClipboardList size={12} /> Suggested Demo
+              <ClipboardList size={12} aria-hidden="true" /> Suggested Demo
             </button>
           </div>
 

@@ -13,18 +13,18 @@ const DECISION_META: Record<
   DecisionStatus,
   { label: string; icon: React.ReactNode; tone: "green" | "red" | "amber" | "neutral" }
 > = {
-  MATCH: { label: "MATCH", icon: <Check size={14} strokeWidth={2.5} />, tone: "green" },
-  DO_NOT_MERGE: { label: "DO NOT MERGE", icon: <X size={14} strokeWidth={2.5} />, tone: "red" },
-  REVIEW: { label: "REVIEW", icon: <AlertTriangle size={14} strokeWidth={2.5} />, tone: "amber" },
-  NO_MATCH: { label: "NO MATCH", icon: <CircleSlash size={14} strokeWidth={2.5} />, tone: "neutral" },
+  MATCH: { label: "MATCH", icon: <Check size={14} strokeWidth={2.5} aria-hidden="true" />, tone: "green" },
+  DO_NOT_MERGE: { label: "DO NOT MERGE", icon: <X size={14} strokeWidth={2.5} aria-hidden="true" />, tone: "red" },
+  REVIEW: { label: "REVIEW", icon: <AlertTriangle size={14} strokeWidth={2.5} aria-hidden="true" />, tone: "amber" },
+  NO_MATCH: { label: "NO MATCH", icon: <CircleSlash size={14} strokeWidth={2.5} aria-hidden="true" />, tone: "neutral" },
 };
 
 const STATUS_ICONS = {
-  green: <Check size={13} strokeWidth={2.5} className="text-dna-green" />,
-  red: <X size={13} strokeWidth={2.5} className="text-dna-red" />,
-  amber: <AlertTriangle size={13} strokeWidth={2.5} className="text-dna-amber" />,
-  neutral: <ShieldAlert size={13} strokeWidth={2.5} className="text-dna-muted" />,
-  unknown: <HelpCircle size={13} strokeWidth={2.5} className="text-dna-muted" />,
+  green: <Check size={13} strokeWidth={2.5} className="text-dna-green" aria-hidden="true" />,
+  red: <X size={13} strokeWidth={2.5} className="text-dna-red" aria-hidden="true" />,
+  amber: <AlertTriangle size={13} strokeWidth={2.5} className="text-dna-amber" aria-hidden="true" />,
+  neutral: <ShieldAlert size={13} strokeWidth={2.5} className="text-dna-muted" aria-hidden="true" />,
+  unknown: <HelpCircle size={13} strokeWidth={2.5} className="text-dna-muted" aria-hidden="true" />,
 };
 
 export function DecisionBadge({ decision, size = "md" }: { decision: DecisionStatus; size?: "sm" | "md" | "lg" }) {

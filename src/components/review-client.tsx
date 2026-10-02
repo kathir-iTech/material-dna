@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, TriangleAlert } from "lucide-react";
 import { reviewQueueStore, useReviewQueue } from "@/hooks/use-review-queue";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { RiskBadge } from "@/components/ui/status";
 import { DecisionBadge } from "@/components/ui/status";
 import type { ReviewCase } from "@/types/domain";
-import { cn } from "@/lib/utils";
+import { cn, formatTimestampUtc } from "@/lib/utils";
 
 const STATUS_TONES: Record<ReviewCase["status"], "amber" | "green" | "red" | "blue"> = {
   PENDING: "amber",
@@ -50,6 +50,10 @@ export function ReviewClient() {
         <p className="mt-1 max-w-3xl text-sm text-dna-muted">
           Ambiguous and high-risk material identity decisions requiring human validation.
         </p>
+        <p className="mt-2 inline-flex items-center gap-1.5 rounded border border-dna-amber/40 bg-dna-amber/10 px-2 py-1 text-xs text-dna-amber">
+          <TriangleAlert size={12} aria-hidden="true" />
+          Demo state is held in memory only — approving or rejecting here is lost on page refresh.
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -58,7 +62,7 @@ export function ReviewClient() {
             key={f}
             onClick={() => setFilter(f)}
             className={cn(
-              "rounded border px-2.5 py-1.5 text-xs transition-colors",
+              "inline-flex min-h-9 items-center rounded border px-2.5 text-xs transition-colors",
               filter === f
                 ? "border-dna-cyan/60 bg-dna-cyan/10 text-dna-cyan"
                 : "border-dna-border2 text-dna-muted hover:text-dna-text"
@@ -69,9 +73,9 @@ export function ReviewClient() {
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2 rounded border border-dna-border bg-dna-panel px-2 py-1.5">
-          <Search size={13} className="text-dna-faint" />
+          <Search size={13} className="text-dna-faint" aria-hidden="true" />
           <input
-            className="w-40 bg-transparent text-xs text-dna-text placeholder:text-dna-faint focus:outline-none"
+            className="h-8 w-40 bg-transparent text-xs text-dna-text placeholder:text-dna-faint focus:outline-none"
             placeholder="Search case ID…"
             aria-label="Search review cases"
           />
@@ -137,7 +141,7 @@ export function ReviewClient() {
               <Badge tone={STATUS_TONES[selected.status]}>{selected.status}</Badge>
               <RiskBadge risk={selected.risk} />
             </div>
-            <p className="mt-1 text-xs text-dna-muted">Created {new Date(selected.createdAt).toLocaleString()}</p>
+            <p className="mt-1 text-xs text-dna-muted">Created {formatTimestampUtc(selected.createdAt)}</p>
           </div>
 
           <div className="grid gap-4 p-4 lg:grid-cols-2">

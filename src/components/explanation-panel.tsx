@@ -48,7 +48,7 @@ export function ExplanationPanel({
       <CardBody className="space-y-4">
         <div>
           <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-green">
-            <Check size={12} /> Matching Evidence
+            <Check size={12} aria-hidden="true" /> Matching Evidence
           </h4>
           <ul className="space-y-1">
             {explain.evidence.length === 0 && (
@@ -56,7 +56,7 @@ export function ExplanationPanel({
             )}
             {explain.evidence.map((e) => (
               <li key={e} className="flex items-start gap-2 text-xs text-dna-text">
-                <Check size={13} className="mt-0.5 shrink-0 text-dna-green" />
+                <Check size={13} className="mt-0.5 shrink-0 text-dna-green" aria-hidden="true" />
                 {e}
               </li>
             ))}
@@ -65,7 +65,7 @@ export function ExplanationPanel({
 
         <div>
           <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-red">
-            <X size={12} /> Conflicts
+            <X size={12} aria-hidden="true" /> Conflicts
           </h4>
           <ul className="space-y-1">
             {explain.conflicts.length === 0 && (
@@ -73,7 +73,7 @@ export function ExplanationPanel({
             )}
             {explain.conflicts.map((c) => (
               <li key={c} className="flex items-start gap-2 text-xs text-dna-red">
-                <X size={13} className="mt-0.5 shrink-0" />
+                <X size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
                 {c}
               </li>
             ))}
@@ -82,7 +82,7 @@ export function ExplanationPanel({
 
         <div>
           <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-amber">
-            <HelpCircle size={12} /> Unknowns
+            <HelpCircle size={12} aria-hidden="true" /> Unknowns
           </h4>
           <ul className="space-y-1">
             {explain.unknowns.length === 0 && (
@@ -90,7 +90,7 @@ export function ExplanationPanel({
             )}
             {explain.unknowns.map((u) => (
               <li key={u} className="flex items-start gap-2 text-xs text-dna-amber/80">
-                <HelpCircle size={13} className="mt-0.5 shrink-0 text-dna-amber" />
+                <HelpCircle size={13} className="mt-0.5 shrink-0 text-dna-amber" aria-hidden="true" />
                 {u}
               </li>
             ))}
@@ -99,7 +99,7 @@ export function ExplanationPanel({
 
         <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
           <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-cyan">
-            <Activity size={12} /> Score breakdown
+            <Activity size={12} aria-hidden="true" /> Score breakdown
           </div>
           <SubScoreList score={target.scoreDetails} outcome />
           <SubScoreHelp className="text-dna-faint/80" />
@@ -107,7 +107,7 @@ export function ExplanationPanel({
 
         <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
           <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-cyan">
-            Decision <ArrowRight size={11} />
+            Decision <ArrowRight size={11} aria-hidden="true" />
           </div>
           <p className="text-sm leading-relaxed text-dna-text">{explain.summary}</p>
         </div>

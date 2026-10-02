@@ -25,9 +25,9 @@ export function ProcessingSteps({ steps }: { steps: ExtractionStep[] }) {
               {String(step.index).padStart(2, "0")}
             </span>
             {isComplete ? (
-              <Check size={14} className="text-dna-green" />
+              <Check size={14} className="text-dna-green" aria-hidden="true" />
             ) : isActive ? (
-              <Loader2 size={14} className="animate-spin text-dna-cyan" />
+              <Loader2 size={14} className="animate-spin text-dna-cyan" aria-hidden="true" />
             ) : (
               <span className="block h-3.5 w-3.5 rounded-full border border-dna-border2" />
             )}

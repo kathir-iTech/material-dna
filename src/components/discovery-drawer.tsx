@@ -33,7 +33,7 @@ export function DiscoveryDrawer({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileSearch size={15} className="text-dna-cyan" />
+            <FileSearch size={15} className="text-dna-cyan" aria-hidden="true" />
             <h2 className="text-sm font-semibold text-dna-text">Source Evidence</h2>
           </div>
           <button
@@ -41,7 +41,7 @@ export function DiscoveryDrawer({
             className="rounded p-1 text-dna-muted hover:text-dna-text"
             aria-label="Close evidence drawer"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 

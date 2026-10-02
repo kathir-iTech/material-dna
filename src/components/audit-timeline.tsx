@@ -14,7 +14,7 @@ export function AuditTimeline({
       <CardHeader
         title="Audit Trail"
         subtitle="Every resolution produces an inspectable, versioned evidence trail."
-        right={<History size={15} className="text-dna-cyan" />}
+        right={<History size={15} className="text-dna-cyan" aria-hidden="true" />}
       />
       <CardBody>
         <ol className="relative space-y-2 border-l border-dna-border pl-4">

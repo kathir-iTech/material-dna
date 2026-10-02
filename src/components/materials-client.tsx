@@ -37,12 +37,12 @@ export function MaterialsClient() {
       </div>
 
       <div className="flex items-center gap-2 rounded border border-dna-border bg-dna-panel px-2.5 py-2">
-        <Search size={14} className="shrink-0 text-dna-faint" />
+        <Search size={14} className="shrink-0 text-dna-faint" aria-hidden="true" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by canonical ID, source code, description, standard or grade…"
-          className="w-full bg-transparent text-xs text-dna-text placeholder:text-dna-faint focus:outline-none"
+          className="h-8 w-full bg-transparent text-xs text-dna-text placeholder:text-dna-faint focus:outline-none"
           aria-label="Search canonical materials"
         />
       </div>
