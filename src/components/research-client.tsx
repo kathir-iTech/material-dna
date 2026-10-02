@@ -44,9 +44,10 @@ const CAPABILITY_TABLE: Array<{ capability: string; status: string }> = [
 
 // ---------------------------------------------------------------------------
 // Measured 200-pair benchmark results.
-// Source: bench-verify.txt (harness re-run against the current engine,
-// post Phases 1-2 fixes). Numbers below are transcribed verbatim from that
-// run — do not edit by hand without re-running the harness.
+// Source: benchmark/expected-baseline.txt (recorded run of benchmark/bench.ts,
+// lexical-only, post Phases 1-2 fixes); methodology in
+// benchmark/baseline-2026-09-29.md. Numbers below are transcribed verbatim from
+// that run — do not edit by hand without re-running the harness.
 // ---------------------------------------------------------------------------
 
 const BENCHMARK_RUN_DATE = "30 Sep 2026";
