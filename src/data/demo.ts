@@ -379,7 +379,7 @@ export const seededReviewCases: ReviewCase[] = [
     reason: "Grade differs: 10.9 vs 8.8.",
     status: "PENDING",
     confidence: 62,
-    createdAt: new Date(2026, 8, 6, 8, 42, 11).toISOString(),
+    createdAt: new Date(Date.UTC(2026, 8, 6, 8, 42, 11)).toISOString(),
   },
   {
     id: "REVIEW-1047",
@@ -390,7 +390,7 @@ export const seededReviewCases: ReviewCase[] = [
     reason: "Material composition differs: 316L vs 304.",
     status: "PENDING",
     confidence: 58,
-    createdAt: new Date(2026, 8, 5, 11, 3, 44).toISOString(),
+    createdAt: new Date(Date.UTC(2026, 8, 5, 11, 3, 44)).toISOString(),
   },
   {
     id: "REVIEW-1051",
@@ -401,8 +401,8 @@ export const seededReviewCases: ReviewCase[] = [
     reason: "Pipe class differs: B vs C.",
     status: "APPROVED",
     confidence: 71,
-    createdAt: new Date(2026, 8, 4, 14, 20, 5).toISOString(),
-    reviewerDecisionAt: new Date(2026, 8, 5, 9, 0, 0).toISOString(),
+    createdAt: new Date(Date.UTC(2026, 8, 4, 14, 20, 5)).toISOString(),
+    reviewerDecisionAt: new Date(Date.UTC(2026, 8, 5, 9, 0, 0)).toISOString(),
   },
   {
     id: "REVIEW-1060",
@@ -413,7 +413,7 @@ export const seededReviewCases: ReviewCase[] = [
     reason: "Pressure class differs: Class 300 vs Class 150.",
     status: "PENDING",
     confidence: 55,
-    createdAt: new Date(2026, 8, 3, 16, 45, 30).toISOString(),
+    createdAt: new Date(Date.UTC(2026, 8, 3, 16, 45, 30)).toISOString(),
   },
   {
     id: "REVIEW-1064",
@@ -424,8 +424,8 @@ export const seededReviewCases: ReviewCase[] = [
     reason: "Grade differs: E350C vs E250A.",
     status: "OVERRIDDEN",
     confidence: 60,
-    createdAt: new Date(2026, 8, 2, 10, 12, 0).toISOString(),
-    reviewerDecisionAt: new Date(2026, 8, 3, 12, 0, 0).toISOString(),
+    createdAt: new Date(Date.UTC(2026, 8, 2, 10, 12, 0)).toISOString(),
+    reviewerDecisionAt: new Date(Date.UTC(2026, 8, 3, 12, 0, 0)).toISOString(),
     reviewerNote:
       "Engineering team confirmed both refer to the same approved plate grade under internal spec X.",
   },
