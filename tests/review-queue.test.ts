@@ -25,7 +25,16 @@ describe("B1: shared review queue store", () => {
 
   it("starts with the seeded demo cases (before anything is sent)", () => {
     expect(reviewQueueStore.getSnapshot()).toEqual(seededReviewCases);
-    expect(reviewQueueStore.getSnapshot()).toHaveLength(5);
+    expect(reviewQueueStore.getSnapshot()).toHaveLength(seededReviewCases.length);
+    // Every risk filter must have something to show, so the seeded set has to span
+    // both the matching and the abstaining recommendation kinds.
+    const recommendations = new Set(
+      seededReviewCases.map((c) => c.systemRecommendation)
+    );
+    expect(recommendations.has("DO_NOT_MERGE")).toBe(true);
+    expect(recommendations.has("REVIEW")).toBe(true);
+    expect(seededReviewCases.some((c) => c.status === "PENDING")).toBe(true);
+    expect(seededReviewCases.some((c) => c.status !== "PENDING")).toBe(true);
   });
 
   it("sending 3 cases from Resolve shows exactly those 3 (seeded placeholders replaced)", () => {

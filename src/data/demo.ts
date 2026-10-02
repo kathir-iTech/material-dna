@@ -429,6 +429,21 @@ export const seededReviewCases: ReviewCase[] = [
     reviewerNote:
       "Engineering team confirmed both refer to the same approved plate grade under internal spec X.",
   },
+  {
+    // The one abstention in the seeded queue: same plate thickness, different
+    // standard families, no certified equivalence on file. Without a case like
+    // this the "Ambiguous" filter would be permanently empty and the risk-aware
+    // abstention path would never be visible in the human review demo.
+    id: "REVIEW-1068",
+    materialA: materialRecords.find((r) => r.id === "REC-030")!,
+    materialB: materialRecords.find((r) => r.id === "REC-028")!,
+    risk: "MEDIUM",
+    systemRecommendation: "REVIEW",
+    reason: "Insufficient evidence to establish identity across standard families.",
+    status: "PENDING",
+    confidence: 44,
+    createdAt: new Date(Date.UTC(2026, 8, 1, 9, 30, 0)).toISOString(),
+  },
 ];
 
 // ---------------------------------------------------------------------------

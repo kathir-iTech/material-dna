@@ -26,8 +26,18 @@ export function ReviewClient() {
   const [selectedId, setSelectedId] = useState<string | null>(queue[0]?.id ?? null);
   const [note, setNote] = useState("");
   const [actions, setActions] = useState<Record<string, string>>({});
+  const [query, setQuery] = useState("");
+
+  const needle = query.trim().toLowerCase();
 
   const filtered = queue.filter((c) => {
+    if (needle) {
+      const haystack = [c.id, c.reason, c.materialA?.rawDescription, c.materialB?.rawDescription]
+        .filter((s): s is string => typeof s === "string")
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(needle)) return false;
+    }
     if (filter === "All") return true;
     if (filter === "Pending") return c.status === "PENDING";
     if (filter === "High Risk") return c.risk === "HIGH" || c.risk === "CRITICAL";
@@ -36,7 +46,9 @@ export function ReviewClient() {
     return true;
   });
 
-  const selected = queue.find((c) => c.id === selectedId) ?? null;
+  // Derived from `filtered` so the detail panel never shows a row the user
+  // has just filtered or searched out of the table.
+  const selected = filtered.find((c) => c.id === selectedId) ?? null;
 
   const decide = (id: string, action: "APPROVED" | "REJECTED" | "OVERRIDDEN") => {
     setActions((prev) => ({ ...prev, [id]: action }));
@@ -76,8 +88,10 @@ export function ReviewClient() {
           <Search size={13} className="text-dna-faint" aria-hidden="true" />
           <input
             className="h-8 w-40 bg-transparent text-xs text-dna-text placeholder:text-dna-faint focus:outline-none"
-            placeholder="Search case ID…"
+            placeholder="Search ID, material, reason…"
             aria-label="Search review cases"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </div>
       </div>
@@ -100,7 +114,7 @@ export function ReviewClient() {
               {filtered.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-sm text-dna-faint">
-                    No pending review cases.
+                    No review cases match the current filter or search.
                   </td>
                 </tr>
               )}

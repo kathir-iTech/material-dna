@@ -18,6 +18,7 @@ yarn-error.log*
 server.pid
 server.log
 server.err
+server.out
 server2.log
 s3.log
 s3.err
@@ -34,6 +35,10 @@ s3.err
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright
+/test-results
+/playwright-report
 
 # misc
 .DS_Store
