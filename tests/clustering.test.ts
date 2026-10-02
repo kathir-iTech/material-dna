@@ -17,9 +17,10 @@ import type { MaterialRecord } from "@/types/domain";
 // the shipped corpus: all three pairwise similarities sit in the MATCH band
 // (>= 85) so similarity-only closure chains all three records together, while
 // an engineering-critical conflict on the A-C and B-C legs must keep C out of
-// A/B's cluster. Fixture 1 is the triple documented in final_audit.md
-// ("TRIPLE 2": A~B=97, B~C=93, A~C=95, critical-grade-mismatch). The other
-// five were re-discovered by the same probe on the current engine and pin the
+// A/B's cluster. Fixture 1 is the triple recorded in
+// benchmark/baseline-2026-09-29.md ("TRIPLE 2": A~B=97, B~C=93, A~C=95,
+// critical-grade-mismatch). The other five were re-discovered by the same probe
+// on the current engine and pin the
 // other veto rules (grade, dimension, electrical rating).
 //
 // Every number is transcribed from the measured run — do not edit by hand

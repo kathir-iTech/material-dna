@@ -6,8 +6,8 @@ descriptions (material family, grade/property class, dimensions, standard, finis
 values…), then decides — per-pair, candidate by candidate — whether two records describe the same
 physical material and may be safely merged.
 
-Aligned with the SIH problem statement *"Material Identification and Harmonization"* and the master
-specification (SIH 1.0) that accompanied it.
+Built against SIH problem statement **PS26099**, *"AI-Driven Standardization and Harmonization of
+Material Codes Across CPSEs"* (Ministry of Petroleum & Natural Gas).
 
 > Status: **Hackathon prototype.** All catalog records, review cases and canonical identities are
 > **synthetic** and exist solely to demonstrate the decision engine. UI uses **color semantics only**
@@ -26,10 +26,10 @@ npm run dev        # http://localhost:3000
 Verification commands:
 
 ```bash
-npm test              # vitest: 30 unit tests on the decision engine (tests/domain.test.ts)
+npm test              # vitest: 150 tests across 7 files (decision engine, clustering, migration, review queue)
 npm run lint          # ESLint (Next.js recommended config)
 npm run typecheck     # tsc --noEmit (strict)
-npm run build         # production build (12 static pages)
+npm run build         # production build (7 prerendered routes + 7 API routes)
 ```
 
 ## Pages
@@ -38,12 +38,14 @@ npm run build         # production build (12 static pages)
 | ----------- | -------------------------------------------------------------------- |
 | `/`         | Resolver: type a description or run one of the three demo scenarios |
 | `/review`   | Human-in-the-loop review queue ("material-governance" triage)        |
+| `/migrate`  | Bulk CSV migration: parse, resolve, flag conflicts, rollback         |
 | `/materials`| Browse the 98-record synthetic corpus + extracted material DNA      |
-| `/graph`    | Record linkage graph across the three synthetic sources              |
+| `/graph`    | Record linkage graph across the six synthetic sources                |
 | `/research` | Related work, benchmark baselines and honest limitations             |
 
-Public demo APIs: `GET /api/materials`, `GET /api/reviews`, `GET /api/canonical`,
-`POST /api/resolve` (`{ description, sourceCode? }`).
+Demo APIs: `GET /api/materials`, `GET /api/materials/[id]`, `GET /api/reviews`, `GET /api/canonical`,
+`POST /api/resolve` (`{ description, sourceCode? }`), `POST /api/resolve-batch` (`{ inputs[] }`),
+`POST /api/migrate/parse`.
 
 ## Demo scenarios (buttons on `/`)
 
@@ -84,7 +86,7 @@ Reviewed verdicts and canonical mappings live in a client-side store, not a real
 | Insufficient-evidence gating | **Implemented** | `< 3` defined attrs ⇒ `REVIEW` |
 | Candidate ranking (duplicates before near-matches) | **Implemented** | attr → evidence-coverage → lexical |
 | Human-in-the-loop review queue | **Implemented** | triage matches/false-positives |
-| Seeded corpus + record-linkage graph | **Implemented** | 3 synthetic sources, 98 records |
+| Seeded corpus + record-linkage graph | **Implemented** | 6 synthetic sources, 98 records |
 | Governance / approval workflow | **Proposed for production** | needs RBAC, audit trail, sign-off |
 | Weight/calibration tuning | **Proposed** | thresholds hard-coded in `config.ts` |
 | Validation against real CPSE data | **Proposed** | requires sanctioned legacy exports |
@@ -94,13 +96,19 @@ Reviewed verdicts and canonical mappings live in a client-side store, not a real
 
 ## Validation honesty
 
-- The 30 tests pin behavior on the three demo scenarios plus edge cases (SS316L vs SS316, M12×50
-  dimension conflict, pipe/valve/extraction regressions). Green: `npm test`, `npm run lint`,
+- **150 tests** across 7 files (`npm test`), covering the three demo scenarios, constraint vetoes
+  (SS316L vs SS316, M12×50 dimension conflict, pipe/valve/extraction regressions), constraint-aware
+  clustering, bulk migration and the shared review queue. Green: `npm test`, `npm run lint`,
   `npm run typecheck`, `npm run build`.
-- Research page benchmarks cite only real baselines from
-  `../material-dna-sih26099/02-benchmark-datasets/baseline-results.md` (e.g. TF-IDF P@10 = 1.000 and
-  R@200 = 0.170 on Abt-Buy). The synthetic-material dataset (200 pairs) is our intended evaluation
-  target — Leipzig product benchmarks are too simple for industrial-material jargon.
+- The 200-pair labelled benchmark is reproducible *here* — harness [`benchmark/bench.ts`](./benchmark/bench.ts),
+  recorded reference outputs ([baseline](./benchmark/expected-baseline.txt) F1 **0.813**,
+  [fused](./benchmark/expected-embed.txt) F1 **0.815**) and the methodology note
+  ([baseline-2026-09-29.md](./benchmark/baseline-2026-09-29.md)). **Caveat:** the labelled CSV those
+  200 pairs come from is not committed (synthetic research data, not cleared for the public repo).
+  A fresh clone reproduces the recorded outputs only if you supply the CSV via `BENCH_CSV=`;
+  without it `bench.ts` exits with instructions rather than guessing.
+- Research page external baselines (TF-IDF P@10 = 1.000, R@200 = 0.170 on Abt-Buy) are cited as
+  literature values, not as measurements of this system.
 - We report no fabricated accuracy/precision claims for this prototype.
 
 ## Repository layout
@@ -108,12 +116,15 @@ Reviewed verdicts and canonical mappings live in a client-side store, not a real
 ```
 app/                                   <- this Next.js app
   src/
-    components/                        (resolve-client, review-client, graph, materials, panels…)
+    components/                        (resolve-client, review-client, migration-client, graph, materials, panels…)
     data/demo.ts                       synthetic corpus + scenarios
     hooks/use-resolver.ts              orchestration + review/counterfactual
-    lib/material-dna/{extraction,normalization,matching,decision*,demo,config,graph}
+    lib/material-dna/
+      config.ts grade-equivalence.ts canonical-id.ts units.ts dataset-stats.ts clusters.ts
+      extraction/ normalization/ matching/ constraints/ demo/
     types/domain.ts                    shared domain model
-    app/api/..., app/(pages)           routes
-  tests/domain.test.ts                 engine tests
-../material-dna-sih26099/              research/benchmarks (standards, papers, baselines, UG/CPSE style)
+    app/api/..., app/<routes>           7 API routes, 6 pages
+  tests/                               7 test files, 150 tests
+  benchmark/                           harness + recorded reference outputs
+  scripts/                             postinstall prune + Vercel output helpers
 ```

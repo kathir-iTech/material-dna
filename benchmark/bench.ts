@@ -1,23 +1,27 @@
-// Reconstructed 200-pair benchmark harness (methodology from final_audit.md §3):
+// Reconstructed 200-pair benchmark harness (methodology recorded in
+// benchmark/baseline-2026-09-29.md):
 // pairwise, A as input, B as sole candidate; confusion matrix over decided pairs.
 // `--embed` fuses the transformers.js dense-retrieval signal (ranking only).
 import * as fs from "fs";
-import { fileURLToPath } from "node:url";
 import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
 import { normalizeDescription } from "@/lib/material-dna/normalization";
 import { createEmbeddingSignal } from "@/lib/material-dna/matching/embeddings";
 import type { EmbeddingSignal } from "@/lib/material-dna/matching";
 import type { DecisionStatus } from "@/types/domain";
 
-// Labelled 200-pair CSV from the SIH dataset (repo-relative unless BENCH_CSV is set).
-const CSV_PATH =
-  process.env.BENCH_CSV ??
-  fileURLToPath(
-    new URL(
-      "../../material-dna-sih26099/05-our-synthetic-data/material-pairs-labeled.csv",
-      import.meta.url
-    )
+// Labelled 200-pair CSV from the SIH dataset. It is NOT committed to this repo
+// (synthetic research data not cleared for the public repo), so there is no
+// default path — supply your own copy via BENCH_CSV. See benchmark/README.md.
+const CSV_PATH = process.env.BENCH_CSV;
+if (!CSV_PATH) {
+  console.error(
+    "bench: no labelled CSV. The 200-pair labelled data is not committed.\n" +
+      "       Pass your copy explicitly, e.g.\n" +
+      "         BENCH_CSV=/path/to/material-pairs-labeled.csv node benchmark/bench.mjs\n" +
+      "       Recorded reference outputs: expected-baseline.txt (F1 0.813), expected-embed.txt (F1 0.815)."
   );
+  process.exit(1);
+}
 
 interface Row {
   pair_id: string;

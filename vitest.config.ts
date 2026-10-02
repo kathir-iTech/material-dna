@@ -15,5 +15,10 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    // The corpus-level clustering tests run a full O(n^2) pass over 98 records
+    // and legitimately take 2-9s. Vitest's 5s default made them fail
+    // intermittently under parallel load, so give them real headroom.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
 });

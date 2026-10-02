@@ -18,7 +18,7 @@ Requires Node 20+. No environment variables are required to boot.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `TRANSFORMERS_CACHE` | `os.tmpdir()/material-dna-model-cache` (Vercel: `/tmp/...`) | Where the 22.6 MB embedding model is downloaded/cached. Set it only if you want a specific location; it must be writable at runtime. |
+| `TRANSFORMERS_CACHE` | `os.tmpdir()/material-dna-model-cache` (Vercel: `/tmp/...`) | Where the embedding model is downloaded/cached. Set it only if you want a specific location; it must be writable at runtime. |
 
 ## What runs where
 
@@ -109,9 +109,11 @@ Locally: `npm test` (150/150), `npm run lint`, `npm run typecheck`,
 
 ## Benchmark provenance
 
-200 labeled CPSE material pairs
-(`material-dna-sih26099/05-our-synthetic-data/material-pairs-labeled.csv`),
-run 30 Sep 2026. Harness: [`benchmark/bench.ts`](./benchmark/bench.ts) with
-recorded reference outputs ([baseline](./benchmark/expected-baseline.txt),
-[fused](./benchmark/expected-embed.txt)) — see [`benchmark/README.md`](./benchmark/README.md).
+200 labelled CPSE material pairs. **That CSV is not committed** (synthetic
+research data not cleared for the public repo) — point the harness at your copy
+with `BENCH_CSV=/path/to.csv`. Run 30 Sep 2026. Harness:
+[`benchmark/bench.ts`](./benchmark/bench.ts) with recorded reference outputs
+([baseline](./benchmark/expected-baseline.txt), [fused](./benchmark/expected-embed.txt))
+— see [`benchmark/README.md`](./benchmark/README.md) and the methodology note
+[`benchmark/baseline-2026-09-29.md`](./benchmark/baseline-2026-09-29.md).
 The research page displays the baseline figure **0.813** (client-side scoring).

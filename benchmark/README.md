@@ -1,6 +1,7 @@
 # 200-pair benchmark harness
 
-Reconstructed methodology (final_audit.md §3): pairwise evaluation — A as
+Methodology and the measured baseline are recorded in
+[`baseline-2026-09-29.md`](./baseline-2026-09-29.md): pairwise evaluation — A as
 input, B as the sole candidate; confusion matrix over decided pairs.
 
 - `bench.ts` — the harness (bundled with esbuild, run as ESM so `--embed`
@@ -9,8 +10,9 @@ input, B as the sole candidate; confusion matrix over decided pairs.
 - `expected-embed.txt` — dense-retrieval signal fused (F1 **0.815**,
   identical 64 `DO_NOT_MERGE` set / 84.4% veto precision)
 
-Input: `../material-dna-sih26099/05-our-synthetic-data/material-pairs-labeled.csv`
-(200 labelled pairs; override with `BENCH_CSV=/path/to.csv`).
+Input: the 200-pair labelled CSV is **not committed** (synthetic research data
+not cleared for the public repo). Supply it via `BENCH_CSV=/path/to.csv`; the
+two `expected-*.txt` files are the recorded outputs of that run.
 
 ## Run (from the `app/` directory)
 
