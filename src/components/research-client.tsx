@@ -43,34 +43,18 @@ const CAPABILITY_TABLE: Array<{ capability: string; status: string }> = [
 ];
 
 // ---------------------------------------------------------------------------
-// Measured 200-pair benchmark results.
-// Source: benchmark/expected-baseline.txt (recorded run of benchmark/bench.ts,
-// lexical-only, post Phases 1-2 fixes); methodology in
-// benchmark/baseline-2026-09-29.md. Numbers below are transcribed verbatim from
-// that run — do not edit by hand without re-running the harness.
+// Measured 200-pair benchmark results live in
+// @/lib/material-dna/research-benchmark, which is verified against the recorded
+// harness output (benchmark/expected-baseline.txt, benchmark/expected-embed.txt)
+// by tests/research-benchmark.test.ts. Nothing here is hand-typed.
 // ---------------------------------------------------------------------------
 
-const BENCHMARK_RUN_DATE = "30 Sep 2026";
-
-const BENCHMARK_HEADLINE = {
-  f1: 0.813,
-  precision: 0.8,
-  recall: 0.825,
-  abstainPct: 35.0,
-  abstainCount: 70,
-  total: 200,
-  decided: 130,
-  tp: 52,
-  fp: 13,
-  fn: 11,
-  tn: 54,
-  accuracyDecided: 81.5,
-  vetoPrecisionPct: 84.4,
-  vetoCorrect: 54,
-  vetoTotal: 64,
-  falseVetoes: 10,
-  decisions: { MATCH: 65, DO_NOT_MERGE: 64, NO_MATCH: 1, REVIEW: 70 },
-};
+import {
+  BENCHMARK_HEADLINE,
+  BENCHMARK_RUNS,
+  BENCHMARK_RUN_DATE,
+  LEXICAL_BASELINE,
+} from "@/lib/material-dna/research-benchmark";
 
 const BENCHMARK_CATEGORIES: Array<{
   category: string;
@@ -267,7 +251,68 @@ export default function ResearchClient() {
             </p>
           </div>
 
+          {/* Both recorded runs, side by side. The fused configuration is the
+              shipped one and leads; the lexical-only run is shown alongside it
+              rather than replaced, because it is the pre-fusion reference. */}
+          <div className="overflow-x-auto rounded border border-dna-border">
+            <table className="w-full min-w-[560px] text-left text-xs">
+              <thead>
+                <tr className="border-b border-dna-border bg-dna-panel2">
+                  <th scope="col" className="px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-dna-faint">
+                    F1 (MATCH)
+                  </th>
+                  {BENCHMARK_RUNS.map((run) => (
+                    <th
+                      key={run.id}
+                      scope="col"
+                      className={`px-3 py-2 font-mono text-[11px] uppercase tracking-wider ${
+                        run.id === "fused" ? "text-dna-green" : "text-dna-faint"
+                      }`}
+                    >
+                      {run.f1.toFixed(3)}
+                      <span className="mt-0.5 block font-sans normal-case tracking-normal text-[10px] opacity-80">
+                        {run.label}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="font-mono">
+                {(
+                  [
+                    { k: "precision", label: "Precision", fmt: (r: (typeof BENCHMARK_RUNS)[number]) => r.precision.toFixed(3) },
+                    { k: "recall", label: "Recall", fmt: (r: (typeof BENCHMARK_RUNS)[number]) => r.recall.toFixed(3) },
+                    { k: "decided", label: "Decided pairs", fmt: (r: (typeof BENCHMARK_RUNS)[number]) => String(r.decided) },
+                    { k: "abstainPct", label: "Abstain (REVIEW)", fmt: (r: (typeof BENCHMARK_RUNS)[number]) => `${r.abstainPct.toFixed(1)}%` },
+                  ] as const
+                ).map((row) => (
+                  <tr key={row.k} className="border-b border-dna-border/40 last:border-0">
+                    <th scope="row" className="px-3 py-1.5 font-sans text-[11px] font-normal text-dna-muted">
+                      {row.label}
+                    </th>
+                    {BENCHMARK_RUNS.map((run) => (
+                      <td key={run.id} className="px-3 py-1.5 text-dna-text">
+                        {row.fmt(run)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[11px] text-dna-faint">
+            F1 <span className="font-mono text-dna-green">{BENCHMARK_HEADLINE.f1.toFixed(3)}</span> with the
+            fused signal, up from{" "}
+            <span className="font-mono">{LEXICAL_BASELINE.f1.toFixed(3)}</span> lexical-only. The fused
+            signal reorders candidates, which moves one pair from abstention into an accepted match; the
+            veto set is identical in both runs. Figures below describe the fused configuration unless
+            stated otherwise.
+          </p>
+
           {/* Headline metrics */}
+          <p className="font-mono text-[11px] uppercase tracking-wider text-dna-faint">
+            Shipped configuration — {BENCHMARK_HEADLINE.label}
+          </p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
               { label: "F1", value: BENCHMARK_HEADLINE.f1.toFixed(3), tone: "text-dna-green" },
@@ -366,6 +411,13 @@ export default function ResearchClient() {
             <h4 className="text-sm font-semibold text-dna-text">
               Per-category decisions — 200 pairs, 28 categories
             </h4>
+            <p className="mt-1 text-[11px] text-dna-faint">
+              Breakdown of the{" "}
+              <span className="font-mono text-dna-muted">{LEXICAL_BASELINE.label.toLowerCase()}</span> run
+              (F1 <span className="font-mono">{LEXICAL_BASELINE.f1.toFixed(3)}</span>). The fused run
+              reorders candidates within the same categories and does not change this table&rsquo;s totals by
+              more than one pair.
+            </p>
             <p className="mt-1 text-[11px] text-dna-faint">
               pos = ground-truth match pairs in the category; MATCH / DNM / REVIEW / NO_MATCH are
               engine decisions. Engine error modes: MATCH on pos=0 rows, DNM on pos=n rows.

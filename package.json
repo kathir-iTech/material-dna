@@ -16,6 +16,8 @@
     "typecheck": "tsc --noEmit",
     "bench": "node scripts/build-bench.mjs && node benchmark/bench.mjs",
     "bench:embed": "node scripts/build-bench.mjs && node benchmark/bench.mjs --embed",
+    "bench:check": "node scripts/check-bench.mjs",
+    "bench:check:embed": "node scripts/check-bench.mjs --embed",
     "postinstall": "node scripts/prune-node-modules.mjs"
   },
   "dependencies": {

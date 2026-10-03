@@ -1,0 +1,14 @@
+# The benchmark golden files are compared byte-for-byte against harness output,
+# so their line endings and encoding must be identical on every platform and
+# every checkout. Without this, core.autocrlf on Windows rewrites them to CRLF
+# and a byte comparison can never match on Linux or macOS.
+* text=auto eol=lf
+
+# Never touched by the text pipeline.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

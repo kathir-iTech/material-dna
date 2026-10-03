@@ -35,7 +35,28 @@ Both bundle `bench.ts` to `benchmark/bench.mjs` first, so there is no separate
 build step to remember. Set `BENCH_CSV=/path/to/other.csv` to score a different
 labelled set without editing the harness.
 
+### Verifying against the golden files
+
+To check rather than eyeball:
+
+```bash
+npm run bench:check        # lexical-only run vs expected-baseline.txt
+npm run bench:check:embed  # fused run vs expected-embed.txt
+```
+
+Each compares the harness output to its recorded run **line for line** and exits
+non-zero on any difference, printing the offending lines. Only wall-clock
+timings are masked (`runtime:`, and the model load time on the embedding run);
+every other line must match exactly. If it fails after an intended engine
+change, re-run the harness and replace the golden file deliberately rather than
+editing the expected numbers by hand.
+
+The golden files are UTF-8 with LF line endings, pinned by `.gitattributes`, so
+the comparison is byte-identical on Windows, macOS and Linux.
+
 ## Expected headline lines
+
+Lexical-only run (`expected-baseline.txt`):
 
 ```text
 rows=200  match=1: 100  match=0: 100
@@ -48,7 +69,24 @@ DO_NOT_MERGE: 64 total, 54 on true non-matches (veto precision 84.4%), 64 with >
 false vetoes (true matches blocked): 10
 ```
 
-Only the trailing `runtime:` line varies between runs.
+Dense-retrieval-signal run (`expected-embed.txt`), which is the shipped
+configuration and the figure quoted on `/research`:
+
+```text
+decision distribution: {"MATCH":66,"DO_NOT_MERGE":64,"NO_MATCH":1,"REVIEW":69}
+abstain (REVIEW): 69/200 (34.5%)
+decided: 131  TP=53 FP=13 FN=11 TN=54
+precision(MATCH)=0.803  recall(MATCH)=0.828  F1=0.815
+accuracy on decided pairs=81.7%
+DO_NOT_MERGE: 64 total, 54 on true non-matches (veto precision 84.4%), 64 with >=1 critical conflict
+false vetoes (true matches blocked): 10
+```
+
+Only the trailing `runtime:` line varies between runs. The two runs differ by
+exactly one pair moving from `REVIEW` to `MATCH`: the fused signal reorders
+candidates, so it resolves one abstention into an accepted match. The veto set
+is identical, because the embedding only reorders and never relaxes a hard
+attribute constraint.
 
 ### Reading the confusion matrix
 

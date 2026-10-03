@@ -4,8 +4,28 @@ import { trackPageErrors, gotoClean } from "./helpers";
 /**
  * These are the published, measured figures. They must not drift silently:
  * if the engine changes, the README and this spec must change together.
+ *
+ * Two recorded runs are published side by side. FUSED is the shipped
+ * configuration and carries the headline; LEXICAL is the pre-fusion reference
+ * and is never replaced by it. Both are checked against the golden files by
+ * tests/research-benchmark.test.ts.
  */
-const BENCHMARK = {
+const FUSED = {
+  label: "Fused dense-retrieval signal",
+  f1: "0.815",
+  precision: "0.803",
+  recall: "0.828",
+  abstain: "34.5%",
+  match: 66,
+  doNotMerge: 64,
+  noMatch: 1,
+  review: 69,
+  decided: 131,
+  accuracy: "81.7%",
+};
+
+const LEXICAL = {
+  label: "Lexical-only baseline",
   f1: "0.813",
   precision: "0.800",
   recall: "0.825",
@@ -14,13 +34,18 @@ const BENCHMARK = {
   doNotMerge: 64,
   noMatch: 1,
   review: 70,
+  decided: 130,
+  accuracy: "81.5%",
+};
+
+const BENCHMARK = {
   vetoPrecision: "84.4%",
   falseVetoes: 10,
+  vetoTotal: 64,
+  vetoCorrect: 54,
   total: 200,
   positives: 100,
   categories: 28,
-  decided: 130,
-  accuracy: "81.5%",
   falseMatches: 13,
   runDate: "30 Sep 2026",
 };
@@ -29,18 +54,54 @@ test.describe("Research — headline benchmark values", () => {
   test("publishes the exact F1 / precision / recall / abstain figures", async ({ page }) => {
     const errors = trackPageErrors(page);
     await gotoClean(page, "/research");
-    await expect(page.getByText(BENCHMARK.f1)).toBeVisible();
-    await expect(page.getByText(BENCHMARK.precision)).toBeVisible();
-    await expect(page.getByText(BENCHMARK.recall)).toBeVisible();
-    await expect(page.getByText(BENCHMARK.abstain)).toBeVisible();
-    await expect(page.getByText("F1")).toBeVisible();
+    // The headline grid describes the shipped fused configuration.
+    const headline = page
+      .locator("div")
+      .filter({ has: page.getByText(`Shipped configuration — ${FUSED.label}`) });
+    await expect(headline.getByText(FUSED.f1).first()).toBeVisible();
+    await expect(headline.getByText(FUSED.precision).first()).toBeVisible();
+    await expect(headline.getByText(FUSED.recall).first()).toBeVisible();
+    await expect(headline.getByText(FUSED.abstain).first()).toBeVisible();
+    await expect(headline.getByText("F1", { exact: true })).toBeVisible();
     expect(errors).toHaveLength(0);
+  });
+
+  test("publishes the fused F1 with the lexical baseline alongside, both labelled", async ({
+    page,
+  }) => {
+    await gotoClean(page, "/research");
+    const runTable = page.locator("table").filter({ hasText: "F1 (MATCH)" });
+    await expect(runTable).toHaveCount(1);
+
+    // Each figure must sit under the column that names its run, so a judge
+    // reading the page cannot mistake the baseline for the shipped result.
+    const fusedCol = runTable
+      .getByRole("columnheader")
+      .filter({ hasText: FUSED.label });
+    await expect(fusedCol).toContainText(FUSED.f1);
+
+    const lexicalCol = runTable
+      .getByRole("columnheader")
+      .filter({ hasText: LEXICAL.label });
+    await expect(lexicalCol).toContainText(LEXICAL.f1);
+
+    // The two runs are genuinely different, not one number wearing two labels.
+    expect(FUSED.f1).not.toBe(LEXICAL.f1);
+    const decidedRow = runTable.getByRole("row").filter({ hasText: "Decided pairs" });
+    const decidedCells = (await decidedRow.getByRole("cell").allInnerTexts()).map((s) => s.trim());
+    expect(decidedCells).toEqual([FUSED.decided, LEXICAL.decided].map(String));
+
+    // And the framing matches the submitted deck.
+    await expect(
+      page.getByText(new RegExp(`F1 ${FUSED.f1.replace(".", "\\.")} with the fused signal, up from`))
+    ).toBeVisible();
+    await expect(page.getByText("lexical-only. The fused signal reorders candidates")).toBeVisible();
   });
 
   test("decision distribution sums to the 200-pair set", async ({ page }) => {
     await gotoClean(page, "/research");
-    const { match, doNotMerge, noMatch, review, total } = BENCHMARK;
-    expect(match + doNotMerge + noMatch + review).toBe(total);
+    const { match, doNotMerge, noMatch, review } = FUSED;
+    expect(match + doNotMerge + noMatch + review).toBe(BENCHMARK.total);
     await expect(
       page.getByText(
         `MATCH ${match} · DO_NOT_MERGE ${doNotMerge} · NO_MATCH ${noMatch} · REVIEW ${review}`
@@ -50,9 +111,9 @@ test.describe("Research — headline benchmark values", () => {
 
   test("confusion matrix and decided-set accuracy are published", async ({ page }) => {
     await gotoClean(page, "/research");
-    await expect(page.getByText(/TP=52\s+FP=13\s+FN=11\s+TN=54/)).toBeVisible();
-    await expect(page.getByText(`decided = ${BENCHMARK.decided}`)).toBeVisible();
-    await expect(page.getByText(`Accuracy on decided pairs: ${BENCHMARK.accuracy}`)).toBeVisible();
+    await expect(page.getByText(/TP=53\s+FP=13\s+FN=11\s+TN=54/)).toBeVisible();
+    await expect(page.getByText(`decided = ${FUSED.decided}`)).toBeVisible();
+    await expect(page.getByText(`Accuracy on decided pairs: ${FUSED.accuracy}`)).toBeVisible();
   });
 
   test("constraint-veto quality matches the published figures", async ({ page }) => {
@@ -62,11 +123,18 @@ test.describe("Research — headline benchmark values", () => {
       page.getByText(`false vetoes (true matches blocked): ${BENCHMARK.falseVetoes}`)
     ).toBeVisible();
     // 54 correct of 64 vetoes is exactly 84.4%.
-    expect(Math.round((54 / BENCHMARK.doNotMerge) * 1000) / 10).toBe(84.4);
+    expect(Math.round((BENCHMARK.vetoCorrect / BENCHMARK.vetoTotal) * 1000) / 10).toBe(84.4);
+    // Fusing the signal reorders candidates; it must not change the veto set.
+    expect(FUSED.doNotMerge).toBe(LEXICAL.doNotMerge);
   });
 
   test("per-category table totals reconcile cell-by-cell", async ({ page }) => {
     await gotoClean(page, "/research");
+    // This table is the lexical baseline breakdown, so it must reconcile against
+    // the baseline run rather than the headline.
+    await expect(
+      page.getByText(new RegExp(`Breakdown of the ${LEXICAL.label.toLowerCase()} run`))
+    ).toBeVisible();
     const totalRow = page.getByRole("row").filter({ hasText: /^total/ });
     await expect(totalRow).toHaveCount(1);
     const cells = (await totalRow.getByRole("cell").allInnerTexts()).map((s) => s.trim());
@@ -74,10 +142,10 @@ test.describe("Research — headline benchmark values", () => {
       "total",
       String(BENCHMARK.total),
       String(BENCHMARK.positives),
-      String(BENCHMARK.match),
-      String(BENCHMARK.doNotMerge),
-      String(BENCHMARK.review),
-      String(BENCHMARK.noMatch),
+      String(LEXICAL.match),
+      String(LEXICAL.doNotMerge),
+      String(LEXICAL.review),
+      String(LEXICAL.noMatch),
     ]);
   });
 
