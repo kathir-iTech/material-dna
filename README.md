@@ -166,13 +166,14 @@ identical in both columns. That is the design invariant, and it is asserted in
 | Cluster size distribution | 15 pairs, 2 triples, 1 quad, **0 singletons** |
 | Candidate links (score ≥ review threshold) | 32 |
 | Critical conflicts correctly blocked | 68 |
-| Seeded review cases | 5 (3 pending) |
+| Seeded review cases | 6 (4 pending) |
 | Tests | **150** across 7 files |
 
-> **Benchmark input caveat.** The 200 labelled pairs are **not committed** (synthetic research data
-> not cleared for the public repo). Supply your copy with `BENCH_CSV=/path/to.csv`; without it
-> `bench.ts` exits with instructions rather than guessing. The `expected-*.txt` files above are the
-> recorded outputs of that run.
+> **Benchmark input.** The 200 labelled pairs are committed at
+> [`benchmark/data/material-pairs-labeled.csv`](./benchmark/data/material-pairs-labeled.csv), so the
+> figures above are reproducible from a fresh clone with `npm run bench` — no external files and no
+> environment variables. Point `BENCH_CSV` elsewhere to score a different labelled set. The
+> `expected-*.txt` files are the recorded outputs of the committed run.
 
 ---
 

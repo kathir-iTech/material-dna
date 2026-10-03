@@ -51,6 +51,7 @@ Evidence (all reproducible):
 | PoC pair SS304 vs SS316L | cosine **0.9161** (exact reproduction), decision `DO_NOT_MERGE` |
 | 200-pair benchmark, baseline | F1 **0.813**, `DNM 64`, veto precision **84.4%**, false vetoes 10 |
 | 200-pair benchmark, signal active | F1 **0.815**, `DNM 64` (**identical set**), veto precision **84.4%**, false vetoes 10 |
+| 200-pair benchmark, fresh clone | `npm run bench` on a clean `git clone` reproduces `expected-baseline.txt` on all 249 lines. The labelled CSV is committed, so nothing external is required |
 | Embeddings mis-rank true non-matches? | Yes — global cosine max is pair #4 (M10 vs M12 bolt, 0.9892), which is exactly why the signal only re-ranks candidates and never decides |
 | Live `/api/resolve` | top candidate `embeddingSimilarity: 99` **and** `DO_NOT_MERGE` (`critical-dimension-mismatch`) in the same response |
 
@@ -109,9 +110,10 @@ Locally: `npm test` (150/150), `npm run lint`, `npm run typecheck`,
 
 ## Benchmark provenance
 
-200 labelled CPSE material pairs. **That CSV is not committed** (synthetic
-research data not cleared for the public repo) — point the harness at your copy
-with `BENCH_CSV=/path/to.csv`. Run 30 Sep 2026. Harness:
+200 labelled CPSE material pairs, committed at
+[`benchmark/data/material-pairs-labeled.csv`](./benchmark/data/material-pairs-labeled.csv)
+so `npm run bench` reproduces the figures from a fresh clone; set
+`BENCH_CSV=/path/to.csv` to score a different set. Run 30 Sep 2026. Harness:
 [`benchmark/bench.ts`](./benchmark/bench.ts) with recorded reference outputs
 ([baseline](./benchmark/expected-baseline.txt), [fused](./benchmark/expected-embed.txt))
 — see [`benchmark/README.md`](./benchmark/README.md) and the methodology note
