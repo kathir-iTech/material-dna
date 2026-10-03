@@ -4,33 +4,71 @@ Methodology and the measured baseline are recorded in
 [`baseline-2026-09-29.md`](./baseline-2026-09-29.md): pairwise evaluation — A as
 input, B as the sole candidate; confusion matrix over decided pairs.
 
-- `bench.ts` — the harness (bundled with esbuild, run as ESM so `--embed`
-  can await model download)
-- `expected-baseline.txt` — lexical-only reference run (F1 **0.813**)
-- `expected-embed.txt` — dense-retrieval signal fused (F1 **0.815**,
-  identical 64 `DO_NOT_MERGE` set / 84.4% veto precision)
+Everything needed to reproduce the published numbers is in this directory. A
+fresh clone can run the benchmark with no external files and no environment
+variables.
 
-Input: the 200-pair labelled CSV is **not committed** (synthetic research data
-not cleared for the public repo). Supply it via `BENCH_CSV=/path/to.csv`; the
-two `expected-*.txt` files are the recorded outputs of that run.
+## Contents
 
-## Run (from the `app/` directory)
+| File | What it is |
+|---|---|
+| `data/material-pairs-labeled.csv` | The labelled 200-pair set (100 true matches, 100 true non-matches, 28 categories) |
+| `bench.ts` | The harness |
+| `expected-baseline.txt` | Recorded lexical-only reference run (F1 **0.813**) |
+| `expected-embed.txt` | Recorded dense-retrieval-signal run (F1 **0.815**) |
+| `baseline-2026-09-29.md` | Methodology, threshold sweep and interpretation |
+
+The labelled data is **synthetic**, team-authored for this demonstrator. It is
+committed deliberately so the reported metrics are checkable rather than
+merely asserted.
+
+## Run
+
+From the `app/` directory, after `npm install`:
 
 ```bash
-npx esbuild benchmark/bench.ts --bundle --platform=node --format=esm "--alias:@=./src" --external:@xenova/transformers --outfile=benchmark/bench.mjs
-
-node benchmark/bench.mjs            # lexical-only  -> matches expected-baseline.txt
-node benchmark/bench.mjs --embed    # signal fused  -> matches expected-embed.txt
+npm run bench          # lexical-only  -> reproduces expected-baseline.txt
+npm run bench:embed    # signal fused  -> reproduces expected-embed.txt
 ```
 
-Expected headline lines:
+Both bundle `bench.ts` to `benchmark/bench.mjs` first, so there is no separate
+build step to remember. Set `BENCH_CSV=/path/to/other.csv` to score a different
+labelled set without editing the harness.
+
+## Expected headline lines
 
 ```text
-precision(MATCH)=0.800  recall(MATCH)=0.825  F1=0.813     # baseline
+rows=200  match=1: 100  match=0: 100
+decision distribution: {"MATCH":65,"DO_NOT_MERGE":64,"NO_MATCH":1,"REVIEW":70}
+abstain (REVIEW): 70/200 (35.0%)
+decided: 130  TP=52 FP=13 FN=11 TN=54
+precision(MATCH)=0.800  recall(MATCH)=0.825  F1=0.813
+accuracy on decided pairs=81.5%
 DO_NOT_MERGE: 64 total, 54 on true non-matches (veto precision 84.4%), 64 with >=1 critical conflict
 false vetoes (true matches blocked): 10
 ```
 
-`--embed` warms the model on first run (~7 s download, cached afterwards) and
-only changes candidate ranking: the vetoed set and false-veto count must be
-identical to baseline.
+Only the trailing `runtime:` line varies between runs.
+
+### Reading the confusion matrix
+
+`TP`/`FP`/`FN`/`TN` cover **decided** pairs only, so they do not sum to the 100
+positives. The engine deliberately abstains on a third of the set, and those
+`REVIEW` pairs are excluded from the matrix rather than scored as errors:
+
+```text
+positives (100) = TP 52 + FN 11 + 37 sent to REVIEW
+negatives (100) = TN 54 + FP 13 + 33 sent to REVIEW
+abstentions     = 37 + 33 = 70  -> the 70 REVIEW decisions
+```
+
+`accuracy counting REVIEW as wrong` in the harness output (53.0%) is the
+pessimistic view that charges every abstention as a miss; the 81.5% headline
+scores only pairs the engine actually decided.
+
+## Embeddings
+
+`npm run bench:embed` warms the model on first run (~7 s download, cached
+afterwards) and only changes candidate ranking. The vetoed set and the
+false-veto count must be identical to the lexical-only baseline — the
+embedding signal never reaches the veto or the decision.

@@ -370,6 +370,12 @@ export default function ResearchClient() {
               pos = ground-truth match pairs in the category; MATCH / DNM / REVIEW / NO_MATCH are
               engine decisions. Engine error modes: MATCH on pos=0 rows, DNM on pos=n rows.
             </p>
+            <p className="mt-1 text-[11px] text-dna-faint">
+              The confusion matrix counts decided pairs only, so pos does not equal TP + FN. Of the
+              100 ground-truth matches, 52 became TP and 11 FN while 37 were abstained to REVIEW; of
+              the 100 non-matches, 54 became TN and 13 FP while 33 were abstained. Those 37 + 33 = 70
+              abstentions are exactly the REVIEW row in the distribution above.
+            </p>
             <div className="mt-2 overflow-x-auto rounded border border-dna-border">
               <table className="w-full text-left text-xs">
                 <thead>

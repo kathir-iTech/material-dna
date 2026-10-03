@@ -60,7 +60,10 @@ export function ReviewClient() {
       <div>
         <h1 className="text-xl font-bold text-dna-text">Human Review Queue</h1>
         <p className="mt-1 max-w-3xl text-sm text-dna-muted">
-          Ambiguous and high-risk material identity decisions requiring human validation.
+          Ambiguous and high-risk material identity decisions requiring human validation. The{" "}
+          <span className="text-dna-faint">Ambiguous</span> and{" "}
+          <span className="text-dna-faint">Critical Conflict</span> filters select on the{" "}
+          <span className="text-dna-faint">Recommendation</span> column.
         </p>
         <p className="mt-2 inline-flex items-center gap-1.5 rounded border border-dna-amber/40 bg-dna-amber/10 px-2 py-1 text-xs text-dna-amber">
           <TriangleAlert size={12} aria-hidden="true" />
@@ -98,7 +101,7 @@ export function ReviewClient() {
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-xs">
+          <table className="w-full min-w-[880px] text-left text-xs">
             <thead>
               <tr className="border-b border-dna-border text-[11px] uppercase tracking-wider text-dna-faint">
                 <th className="px-4 py-2 font-medium">Case</th>
@@ -107,13 +110,14 @@ export function ReviewClient() {
                 <th className="px-2 py-2 font-medium">Risk</th>
                 <th className="px-2 py-2 font-medium">Confidence</th>
                 <th className="px-2 py-2 font-medium">Reason</th>
+                <th className="px-2 py-2 font-medium">Recommendation</th>
                 <th className="px-4 py-2 font-medium">Status</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-dna-faint">
+                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-dna-faint">
                     No review cases match the current filter or search.
                   </td>
                 </tr>
@@ -137,6 +141,9 @@ export function ReviewClient() {
                   <td className="px-2 py-2"><RiskBadge risk={c.risk} /></td>
                   <td className="px-2 py-2 font-mono text-dna-muted">{c.confidence}%</td>
                   <td className="max-w-56 truncate px-2 py-2 text-dna-muted">{c.reason}</td>
+                  <td className="px-2 py-2">
+                    <DecisionBadge decision={c.systemRecommendation} size="sm" />
+                  </td>
                   <td className="px-4 py-2">
                     <Badge tone={STATUS_TONES[c.status]}>{c.status}</Badge>
                   </td>

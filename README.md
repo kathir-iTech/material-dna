@@ -2,7 +2,7 @@
 
 # Material DNA
 
-### AI-driven standardization &amp; harmonization of material codes across CPSEs
+### AI-Driven Standardization and Harmonization of Material Codes Across CPSEs
 
 **Smart India Hackathon 2026 · Problem Statement [PS26099](https://www.sih.gov.in/)**
 Ministry of Petroleum &amp; Natural Gas
@@ -227,9 +227,23 @@ app/
       dataset-stats.ts clusters.ts
     types/domain.ts             shared domain model
   tests/                        7 files, 150 tests
-  benchmark/                    harness + recorded reference outputs
+  benchmark/                    labelled 200-pair CSV, harness, recorded reference outputs
   scripts/                      postinstall prune + Vercel output helpers
 ```
+
+### API routes
+
+All seven endpoints, with the page that exercises each one:
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/resolve` | `POST` | Resolve one pair — the pipeline behind `/` |
+| `/api/resolve-batch` | `POST` | Resolve a parsed CSV batch — the pipeline behind `/migrate` |
+| `/api/migrate/parse` | `POST` | Validate and stage an uploaded CSV before batch resolve |
+| `/api/materials` | `GET` | Canonical identity list — feeds `/materials` and `/graph` |
+| `/api/materials/[id]` | `GET` | One identity with its linked legacy records and sources |
+| `/api/canonical` | `GET` | Canonical graph and per-identity lineage — feeds `/graph` |
+| `/api/reviews` | `GET` | Seeded review queue snapshot — feeds `/review` |
 
 ---
 

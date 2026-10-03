@@ -1,0 +1,201 @@
+pair_id,cpse_a_description,cpse_b_description,match,category
+1,"SS304 stainless steel pipe 50mm OD x 3mm wall","Stainless Steel 304 Seamless Pipe 50mm x 3mm",1,unit_normalization
+2,"SS304 stainless steel pipe 50mm OD x 3mm wall","SS316L stainless steel pipe 50mm OD x 3mm wall",0,grade_difference
+3,"Hex bolt M10x50 grade 8.8 zinc plated","Hexagon Head Bolt M10 x 50mm Grade 8.8 Galvanised",1,abbreviated_vs_full
+4,"Hex bolt M10x50 grade 8.8 zinc plated","Hex bolt M12x50 grade 8.8 zinc plated",0,size_difference
+5,"IS 2062 E250A structural steel plate 10mm","ASTM A36 carbon steel plate 10mm thick",1,standard_mapping
+6,"IS 2062 E250A structural steel plate 10mm","IS 2062 E350C structural steel plate 10mm",0,grade_difference
+7,"Globe valve 2 inch SS316 flanged","SS316 Flanged Globe Valve 50mm",1,unit_normalization
+8,"Globe valve 2 inch SS316 flanged","Gate valve 2 inch SS316 flanged",0,type_difference
+9,"Cable tray 300mm perforated GI","Perforated GI Cable Tray 300mm Width",1,word_reorder
+10,"Cable tray 300mm perforated GI","Cable tray 600mm perforated GI",0,size_difference
+11,"Mild steel round bar 25mm diameter","MS Round Rod 25mm dia",1,abbreviated_vs_full
+12,"Mild steel round bar 25mm diameter","Mild steel round bar 32mm diameter",0,size_difference
+13,"Butterfly valve 150mm wafer type EPDM seat","Wafer Type Butterfly Valve 150mm EPDM Seated",1,word_reorder
+14,"Butterfly valve 150mm wafer type EPDM seat","Butterfly valve 150mm lug type EPDM seat",0,type_difference
+15,"MS flat bar 40x6mm IS 2062","IS 2062 MS Flat 40mm x 6mm",1,abbreviated_vs_full
+16,"MS flat bar 40x6mm IS 2062","MS flat bar 50x6mm IS 2062",0,size_difference
+17,"Industrial bearing 6205 25x52x15mm","SKF 6205 Deep Groove Ball Bearing 25x52x15",1,manufacturer_variation
+18,"Industrial bearing 6205 25x52x15mm","Industrial bearing 6206 30x62x16mm",0,size_difference
+19,"Rubber gasket 3mm thick 100mm ID NBR","NBR Rubber Gasket ID 100mm THK 3mm",1,word_reorder
+20,"Rubber gasket 3mm thick 100mm ID NBR","PTFE gasket 3mm thick 100mm ID",0,material_difference
+21,"Electrical cable 2.5 sq mm 3 core copper XLPE","3 Core 2.5 sqmm Copper XLPE Cable",1,word_reorder
+22,"Electrical cable 2.5 sq mm 3 core copper XLPE","Electrical cable 4 sq mm 3 core copper XLPE",0,size_difference
+23,"GI pipe class C 2 inch BIS 1239","Galvanised Iron Pipe 50mm Class C IS 1239",1,abbreviated_vs_full
+24,"GI pipe class C 2 inch BIS 1239","GI pipe class B 2 inch BIS 1239",0,grade_difference
+25,"PVC conduit pipe 25mm heavy duty","Heavy Duty PVC Conduit 25mm",1,word_reorder
+26,"PVC conduit pipe 25mm heavy duty","PVC conduit pipe 20mm heavy duty",0,size_difference
+27,"Flange 150# RF SS304 ANSI B16.5","SS304 RF Flange 150# ASME B16.5",1,standard_mapping
+28,"Flange 150# RF SS304 ANSI B16.5","Flange 300# RF SS304 ANSI B16.5",0,pressure_difference
+29,"Nitrile O-ring 50mm ID 3mm CS NBR","NBR O-Ring ID 50mm Cross Section 3mm",1,abbreviated_vs_full
+30,"Nitrile O-ring 50mm ID 3mm CS NBR","Nitrile O-ring 50mm ID 5mm CS NBR",0,size_difference
+31,"Copper earthing rod 16mm x 3m","Earth Rod Copper 16mm Length 3m",1,word_reorder
+32,"Copper earthing rod 16mm x 3m","Copper earthing rod 20mm x 3m",0,size_difference
+33,"MS chequered plate 5mm 1000x2000mm","Chequered Mild Steel Plate 5mm 1m x 2m",1,unit_normalization
+34,"MS chequered plate 5mm 1000x2000mm","MS chequered plate 6mm 1000x2000mm",0,size_difference
+35,"Motor starter 7.5HP DOL AC3","DOL Starter 7.5 HP AC3 Category",1,word_reorder
+36,"Motor starter 7.5HP DOL AC3","Motor starter 10HP DOL AC3",0,size_difference
+37,"Hydraulic hose 1/2 inch 2 wire bsp","2 Wire Hydraulic Hose 12.5mm BSP Ends",1,unit_normalization
+38,"Hydraulic hose 1/2 inch 2 wire bsp","Hydraulic hose 3/4 inch 2 wire bsp",0,size_difference
+39,"SS316L welded pipe 100mm x 6m","Welded Pipe SS316L 100mm Length 6m",1,word_reorder
+40,"SS316L welded pipe 100mm x 6m","SS304 welded pipe 100mm x 6m",0,grade_difference
+41,"Industrial grease NLGI 2 lithium based","Lithium Based Industrial Grease NLGI 2",1,word_reorder
+42,"Industrial grease NLGI 2 lithium based","Industrial grease NLGI 3 lithium based",0,grade_difference
+43,"Cable gland 20mm brass IP68","Brass Cable Gland 20mm IP68 Rated",1,abbreviated_vs_full
+44,"Cable gland 20mm brass IP68","Cable gland 25mm brass IP68",0,size_difference
+45,"ISMC 100 channel 100x50x5mm","Indian Standard Medium Channel 100mm",1,abbreviated_vs_full
+46,"ISMC 100 channel 100x50x5mm","ISMC 125 channel 125x65x6mm",0,size_difference
+47,"Transformer oil 33KV grade mineral","Mineral Transformer Oil 33KV Grade",1,word_reorder
+48,"Transformer oil 33KV grade mineral","Transformer oil 11KV grade mineral",0,voltage_difference
+49,"Anchor bolt M16x200 chemical type","Chemical Anchor Bolt M16 Length 200mm",1,abbreviated_vs_full
+50,"Anchor bolt M16x200 chemical type","Anchor bolt M20x200 chemical type",0,size_difference
+51,"FRP pipe 100mm class 3 pressure","Fiberglass Reinforced Plastic Pipe 100mm Cl 3",1,abbreviated_vs_full
+52,"FRP pipe 100mm class 3 pressure","FRP pipe 100mm class 5 pressure",0,pressure_difference
+53,"Centrifugal pump 20HP 3phase SS316","SS316 Centrifugal Pump 20HP Three Phase",1,word_reorder
+54,"Centrifugal pump 20HP 3phase SS316","Centrifugal pump 15HP 3phase SS316",0,size_difference
+55,"MS angle 50x50x5mm IS 2062","IS 2062 MS Equal Angle 50x50x5",1,word_reorder
+56,"MS angle 50x50x5mm IS 2062","MS angle 75x75x6mm IS 2062",0,size_difference
+57,"Solenoid valve 24VDC 2 way normally closed","2 Way NC Solenoid Valve 24V DC",1,word_reorder
+58,"Solenoid valve 24VDC 2 way normally closed","Solenoid valve 220VAC 2 way normally closed",0,voltage_difference
+59,"Heat exchanger shell and tube SS304 5sqm","SS304 Shell & Tube Heat Exchanger 5 sqm Area",1,abbreviated_vs_full
+60,"Heat exchanger shell and tube SS304 5sqm","Heat exchanger shell and tube SS316 5sqm",0,grade_difference
+61,"Lube oil ISO VG 68 mineral","Mineral Lube Oil ISO VG 68",1,word_reorder
+62,"Lube oil ISO VG 68 mineral","Lube oil ISO VG 100 mineral",0,viscosity_difference
+63,"Polypropylene pipe 50mm PN10","PP Pipe 50mm PN 10 Rating",1,abbreviated_vs_full
+64,"Polypropylene pipe 50mm PN10","Polypropylene pipe 63mm PN10",0,size_difference
+65,"Conveyor belt EP 800/3 600mm width","EP 800/3 Conveyor Belt 600mm Wide",1,word_reorder
+66,"Conveyor belt EP 800/3 600mm width","Conveyor belt EP 800/3 800mm width",0,size_difference
+67,"Diesel engine oil 15W40 CI-4 20L pail","15W-40 CI-4 Diesel Engine Oil 20 Litre",1,unit_normalization
+68,"Diesel engine oil 15W40 CI-4 20L pail","Diesel engine oil 10W30 CI-4 20L pail",0,viscosity_difference
+69,"Plug valve 2 inch SS304 full bore","Full Bore SS304 Plug Valve 50mm",1,unit_normalization
+70,"Plug valve 2 inch SS304 full bore","Plug valve 2 inch SS304 reduced bore",0,type_difference
+71,"Hollow section 50x50x3mm MS","MS Square Hollow Section 50x50x3",1,word_reorder
+72,"Hollow section 50x50x3mm MS","Hollow section 60x60x4mm MS",0,size_difference
+73,"Sump pump 5HP submersible SS","Submersible Sump Pump 5HP SS",1,word_reorder
+74,"Sump pump 5HP submersible SS","Sump pump 7.5HP submersible SS",0,size_difference
+75,"Teflon tape 12mm x 20m PTFE","PTFE Thread Seal Tape 12mm 20m",1,abbreviated_vs_full
+76,"Teflon tape 12mm x 20m PTFE","Teflon tape 19mm x 20m PTFE",0,size_difference
+77,"Water meter 25mm mag type brass","Brass Magnetic Water Meter 25mm",1,word_reorder
+78,"Water meter 25mm mag type brass","Water meter 40mm mag type brass",0,size_difference
+79,"Power capacitor 10KVAR 440V 3phase","3 Phase Power Capacitor 10 KVAR 440V",1,word_reorder
+80,"Power capacitor 10KVAR 440V 3phase","Power capacitor 15KVAR 440V 3phase",0,capacitance_difference
+81,"Angle valve 1/2 inch brass chrome","Chrome Plated Brass Angle Valve 15mm",1,unit_normalization
+82,"Angle valve 1/2 inch brass chrome","Angle valve 3/4 inch brass chrome",0,size_difference
+83,"MS flat 75x10mm hot rolled","Hot Rolled MS Flat Bar 75mm x 10mm",1,word_reorder
+84,"MS flat 75x10mm hot rolled","MS flat 75x12mm hot rolled",0,size_difference
+85,"Safety valve 1 inch spring loaded SS","SS Spring Loaded Safety Valve 25mm",1,unit_normalization
+86,"Safety valve 1 inch spring loaded SS","Safety valve 1.5 inch spring loaded SS",0,size_difference
+87,"Aluminium bus bar 40x6mm 99.5% purity","99.5% Pure Aluminium Busbar 40mm x 6mm",1,word_reorder
+88,"Aluminium bus bar 40x6mm 99.5% purity","Aluminium bus bar 50x6mm 99.5% purity",0,size_difference
+89,"Check valve 100mm wafer type cast iron","Wafer Type Cast Iron Check Valve 100mm",1,word_reorder
+90,"Check valve 100mm wafer type cast iron","Check valve 100mm flanged type cast iron",0,type_difference
+91,"Inverter duty motor 10HP 1440RPM IP55","10HP IP55 Inverter Duty Motor 1440 RPM",1,word_reorder
+92,"Inverter duty motor 10HP 1440RPM IP55","Inverter duty motor 7.5HP 1440RPM IP55",0,size_difference
+93,"Butt weld elbow 90 deg 100mm SS304","SS304 90 Degree Butt Weld Elbow 100mm",1,word_reorder
+94,"Butt weld elbow 90 deg 100mm SS304","Butt weld elbow 45 deg 100mm SS304",0,angle_difference
+95,"Lithium grease NLGI 2 EP 400g tube","EP Lithium Grease NLGI 2 400g Cartridge",1,word_reorder
+96,"Lithium grease NLGI 2 EP 400g tube","Lithium grease NLGI 2 EP 1kg tin",0,size_difference
+97,"Proximity sensor M12 10mm PNP NO","10mm PNP NO Inductive Proximity Sensor M12",1,word_reorder
+98,"Proximity sensor M12 10mm PNP NO","Proximity sensor M12 20mm PNP NO",0,sensing_distance
+99,"Pneumatic cylinder 63mm bore 300mm stroke","300mm Stroke Pneumatic Cylinder 63mm Bore",1,word_reorder
+100,"Pneumatic cylinder 63mm bore 300mm stroke","Pneumatic cylinder 63mm bore 500mm stroke",0,size_difference
+101,"EPDM rubber sheet 3mm thick black","Black EPDM Rubber Sheet 3mm",1,word_reorder
+102,"EPDM rubber sheet 3mm thick black","Nitrile rubber sheet 3mm thick black",0,material_difference
+103,"Safety shoe size 10 steel toe","Steel Toe Safety Shoes UK 10",1,word_reorder
+104,"Safety shoe size 10 steel toe","Safety shoe size 9 steel toe",0,size_difference
+105,"Control valve 1 inch globe type pneumatic","Pneumatic Globe Type Control Valve 25mm",1,unit_normalization
+106,"Control valve 1 inch globe type pneumatic","Control valve 1 inch globe type hydraulic",0,actuator_difference
+107,"Mild steel plate 12mm hot rolled IS 2062","IS 2062 HR MS Plate 12mm Thick",1,abbreviated_vs_full
+108,"Mild steel plate 12mm hot rolled IS 2062","Mild steel plate 16mm hot rolled IS 2062",0,size_difference
+109,"Nitrile glove 8 mil size L disposable","Disposable Nitrile Gloves 8mil Large",1,word_reorder
+110,"Nitrile glove 8 mil size L disposable","Nitrile glove 8 mil size M disposable",0,size_difference
+111,"Pressure gauge 0-100 bar SS304 100mm dial","SS304 Pressure Gauge 0-100 Bar 100mm Dial",1,word_reorder
+112,"Pressure gauge 0-100 bar SS304 100mm dial","Pressure gauge 0-160 bar SS304 100mm dial",0,range_difference
+113,"MS pipe 50mm class A ERW 6m","ERW MS Pipe 50mm Class A Length 6m",1,word_reorder
+114,"MS pipe 50mm class A ERW 6m","MS pipe 50mm class B ERW 6m",0,grade_difference
+115,"V belt section B 1200mm inside length","B Section V-Belt 1200mm BIC",1,abbreviated_vs_full
+116,"V belt section B 1200mm inside length","V belt section A 1200mm inside length",0,section_difference
+117,"Stainless steel wire mesh 40 mesh SS304","SS304 Stainless Steel Wire Mesh 40 Mesh",1,word_reorder
+118,"Stainless steel wire mesh 40 mesh SS304","Stainless steel wire mesh 60 mesh SS304",0,mesh_size_difference
+119,"Compression fitting 15mm copper","Copper Compression Fitting 15mm",1,word_reorder
+120,"Compression fitting 15mm copper","Compression fitting 22mm copper",0,size_difference
+121,"Limit switch roller lever IP65 10A 240V","Roller Lever Limit Switch 10A 240V IP65",1,word_reorder
+122,"Limit switch roller lever IP65 10A 240V","Limit switch plunger type IP65 10A 240V",0,actuator_difference
+123,"Welding rod E7018 3.15mm 5kg pack","E7018 Welding Electrode 3.15mm 5 Kg",1,abbreviated_vs_full
+124,"Welding rod E7018 3.15mm 5kg pack","Welding rod E6013 3.15mm 5kg pack",0,electrode_difference
+125,"Insulation tape 18mm x 20m PVC 70deg C","PVC Insulation Tape 18mm 20m 70C Rated",1,word_reorder
+126,"Insulation tape 18mm x 20m PVC 70deg C","Insulation tape 25mm x 20m PVC 70deg C",0,size_difference
+127,"Water chiller 5TR air cooled screw","Air Cooled Screw Compressor Chiller 5 TR",1,abbreviated_vs_full
+128,"Water chiller 5TR air cooled screw","Water chiller 10TR air cooled screw",0,capacity_difference
+129,"Silicon carbide paper 120 grit 230mm","120 Grit Silicon Carbide Disc 230mm",1,word_reorder
+130,"Silicon carbide paper 120 grit 230mm","Silicon carbide paper 240 grit 230mm",0,grit_difference
+131,"Quick release coupling 1/2 inch SS304","SS304 Quick Disconnect Coupling 12.5mm",1,unit_normalization
+132,"Quick release coupling 1/2 inch SS304","Quick release coupling 3/4 inch SS304",0,size_difference
+133,"Tool steel D2 round 50mm hardened","Hardened D2 Tool Steel Round Bar 50mm",1,word_reorder
+134,"Tool steel D2 round 50mm hardened","Tool steel D3 round 50mm hardened",0,grade_difference
+135,"Voltage stabilizer 50KVA 3 phase servo","Servo Controlled 3 Phase Voltage Stabilizer 50KVA",1,word_reorder
+136,"Voltage stabilizer 50KVA 3 phase servo","Voltage stabilizer 100KVA 3 phase servo",0,capacity_difference
+137,"Rubber hose 1 inch 200 bar hydraulic","200 Bar Hydraulic Rubber Hose 25mm",1,unit_normalization
+138,"Rubber hose 1 inch 200 bar hydraulic","Rubber hose 1 inch 350 bar hydraulic",0,pressure_difference
+139,"Bronze bush 50mm ID x 55mm OD x 40mm","50x55x40mm Bronze Bushing",1,abbreviated_vs_full
+140,"Bronze bush 50mm ID x 55mm OD x 40mm","Bronze bush 60mm ID x 65mm OD x 40mm",0,size_difference
+141,"LED panel light 600x600 40W 4000K","40W 4000K LED Panel 600x600mm",1,word_reorder
+142,"LED panel light 600x600 40W 4000K","LED panel light 600x600 50W 4000K",0,wattage_difference
+143,"Nylon cable tie 200mm 18kg black","Black Nylon Cable Tie 200mm 18kg",1,word_reorder
+144,"Nylon cable tie 200mm 18kg black","Nylon cable tie 300mm 18kg black",0,size_difference
+145,"Sight glass 2 inch SS304 circular","Circular SS304 Sight Glass 50mm",1,unit_normalization
+146,"Sight glass 2 inch SS304 circular","Sight glass 2 inch SS316 circular",0,grade_difference
+147,"Torque wrench 1/2 drive 50-250 Nm","1/2 Drive Torque Wrench 50-250Nm",1,word_reorder
+148,"Torque wrench 1/2 drive 50-250 Nm","Torque wrench 3/4 drive 50-250 Nm",0,drive_size_difference
+149,"Acid resistant paint 20L epoxy novolac","Epoxy Novolac Acid Resistant Paint 20 Litre",1,abbreviated_vs_full
+150,"Acid resistant paint 20L epoxy novolac","Acid resistant paint 5L epoxy novolac",0,size_difference
+151,"PVC ball valve 25mm full port","Full Port PVC Ball Valve 25mm",1,word_reorder
+152,"PVC ball valve 25mm full port","PVC ball valve 25mm standard port",0,type_difference
+153,"Steel wire rope 10mm 6x19 construction","6x19 Construction Steel Wire Rope 10mm",1,word_reorder
+154,"Steel wire rope 10mm 6x19 construction","Steel wire rope 12mm 6x19 construction",0,size_difference
+155,"Cartridge fuse 63A 500V HRC","HRC Cartridge Fuse 63A 500V",1,word_reorder
+156,"Cartridge fuse 63A 500V HRC","Cartridge fuse 100A 500V HRC",0,current_difference
+157,"Gasket sheet 1.5mm compressed fibre","Compressed Fibre Gasket Sheet 1.5mm",1,word_reorder
+158,"Gasket sheet 1.5mm compressed fibre","Gasket sheet 3mm compressed fibre",0,size_difference
+159,"PTFE rod 30mm diameter virgin","Virgin PTFE Rod 30mm dia",1,abbreviated_vs_full
+160,"PTFE rod 30mm diameter virgin","PTFE rod 30mm diameter filled",0,material_difference
+161,"VFD drive 10HP 380V 3 phase","3 Phase 10HP VFD 380V",1,word_reorder
+162,"VFD drive 10HP 380V 3 phase","VFD drive 15HP 380V 3 phase",0,size_difference
+163,"Socket head cap screw M8x30 grade 12.9","Grade 12.9 Socket Head Cap Screw M8 x 30",1,word_reorder
+164,"Socket head cap screw M8x30 grade 12.9","Socket head cap screw M8x30 grade 10.9",0,grade_difference
+165,"Teflon PTFE sheet 5mm thick white","White PTFE Teflon Sheet 5mm Thick",1,word_reorder
+166,"Teflon PTFE sheet 5mm thick white","Teflon PTFE sheet 3mm thick white",0,size_difference
+167,"Marine paint 20L epoxy anti fouling","Epoxy Anti-Fouling Marine Paint 20 Litre",1,abbreviated_vs_full
+168,"Marine paint 20L epoxy anti fouling","Marine paint 20L epoxy anti-corrosive",0,type_difference
+169,"Pump mechanical seal 25mm silicon carbide","Silicon Carbide Mechanical Seal 25mm Shaft",1,word_reorder
+170,"Pump mechanical seal 25mm silicon carbide","Pump mechanical seal 30mm silicon carbide",0,size_difference
+171,"PLC module 24VDC 16 digital input","16 DI 24VDC PLC Input Module",1,abbreviated_vs_full
+172,"PLC module 24VDC 16 digital input","PLC module 24VDC 32 digital input",0,capacity_difference
+173,"Nylon roller 50mm diameter 100mm width","100mm Wide Nylon Roller 50mm Dia",1,word_reorder
+174,"Nylon roller 50mm diameter 100mm width","Nylon roller 50mm diameter 150mm width",0,size_difference
+175,"Copper tubing 15mm refrigeration 3m","Refrigeration Copper Tube 15mm 3m Length",1,word_reorder
+176,"Copper tubing 15mm refrigeration 3m","Copper tubing 22mm refrigeration 3m",0,size_difference
+177,"Hydraulic filter element 10 micron 20GPM","20 GPM 10 Micron Hydraulic Filter Element",1,word_reorder
+178,"Hydraulic filter element 10 micron 20GPM","Hydraulic filter element 25 micron 20GPM",0,filtration_difference
+179,"Tie rod cylinder 80mm bore 500mm stroke","500mm Stroke Tie Rod Hydraulic Cylinder 80mm",1,word_reorder
+180,"Tie rod cylinder 80mm bore 500mm stroke","Tie rod cylinder 80mm bore 300mm stroke",0,size_difference
+181,"Silicone rubber sheet 60 shore A 2mm","2mm Silicone Rubber Sheet 60A Hardness",1,word_reorder
+182,"Silicone rubber sheet 60 shore A 2mm","Silicone rubber sheet 70 shore A 2mm",0,hardness_difference
+183,"Probe thermocouple K type 6mm x 300mm","K Type Thermocouple Probe 6mm 300mm",1,word_reorder
+184,"Probe thermocouple K type 6mm x 300mm","Probe thermocouple J type 6mm x 300mm",0,type_difference
+185,"Bearing housing SA206 2 bolt pillow block","2 Bolt Pillow Block Bearing Housing SA206",1,word_reorder
+186,"Bearing housing SA206 2 bolt pillow block","Bearing housing SA207 2 bolt pillow block",0,size_difference
+187,"Stainless steel wire 1.6mm 304 grade","SS304 Stainless Steel Wire 1.6mm dia",1,abbreviated_vs_full
+188,"Stainless steel wire 1.6mm 304 grade","Stainless steel wire 2mm 304 grade",0,size_difference
+189,"Coil spring 50mm OD 100mm free length 5mm wire","Compression Spring 50mm OD 100mm FL 5mm Wire",1,abbreviated_vs_full
+190,"Coil spring 50mm OD 100mm free length 5mm wire","Coil spring 50mm OD 120mm free length 5mm wire",0,size_difference
+191,"Safety goggles clear lens anti fog","Anti-Fog Clear Lens Safety Goggles",1,word_reorder
+192,"Safety goggles clear lens anti fog","Safety goggles clear lens anti scratch",0,coating_difference
+193,"Ceramic tile 600x600mm polished vitrified","Vitrified Polished Porcelain Tile 600x600",1,word_reorder
+194,"Ceramic tile 600x600mm polished vitrified","Ceramic tile 300x600mm polished vitrified",0,size_difference
+195,"Ball valve 1/2 inch SS304 full port blowout proof","SS304 Full Port Blowout Proof Ball Valve 15mm",1,unit_normalization
+196,"Ball valve 1/2 inch SS304 full port blowout proof","Ball valve 1/2 inch SS316 full port blowout proof",0,grade_difference
+197,"Conduit bending spring 20mm","20mm Conduit Bending Spring",1,word_reorder
+198,"Conduit bending spring 20mm","Conduit bending spring 25mm",0,size_difference
+199,"Rectifier diode 1N4007 1A 1000V","1N4007 1000V 1A Rectifier Diode",1,word_reorder
+200,"Rectifier diode 1N4007 1A 1000V","Rectifier diode 1N5408 3A 1000V",0,current_difference

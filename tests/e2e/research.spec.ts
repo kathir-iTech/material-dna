@@ -130,6 +130,17 @@ test.describe("Research — headline benchmark values", () => {
     ).toBeVisible();
     await expect(page.getByText(/100 match \/ 100 non-match/)).toBeVisible();
   });
+
+  test("the per-category table reconciles the abstentions, not just the matrix", async ({ page }) => {
+    await gotoClean(page, "/research");
+    // TP + FN counts only decided positives, so it cannot reach 100 on its own.
+    // The table has to say where the remaining pairs went, or the totals look
+    // like a bug rather than the abstention policy they are.
+    await expect(page.getByText(/pos does not equal TP \+ FN/)).toBeVisible();
+    await expect(page.getByText(/52 became TP and 11 FN while 37 were abstained/)).toBeVisible();
+    await expect(page.getByText(/54 became TN and 13 FP while 33 were abstained/)).toBeVisible();
+    await expect(page.getByText(/37 \+ 33 = 70/)).toBeVisible();
+  });
 });
 
 test.describe("Research — prototype experiments", () => {

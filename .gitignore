@@ -40,6 +40,9 @@ next-env.d.ts
 /test-results
 /playwright-report
 
+# generated benchmark bundle (rebuild with `npm run bench`)
+benchmark/bench.mjs
+
 # misc
 .DS_Store
 *.pem

@@ -82,6 +82,31 @@ test.describe("Review queue", () => {
     }
   });
 
+  test("the Recommendation column explains what the risk filters select on", async ({ page }) => {
+    await gotoClean(page, "/review");
+    // The filters key off systemRecommendation, which used to be invisible, so a
+    // reviewer saw rows vanish with no stated reason. The column must be present
+    // and must agree with what each filter keeps.
+    await expect(
+      page.getByRole("columnheader", { name: "Recommendation" })
+    ).toBeVisible();
+
+    const rowsFor = async (filter: string) => {
+      await page.getByRole("button", { name: `Filter: ${filter}` }).click();
+      const rows = await caseRows(page).all();
+      expect(rows.length, `filter "${filter}" returned nothing`).toBeGreaterThan(0);
+      return rows;
+    };
+
+    for (const row of await rowsFor("Critical Conflict")) {
+      await expect(row.getByText("DO NOT MERGE", { exact: true })).toBeVisible();
+    }
+    for (const row of await rowsFor("Ambiguous")) {
+      // Exact match, so the "REVIEW-" case id cannot satisfy this on its own.
+      await expect(row.getByText("REVIEW", { exact: true })).toBeVisible();
+    }
+  });
+
   test("search narrows by material description", async ({ page }) => {
     await gotoClean(page, "/review");
     await expect(caseRows(page)).toHaveCount(SEEDED);
