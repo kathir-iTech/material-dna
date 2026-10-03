@@ -50,7 +50,7 @@ so the engine refuses, and shows the conflicting attribute as the reason.
 | --- | --- |
 | <img src="./docs/screenshots/02-resolve-veto.png" alt="Resolve page showing a DO NOT MERGE verdict caused by an engineering-critical grade conflict" width="100%" /> | <img src="./docs/screenshots/03-graph.png" alt="Identity graph page showing canonical identity clusters and held-out vetoed proposals" width="100%" /> |
 | **`/` · the veto.** Same input as the left neighbour, but the nearest candidate is grade 10.9 — blocked. | **`/graph` · constraint-aware clusters.** 18 identities from 98 records; 24 high-similarity pairs held out by the veto instead of merged. |
-| <img src="./docs/screenshots/04-materials.png" alt="Materials page listing canonical material identities with their linked source records" width="100%" /> | <img src="./docs/screenshots/05-review.png" alt="Review queue page with risk filters and human approval workflow" width="100%" /> |
+| <img src="./docs/screenshots/04-materials.png" alt="Materials page listing canonical material identities with their linked source records" width="100%" /> | <img src="./docs/screenshots/05-review.png" alt="Review queue page with risk filters, human approval workflow, and system recommendation column" width="100%" /> |
 | **`/materials` · canonical identities** and the legacy codes each one absorbs. | **`/review` · human-in-the-loop queue.** Every AI verdict a human can approve, reject, or override — with an audit note. |
 
 ---
