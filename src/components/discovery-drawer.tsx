@@ -115,7 +115,7 @@ export function DiscoveryDrawer({
           </div>
 
           <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
-            <div className="text-[11px] uppercase tracking-wider text-dna-faint">
+            <div className="text-xs tracking-normal text-dna-faint">
               Source text
             </div>
             <p className="mt-1 font-mono text-xs text-dna-text">
@@ -124,7 +124,7 @@ export function DiscoveryDrawer({
           </div>
 
           <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
-            <div className="text-[11px] uppercase tracking-wider text-dna-faint">
+            <div className="text-xs tracking-normal text-dna-faint">
               Normalized description
             </div>
             <p className="mt-1 font-mono text-xs text-dna-cyan">
@@ -133,7 +133,7 @@ export function DiscoveryDrawer({
           </div>
 
           <div>
-            <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-dna-muted">
+            <h3 className="mb-2 text-xs font-semibold tracking-normal text-dna-muted">
               Attribute evidence (prototype parser)
             </h3>
             <div className="space-y-2">
@@ -155,10 +155,10 @@ export function DiscoveryDrawer({
                     className="rounded border border-dna-border bg-dna-panel p-2.5"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-dna-muted">
+                      <span className="text-xs text-dna-muted">
                         {meta.label}
                       </span>
-                      <span className="font-mono text-[11px] text-dna-green">
+                      <span className="font-mono text-xs text-dna-green">
                         {Math.round((attr.confidence ?? 0) * 100)}%
                       </span>
                     </div>
@@ -166,7 +166,7 @@ export function DiscoveryDrawer({
                       {Array.isArray(v) ? v.join(", ") : String(v)}
                     </div>
                     {attr.evidence?.span && (
-                      <div className="mt-1 text-[11px] text-dna-cyan">
+                      <div className="mt-1 text-xs text-dna-cyan">
                         Evidence span:{" "}
                         <code className="font-mono">
                           &quot;{attr.evidence.span}&quot;
@@ -179,8 +179,8 @@ export function DiscoveryDrawer({
             </div>
           </div>
 
-          <div className="rounded border border-dna-border2 bg-dna-panel2 p-3 text-[11px] text-dna-muted">
-            <div className="uppercase tracking-wider text-dna-faint">
+          <div className="rounded border border-dna-border2 bg-dna-panel2 p-3 text-xs text-dna-muted">
+            <div className="tracking-normal text-dna-faint">
               Scoring breakdown
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2 font-mono">
@@ -224,7 +224,7 @@ export function DiscoveryDrawer({
             <SubScoreHelp className="text-dna-faint" />
           </div>
 
-          <p className="text-[11px] text-dna-faint">
+          <p className="text-xs text-dna-faint">
             Extractor: Schema-aware prototype parser · v0.1 · Demonstration data
           </p>
         </div>

@@ -70,7 +70,7 @@ export function ClusteringPanel() {
               key={s.label}
               className="rounded border border-dna-border bg-dna-panel2 px-3 py-2"
             >
-              <p className="text-[10px] uppercase tracking-wider text-dna-faint">
+              <p className="text-xs tracking-normal text-dna-faint">
                 {s.label}
               </p>
               <p className={`font-mono text-lg ${s.tone ?? "text-dna-text"}`}>
@@ -104,7 +104,7 @@ export function ClusteringPanel() {
         </div>
 
         <div>
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-dna-cyan">
+          <h4 className="text-xs font-semibold tracking-normal text-dna-cyan">
             Clusters
           </h4>
           <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -129,7 +129,7 @@ export function ClusteringPanel() {
                           {r.sourceCode}
                         </span>{" "}
                         <span className="text-dna-faint">({r.source})</span>
-                        <p className="text-[11px] text-dna-muted">
+                        <p className="text-xs text-dna-muted">
                           {short(r.rawDescription)}
                         </p>
                       </li>
@@ -139,18 +139,18 @@ export function ClusteringPanel() {
               </div>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-dna-faint">
+          <p className="mt-2 text-xs text-dna-faint">
             {singletons.length} records remain singletons (no decide()=MATCH
             edge).
           </p>
         </div>
 
         <div>
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-dna-amber">
+          <h4 className="text-xs font-semibold tracking-normal text-dna-amber">
             Held out by veto — high-similarity pairs the constraint engine
             refuses to chain
           </h4>
-          <p className="mt-1 text-[11px] text-dna-muted">
+          <p className="mt-1 text-xs text-dna-muted">
             {vetoedProposals.length} pairs at similarity &ge; 85 carry an
             engineering-critical conflict. These are the transitivity-breaker
             legs: similarity would chain them into a cluster; the veto keeps the
@@ -160,7 +160,7 @@ export function ClusteringPanel() {
           <div className="mt-2 overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-dna-border2 text-left text-[10px] uppercase tracking-wider text-dna-faint">
+                <tr className="border-b border-dna-border2 text-left text-xs tracking-normal text-dna-faint">
                   <th className="py-1 pr-3 font-medium">Pair</th>
                   <th className="py-1 pr-3 font-medium">Sim</th>
                   <th className="py-1 pr-3 font-medium">Final</th>

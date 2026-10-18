@@ -105,6 +105,30 @@ export const reviewQueueStore = {
     emit();
   },
 
+  /** Reconsider a local decision without erasing its previous evidence. */
+  reopen(id: string, note: string): void {
+    if (!note.trim()) return;
+    cases = cases.map((c) =>
+      c.id === id && c.status !== "PENDING"
+        ? {
+            ...c,
+            status: "PENDING",
+            reviewerNote: undefined,
+            reviewerDecisionAt: undefined,
+            history: [
+              ...(c.history ?? []),
+              {
+                at: new Date().toISOString(),
+                action: "REOPENED",
+                note: note.trim(),
+              },
+            ],
+          }
+        : c,
+    );
+    emit();
+  },
+
   /** Restore the seeded demo state (used by tests). */
   reset(): void {
     cases = seededReviewCases;

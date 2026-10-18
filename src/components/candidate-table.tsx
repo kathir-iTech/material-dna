@@ -22,14 +22,14 @@ export function CandidateTable({
         <h3 className="text-sm font-semibold text-dna-text">
           Candidate Materials
         </h3>
-        <span className="text-[11px] text-dna-faint">
+        <span className="text-xs text-dna-faint">
           Prototype similarity score — click a row to inspect
         </span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-xs">
           <thead>
-            <tr className="border-b border-dna-border text-[11px] uppercase tracking-wider text-dna-faint">
+            <tr className="border-b border-dna-border text-xs tracking-normal text-dna-faint">
               <th className="px-4 py-2 font-medium">Material ID</th>
               <th className="px-2 py-2 font-medium">Description</th>
               <th className="px-2 py-2 font-medium">Similarity</th>
@@ -87,7 +87,7 @@ export function CandidateTable({
                     <div className="font-mono text-dna-text">
                       {c.similarityScore.toFixed(1)}%
                     </div>
-                    <div className="mt-1 space-y-0.5 text-[10px] leading-3 text-dna-faint">
+                    <div className="mt-1 space-y-0.5 text-xs leading-5 text-dna-faint">
                       <div title={SCORE_DEFINITIONS.tokenOverlap}>
                         Token overlap: {c.scoreDetails.tokenOverlap}%
                       </div>

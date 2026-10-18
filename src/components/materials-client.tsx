@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeading } from "./page-heading";
+
 import { useState } from "react";
 import { Search, Download } from "lucide-react";
 import { canonicalMaterials } from "@/data/demo";
@@ -35,18 +37,11 @@ export function MaterialsClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-dna-text">
-            Canonical Materials
-          </h1>
-          <p className="mt-1 max-w-3xl text-sm text-dna-muted">
-            Proposed canonical identities linking equivalent source records
-            across CPSEs.
-          </p>
-        </div>
-        <DemoBadge />
-      </div>
+      <PageHeading
+        title="Canonical Materials"
+        description="Search proposed material identities and trace each one to its original source codes."
+        action={<DemoBadge />}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs text-dna-muted">
@@ -112,7 +107,7 @@ export function MaterialsClient() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[840px] text-left text-xs">
             <thead>
-              <tr className="border-b border-dna-border text-[11px] uppercase tracking-wider text-dna-faint">
+              <tr className="border-b border-dna-border text-xs tracking-normal text-dna-faint">
                 <th className="px-4 py-2 font-medium">Canonical ID</th>
                 <th className="px-2 py-2 font-medium">Material Type</th>
                 <th className="px-2 py-2 font-medium">
@@ -200,14 +195,14 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
             {canonical.canonicalId}
           </h2>
           <Badge tone="green">{canonical.status}</Badge>
-          <span className="font-mono text-[11px] text-dna-faint">
+          <span className="font-mono text-xs text-dna-faint">
             Governed {canonical.governedAt}
           </span>
         </div>
         <p className="mt-2 max-w-2xl font-mono text-sm text-dna-text">
           {canonical.normalizedDescription}
         </p>
-        <p className="mt-1 max-w-2xl text-[11px] text-dna-faint">
+        <p className="mt-1 max-w-2xl text-xs text-dna-faint">
           Proposed canonical representation · Not an official national code.
         </p>
       </div>
@@ -215,7 +210,7 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
       <div className="grid gap-4 p-4 lg:grid-cols-2">
         {/* Legacy mappings */}
         <div>
-          <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-dna-muted">
+          <h3 className="mb-2 text-xs font-semibold tracking-normal text-dna-muted">
             Legacy Code Mappings
           </h3>
           <div className="space-y-2">
@@ -230,13 +225,13 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
                     {m.legacyCode}
                   </code>
                 </div>
-                <p className="mt-1 font-mono text-[11px] text-dna-faint">
+                <p className="mt-1 font-mono text-xs text-dna-faint">
                   &quot;{m.sourceDescription}&quot;
                 </p>
               </div>
             ))}
           </div>
-          <p className="mt-3 text-[11px] text-dna-faint">
+          <p className="mt-3 text-xs text-dna-faint">
             These mappings are synthetic / demonstration data.
           </p>
         </div>
@@ -244,7 +239,7 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
         {/* Evidence sources */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-dna-muted">
+            <h3 className="text-xs font-semibold tracking-normal text-dna-muted">
               Evidence Sources
             </h3>
             <div className="flex gap-1">
@@ -253,7 +248,7 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
                   key={t.id}
                   onClick={() => setOpenSection(t.id)}
                   className={cn(
-                    "rounded border px-2 py-1 text-[11px] transition-colors",
+                    "rounded border px-2 py-1 text-xs transition-colors",
                     openSection === t.id
                       ? "border-dna-cyan/60 bg-dna-cyan/10 text-dna-cyan"
                       : "border-dna-border2 text-dna-muted",
@@ -279,7 +274,7 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
                       Material DNA Parser v0.1
                     </span>
                   </div>
-                  <p className="mt-1 font-mono text-[11px] text-dna-faint">
+                  <p className="mt-1 font-mono text-xs text-dna-faint">
                     &quot;{m.sourceDescription}&quot;
                   </p>
                 </div>
@@ -308,12 +303,12 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-dna-muted">{k}</span>
-                        <span className="font-mono text-[11px] text-dna-cyan">
+                        <span className="font-mono text-xs text-dna-cyan">
                           {Array.isArray(v) ? v.join(", ") : String(v)}
                         </span>
                       </div>
                       {a.evidence?.span && (
-                        <p className="mt-1 font-mono text-[10px] text-dna-faint">
+                        <p className="mt-1 font-mono text-xs text-dna-faint">
                           Evidence: &quot;{a.evidence.span}&quot;
                         </p>
                       )}

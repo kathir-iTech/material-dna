@@ -18,6 +18,7 @@ test("direct comparison exposes the new connection veto and preserves the submit
   const policy = page.getByRole("checkbox", {
     name: /Additional specification checks/,
   });
+  await page.getByText("Matching settings", { exact: true }).click();
   await policy.uncheck();
   await page
     .getByRole("button", { name: "Resolve Material", exact: true })
@@ -70,6 +71,25 @@ test("review decision and its note survive a complete reload", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "Local decision trail" }),
+  ).toBeVisible();
+  const reopen = page.getByRole("button", {
+    name: "Reopen for review",
+    exact: true,
+  });
+  await expect(reopen).toBeDisabled();
+  await page
+    .getByLabel(/Reviewer reason/)
+    .fill("Reopen after receiving a supplier certificate.");
+  await reopen.click();
+  await expect(row).toContainText("PENDING");
+  await page.reload();
+  await expect(row).toContainText("PENDING");
+  await row.click();
+  await expect(
+    page.getByText(/Reopen after receiving a supplier certificate/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Reviewed grade conflict; preserve separate specifications/),
   ).toBeVisible();
 });
 
@@ -213,4 +233,85 @@ test("Present demo opens the walkthrough from the current Resolve route", async 
     .getByRole("button", { name: "01 · Find a duplicate", exact: true })
     .click();
   await expect(page.getByText("MATCH", { exact: true }).first()).toBeVisible();
+});
+
+test("the primary task is visible on desktop and its font loads locally", async ({
+  page,
+  isMobile,
+}) => {
+  await gotoClean(page, "/");
+  const primary = page.getByRole("button", {
+    name: "Resolve Material",
+    exact: true,
+  });
+  await expect(primary).toBeVisible();
+  if (!isMobile) {
+    const bounds = await primary.boundingBox();
+    expect(bounds!.y + bounds!.height).toBeLessThan(
+      page.viewportSize()!.height,
+    );
+  }
+  const font = await page.request.get("/fonts/inter-latin-variable.woff2");
+  expect(font.status()).toBe(200);
+  expect(font.headers()["content-type"]).toContain("font/woff2");
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => document.fonts.check('14px "Inter"'))).toBe(
+    true,
+  );
+});
+
+test("keyboard resolution produces a traceable proposal and marks edited inputs", async ({
+  page,
+}) => {
+  await gotoClean(page, "/");
+  const input = page.getByLabel("Material description input");
+  await input.press("Control+Enter");
+  const proposal = page.getByRole("region", { name: "Material code proposal" });
+  await expect(proposal).toContainText("MDNA-");
+  await expect(proposal).toContainText("Human approval required");
+  await expect(proposal).toContainText("Not an issued national code");
+  await input.fill("BOLT");
+  await expect(
+    page.getByText(
+      "Input or matching settings changed. Resolve again to refresh this decision.",
+    ),
+  ).toBeVisible();
+  await input.press("Control+Enter");
+  await expect(
+    page.getByText(
+      "Input or matching settings changed. Resolve again to refresh this decision.",
+    ),
+  ).toHaveCount(0);
+});
+
+test("optional server ranking makes a real request and discloses the ranking actually used", async ({
+  page,
+}) => {
+  await gotoClean(page, "/");
+  await page.getByText("Matching settings", { exact: true }).click();
+  await page
+    .getByRole("checkbox", { name: "Use MiniLM ranking on the server" })
+    .check();
+  const responsePromise = page.waitForResponse(
+    (r) => r.url().endsWith("/api/resolve") && r.request().method() === "POST",
+  );
+  await page
+    .getByRole("button", { name: "Resolve Material", exact: true })
+    .click();
+  const response = await responsePromise;
+  expect(response.status()).toBe(200);
+  expect(response.request().postDataJSON().embeddings).toBe(true);
+  const result = await response.json();
+  const usedDense =
+    typeof result.selectedCandidate?.scoreDetails.embeddingSimilarity ===
+    "number";
+  await expect(page.locator(".ranking-mode")).toContainText(
+    usedDense ? "MiniLM + lexical signals" : "Lexical signals",
+  );
+  await expect(
+    page.getByRole("region", { name: "Material code proposal" }),
+  ).toContainText(
+    result.identityProposal.proposedCommonCode ??
+      result.identityProposal.inputCode,
+  );
 });

@@ -133,7 +133,7 @@ export interface ReviewCase {
   resolutionId?: string;
   history?: {
     at: string;
-    action: "APPROVED" | "REJECTED" | "OVERRIDDEN";
+    action: "APPROVED" | "REJECTED" | "OVERRIDDEN" | "REOPENED";
     note?: string;
   }[];
   id: string;
@@ -168,13 +168,6 @@ export interface MatchExplanation {
 export interface ScoredCandidate extends CandidateMatch {
   scoreDetails: CandidateScore;
   explanation: MatchExplanation;
-}
-
-export interface ExtractionStep {
-  index: number;
-  label: string;
-  detail?: string;
-  status: "pending" | "active" | "complete";
 }
 
 export interface ResolutionResult {

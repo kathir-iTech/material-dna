@@ -86,7 +86,7 @@ export function CounterfactualPanel({
             className="grid gap-3 rounded border border-dna-border2 bg-dna-panel2 p-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center"
           >
             <div className="text-center">
-              <div className="text-[11px] uppercase tracking-wider text-dna-faint">
+              <div className="text-xs tracking-normal text-dna-faint">
                 Before
               </div>
               <div className="mt-1">
@@ -109,7 +109,7 @@ export function CounterfactualPanel({
               <ArrowDown aria-hidden="true" size={16} />
             </div>
             <div className="text-center">
-              <div className="text-[11px] uppercase tracking-wider text-dna-faint">
+              <div className="text-xs tracking-normal text-dna-faint">
                 After
               </div>
               <div className="mt-1">
@@ -134,7 +134,7 @@ export function CounterfactualPanel({
             </p>
             {output.constraintsActivated.length > 0 && (
               <div className="sm:col-span-3 mt-1 text-center">
-                <span className="text-[11px] text-dna-muted">
+                <span className="text-xs text-dna-muted">
                   Constraint activated:{" "}
                 </span>
                 <code className="font-mono text-xs text-dna-red">

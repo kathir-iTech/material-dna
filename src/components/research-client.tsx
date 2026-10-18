@@ -1,3 +1,5 @@
+import { PageHeading } from "./page-heading";
+import { SubmissionEvidence } from "./submission-evidence";
 import { PolicyEvaluation } from "./policy-evaluation";
 import { ImpactSimulator } from "./impact-simulator";
 import { Badge } from "@/components/ui/badge";
@@ -362,18 +364,12 @@ const PAIR_2_EXAMPLE = {
 export default function ResearchClient() {
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-dna-text">
-            Validation & Research
-          </h1>
-          <p className="mt-1 max-w-3xl text-sm text-dna-muted">
-            Prototype experiments, adversarial demonstration data, and the
-            honest validation roadmap.
-          </p>
-        </div>
-        <DemoBadge />
-      </div>
+      <PageHeading
+        title="Validation & Research"
+        description="Inspect the measured results, submitted claims, and limits of the demonstrator."
+        action={<DemoBadge />}
+      />
+      <SubmissionEvidence />
 
       <p className="max-w-3xl rounded border border-dna-purple/40 bg-dna-purple/5 px-4 py-3 text-xs text-dna-muted">
         Demonstration values are synthetic and do not represent confidential
@@ -396,7 +392,7 @@ export default function ResearchClient() {
             }
           />
           <CardBody className="space-y-3">
-            <p className="rounded-lg border border-dna-amber/20 bg-dna-amber/5 p-3 text-[11px] leading-6 text-dna-muted">
+            <p className="rounded-lg border border-dna-amber/20 bg-dna-amber/5 p-3 text-xs leading-6 text-dna-muted">
               Reported historical figures below have not been independently
               reproduced here. They are not current validation of this
               application.
@@ -420,7 +416,7 @@ export default function ResearchClient() {
                   1.000, but recall drops sharply (R@200 = 0.170) — a retrieval
                   gap.
                 </p>
-                <p className="mt-1 text-[11px] text-dna-faint">
+                <p className="mt-1 text-xs text-dna-faint">
                   Limitation: e-commerce benchmark, not CPSE material data. Used
                   as baseline evidence rather than production material accuracy.
                 </p>
@@ -449,12 +445,12 @@ export default function ResearchClient() {
                   />{" "}
                   <span className="font-mono text-dna-text">102 / 109</span>{" "}
                   <span className="font-mono text-dna-cyan">93.6%</span>
-                  <span className="text-[11px] text-dna-faint">
+                  <span className="text-xs text-dna-faint">
                     {" "}
                     — prototype local quantity-detection coverage
                   </span>
                 </p>
-                <p className="mt-1 text-[11px] text-dna-faint">
+                <p className="mt-1 text-xs text-dna-faint">
                   Limitation: unit-aware parsing requires engineering-domain
                   interpretation; raw quantity parsers can misinterpret
                   identifiers, grades and standard numbers.
@@ -498,7 +494,7 @@ export default function ResearchClient() {
                 </Badge>
               ))}
             </div>
-            <p className="text-[11px] text-dna-faint">
+            <p className="text-xs text-dna-faint">
               Designed as an adversarial demonstration suite; not a
               statistically representative CPSE benchmark.
             </p>
@@ -511,390 +507,402 @@ export default function ResearchClient() {
           Deliberately its own section — never blended with the
           Abt-Buy academic baseline shown above.
           ============================================================ */}
-      <Card>
-        <CardHeader
-          title="Submitted Results — Our 200-Pair Benchmark"
-          subtitle={`Measured on our own 200-pair benchmark, run ${BENCHMARK_RUN_DATE}.`}
-          right={
-            <TrendingUp
-              size={15}
-              className="text-dna-green"
-              aria-hidden="true"
-            />
-          }
-        />
-        <CardBody className="space-y-4">
-          <div className="rounded border border-dna-green/40 bg-dna-green/5 px-4 py-3">
-            <p className="font-mono text-xs font-semibold text-dna-green">
-              Measured on our own 200-pair benchmark, run {BENCHMARK_RUN_DATE}
-            </p>
-            <p className="mt-1 text-xs text-dna-muted">
-              Team-created labelled pairs (100 match / 100 non-match, 28
-              categories), scored pairwise by the submitted engine
-              configuration: pair (A, B) with A as input and B as the sole
-              candidate; the confusion matrix covers decided pairs only (REVIEW
-              = abstention).
-            </p>
-            <p className="mt-1 text-[11px] text-dna-faint">
-              Separate benchmark from the academic Abt-Buy baseline shown under
-              &ldquo;Prototype Experiments&rdquo; above — different dataset,
-              different task. The two sets of numbers are never combined into
-              one table.
-            </p>
-          </div>
+      <div id="submitted-benchmark" className="scroll-mt-6">
+        <Card>
+          <CardHeader
+            title="Submitted Results — Our 200-Pair Benchmark"
+            subtitle={`Measured on our own 200-pair benchmark, run ${BENCHMARK_RUN_DATE}.`}
+            right={
+              <TrendingUp
+                size={15}
+                className="text-dna-green"
+                aria-hidden="true"
+              />
+            }
+          />
+          <CardBody className="space-y-4">
+            <div className="rounded border border-dna-green/40 bg-dna-green/5 px-4 py-3">
+              <p className="font-mono text-xs font-semibold text-dna-green">
+                Measured on our own 200-pair benchmark, run {BENCHMARK_RUN_DATE}
+              </p>
+              <p className="mt-1 text-xs text-dna-muted">
+                Team-created labelled pairs (100 match / 100 non-match, 28
+                categories), scored pairwise by the submitted engine
+                configuration: pair (A, B) with A as input and B as the sole
+                candidate; the confusion matrix covers decided pairs only
+                (REVIEW = abstention).
+              </p>
+              <p className="mt-1 text-xs text-dna-faint">
+                Separate benchmark from the academic Abt-Buy baseline shown
+                under &ldquo;Prototype Experiments&rdquo; above — different
+                dataset, different task. The two sets of numbers are never
+                combined into one table.
+              </p>
+            </div>
 
-          {/* Both recorded runs, side by side. The fused configuration is the
+            {/* Both recorded runs, side by side. The fused configuration is the
               submitted one and leads; the lexical-only run is shown alongside it
               rather than replaced, because it is the pre-fusion reference. */}
-          <div className="overflow-x-auto rounded border border-dna-border">
-            <table className="w-full min-w-[560px] text-left text-xs">
-              <thead>
-                <tr className="border-b border-dna-border bg-dna-panel2">
-                  <th
-                    scope="col"
-                    className="px-3 py-2 font-mono text-[11px] uppercase tracking-wider text-dna-faint"
-                  >
-                    F1 (MATCH)
-                  </th>
-                  {BENCHMARK_RUNS.map((run) => (
+            <div className="overflow-x-auto rounded border border-dna-border">
+              <table className="w-full min-w-[560px] text-left text-xs">
+                <thead>
+                  <tr className="border-b border-dna-border bg-dna-panel2">
                     <th
-                      key={run.id}
                       scope="col"
-                      className={`px-3 py-2 font-mono text-[11px] uppercase tracking-wider ${
-                        run.id === "fused" ? "text-dna-green" : "text-dna-faint"
-                      }`}
+                      className="px-3 py-2 font-mono text-xs tracking-normal text-dna-faint"
                     >
-                      {run.f1.toFixed(3)}
-                      <span className="mt-0.5 block font-sans normal-case tracking-normal text-[10px] opacity-80">
-                        {run.label}
-                      </span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="font-mono">
-                {(
-                  [
-                    {
-                      k: "precision",
-                      label: "Precision",
-                      fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
-                        r.precision.toFixed(3),
-                    },
-                    {
-                      k: "recall",
-                      label: "Recall",
-                      fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
-                        r.recall.toFixed(3),
-                    },
-                    {
-                      k: "decided",
-                      label: "Decided pairs",
-                      fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
-                        String(r.decided),
-                    },
-                    {
-                      k: "abstainPct",
-                      label: "Abstain (REVIEW)",
-                      fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
-                        `${r.abstainPct.toFixed(1)}%`,
-                    },
-                  ] as const
-                ).map((row) => (
-                  <tr
-                    key={row.k}
-                    className="border-b border-dna-border/40 last:border-0"
-                  >
-                    <th
-                      scope="row"
-                      className="px-3 py-1.5 font-sans text-[11px] font-normal text-dna-muted"
-                    >
-                      {row.label}
+                      F1 (MATCH)
                     </th>
                     {BENCHMARK_RUNS.map((run) => (
-                      <td key={run.id} className="px-3 py-1.5 text-dna-text">
-                        {row.fmt(run)}
-                      </td>
+                      <th
+                        key={run.id}
+                        scope="col"
+                        className={`px-3 py-2 font-mono text-xs tracking-normal ${
+                          run.id === "fused"
+                            ? "text-dna-green"
+                            : "text-dna-faint"
+                        }`}
+                      >
+                        {run.f1.toFixed(3)}
+                        <span className="mt-0.5 block font-sans normal-case tracking-normal text-xs">
+                          {run.label}
+                        </span>
+                      </th>
                     ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-[11px] text-dna-faint">
-            F1{" "}
-            <span className="font-mono text-dna-green">
-              {BENCHMARK_HEADLINE.f1.toFixed(3)}
-            </span>{" "}
-            with the fused signal, up from{" "}
-            <span className="font-mono">{LEXICAL_BASELINE.f1.toFixed(3)}</span>{" "}
-            lexical-only. The fused signal reorders candidates, which moves one
-            pair from abstention into an accepted match; the veto set is
-            identical in both runs. Figures below describe the fused
-            configuration unless stated otherwise.
-          </p>
-
-          {/* Headline metrics */}
-          <p className="font-mono text-[11px] uppercase tracking-wider text-dna-faint">
-            Submitted configuration — {BENCHMARK_HEADLINE.label}
-          </p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              {
-                label: "F1",
-                value: BENCHMARK_HEADLINE.f1.toFixed(3),
-                tone: "text-dna-green",
-              },
-              {
-                label: "Precision (MATCH)",
-                value: BENCHMARK_HEADLINE.precision.toFixed(3),
-                tone: "text-dna-text",
-              },
-              {
-                label: "Recall (MATCH)",
-                value: BENCHMARK_HEADLINE.recall.toFixed(3),
-                tone: "text-dna-text",
-              },
-              {
-                label: "Abstain (REVIEW)",
-                value: `${BENCHMARK_HEADLINE.abstainPct.toFixed(1)}%`,
-                tone: "text-dna-amber",
-              },
-            ].map((m) => (
-              <div
-                key={m.label}
-                className="rounded border border-dna-border bg-dna-panel2 p-3 text-center"
-              >
-                <div className={`font-mono text-2xl font-bold ${m.tone}`}>
-                  {m.value}
-                </div>
-                <div className="mt-1 text-[11px] uppercase tracking-wider text-dna-faint">
-                  {m.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Confusion / decisions detail */}
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="rounded border border-dna-border bg-dna-panel2 p-3 text-xs text-dna-muted">
-              <p className="mb-1 font-mono text-[11px] uppercase tracking-wider text-dna-faint">
-                Decision distribution (n = {BENCHMARK_HEADLINE.total})
-              </p>
-              <p className="font-mono">
-                <span className="text-dna-green">
-                  MATCH {BENCHMARK_HEADLINE.decisions.MATCH}
-                </span>
-                {" · "}
-                <span className="text-dna-red">
-                  DO_NOT_MERGE {BENCHMARK_HEADLINE.decisions.DO_NOT_MERGE}
-                </span>
-                {" · "}
-                <span className="text-dna-faint">
-                  NO_MATCH {BENCHMARK_HEADLINE.decisions.NO_MATCH}
-                </span>
-                {" · "}
-                <span className="text-dna-amber">
-                  REVIEW {BENCHMARK_HEADLINE.decisions.REVIEW}
-                </span>
-              </p>
-              <p className="mt-1 font-mono">
-                TP={BENCHMARK_HEADLINE.tp} FP={BENCHMARK_HEADLINE.fp} FN=
-                {BENCHMARK_HEADLINE.fn} TN={BENCHMARK_HEADLINE.tn}
-                <span className="text-dna-faint">
-                  {" "}
-                  (decided = {BENCHMARK_HEADLINE.decided})
-                </span>
-              </p>
-              <p className="mt-1 text-[11px] text-dna-faint">
-                Accuracy on decided pairs:{" "}
-                {BENCHMARK_HEADLINE.accuracyDecided.toFixed(1)}%
-              </p>
-            </div>
-            <div className="rounded border border-dna-border bg-dna-panel2 p-3 text-xs text-dna-muted">
-              <p className="mb-1 font-mono text-[11px] uppercase tracking-wider text-dna-faint">
-                Constraint-veto quality
-              </p>
-              <p className="font-mono">
-                veto precision{" "}
-                <span className="text-dna-text">
-                  {BENCHMARK_HEADLINE.vetoPrecisionPct.toFixed(1)}%
-                </span>{" "}
-                <span className="text-dna-faint">
-                  ({BENCHMARK_HEADLINE.vetoCorrect}/
-                  {BENCHMARK_HEADLINE.vetoTotal} DO_NOT_MERGE correct)
-                </span>
-              </p>
-              <p className="mt-1 font-mono">
-                false vetoes (true matches blocked):{" "}
-                <span className="text-dna-text">
-                  {BENCHMARK_HEADLINE.falseVetoes}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {/* Worked example — same confrontation moment as the Resolve page */}
-          <div>
-            <h4 className="text-sm font-semibold text-dna-text">
-              Worked example — SS304 vs SS316L (benchmark pair #2)
-            </h4>
-            <p className="mt-1 font-mono text-xs text-dna-muted">
-              A: <span className="text-dna-text">{PAIR_2_EXAMPLE.a}</span>
-            </p>
-            <p className="font-mono text-xs text-dna-muted">
-              B: <span className="text-dna-text">{PAIR_2_EXAMPLE.b}</span>
-            </p>
-            <div className="mt-2">
-              <SimilarityWarning
-                similarity={PAIR_2_EXAMPLE.similarity}
-                score={PAIR_2_EXAMPLE.score}
-                constraint={PAIR_2_EXAMPLE.constraint}
-              />
-            </div>
-            <p className="mt-2 text-xs text-dna-muted">
-              <span className="text-dna-faint">Aggregate backing:</span> final
-              score{" "}
-              <span className="font-mono text-dna-text">
-                {PAIR_2_EXAMPLE.finalScore}
-              </span>{" "}
-              with one CRITICAL grade conflict — and this is not a cherry-picked
-              anecdote: across the whole benchmark the veto fired{" "}
-              <span className="font-mono text-dna-text">
-                {BENCHMARK_HEADLINE.vetoTotal}
-              </span>{" "}
-              times,{" "}
-              <span className="font-mono text-dna-green">
-                {BENCHMARK_HEADLINE.vetoCorrect}
-              </span>{" "}
-              of them correct (
-              <span className="font-mono">
-                {BENCHMARK_HEADLINE.vetoPrecisionPct.toFixed(1)}%
-              </span>{" "}
-              precision), with only{" "}
-              <span className="font-mono">
-                {BENCHMARK_HEADLINE.falseVetoes}
-              </span>{" "}
-              false vetoes. In the{" "}
-              <span className="font-mono">grade_difference</span> category that
-              produced this pair:{" "}
-              <span className="font-mono text-dna-text">
-                10 DO_NOT_MERGE / 1 REVIEW / 0 false MATCH
-              </span>{" "}
-              over 11 non-match pairs.
-            </p>
-          </div>
-
-          {/* Per-category table */}
-          <div>
-            <h4 className="text-sm font-semibold text-dna-text">
-              Per-category decisions — 200 pairs, 28 categories
-            </h4>
-            <p className="mt-1 text-[11px] text-dna-faint">
-              Breakdown of the{" "}
-              <span className="font-mono text-dna-muted">
-                {LEXICAL_BASELINE.label.toLowerCase()}
-              </span>{" "}
-              run (F1{" "}
-              <span className="font-mono">
-                {LEXICAL_BASELINE.f1.toFixed(3)}
-              </span>
-              ). The fused run reorders candidates within the same categories
-              and does not change this table&rsquo;s totals by more than one
-              pair.
-            </p>
-            <p className="mt-1 text-[11px] text-dna-faint">
-              pos = ground-truth match pairs in the category; MATCH / DNM /
-              REVIEW / NO_MATCH are engine decisions. Engine error modes: MATCH
-              on pos=0 rows, DNM on pos=n rows.
-            </p>
-            <p className="mt-1 text-[11px] text-dna-faint">
-              The confusion matrix counts decided pairs only, so pos does not
-              equal TP + FN. Of the 100 ground-truth matches, 52 became TP and
-              11 FN while 37 were abstained to REVIEW; of the 100 non-matches,
-              54 became TN and 13 FP while 33 were abstained. Those 37 + 33 = 70
-              abstentions are exactly the REVIEW row in the distribution above.
-            </p>
-            <div className="mt-2 overflow-x-auto rounded border border-dna-border">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-dna-border bg-dna-panel2 font-mono text-[10px] uppercase tracking-wider text-dna-faint">
-                    <th className="px-3 py-2 font-medium">Category</th>
-                    <th className="px-3 py-2 text-right font-medium">n</th>
-                    <th className="px-3 py-2 text-right font-medium">pos</th>
-                    <th className="px-3 py-2 text-right font-medium text-dna-green">
-                      MATCH
-                    </th>
-                    <th className="px-3 py-2 text-right font-medium text-dna-red">
-                      DNM
-                    </th>
-                    <th className="px-3 py-2 text-right font-medium text-dna-amber">
-                      REVIEW
-                    </th>
-                    <th className="px-3 py-2 text-right font-medium">
-                      NO_MATCH
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="font-mono">
-                  {BENCHMARK_CATEGORIES.map((row) => (
+                  {(
+                    [
+                      {
+                        k: "precision",
+                        label: "Precision",
+                        fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
+                          r.precision.toFixed(3),
+                      },
+                      {
+                        k: "recall",
+                        label: "Recall",
+                        fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
+                          r.recall.toFixed(3),
+                      },
+                      {
+                        k: "decided",
+                        label: "Decided pairs",
+                        fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
+                          String(r.decided),
+                      },
+                      {
+                        k: "abstainPct",
+                        label: "Abstain (REVIEW)",
+                        fmt: (r: (typeof BENCHMARK_RUNS)[number]) =>
+                          `${r.abstainPct.toFixed(1)}%`,
+                      },
+                    ] as const
+                  ).map((row) => (
                     <tr
-                      key={row.category}
-                      className="border-b border-dna-border/50"
+                      key={row.k}
+                      className="border-b border-dna-border/40 last:border-0"
                     >
-                      <td className="px-3 py-1.5 text-dna-text">
-                        {row.category}
-                      </td>
-                      <td className="px-3 py-1.5 text-right text-dna-muted">
-                        {row.n}
-                      </td>
-                      <td className="px-3 py-1.5 text-right text-dna-muted">
-                        {row.pos}
-                      </td>
-                      <td className="px-3 py-1.5 text-right text-dna-text">
-                        {row.match}
-                      </td>
-                      <td className="px-3 py-1.5 text-right text-dna-text">
-                        {row.dnm}
-                      </td>
-                      <td className="px-3 py-1.5 text-right text-dna-text">
-                        {row.review}
-                      </td>
-                      <td className="px-3 py-1.5 text-right text-dna-muted">
-                        {row.noMatch}
-                      </td>
+                      <th
+                        scope="row"
+                        className="px-3 py-1.5 font-sans text-xs font-normal text-dna-muted"
+                      >
+                        {row.label}
+                      </th>
+                      {BENCHMARK_RUNS.map((run) => (
+                        <td key={run.id} className="px-3 py-1.5 text-dna-text">
+                          {row.fmt(run)}
+                        </td>
+                      ))}
                     </tr>
                   ))}
-                  <tr className="bg-dna-panel2 font-medium">
-                    <td className="px-3 py-1.5 text-dna-faint">total</td>
-                    <td className="px-3 py-1.5 text-right text-dna-text">
-                      200
-                    </td>
-                    <td className="px-3 py-1.5 text-right text-dna-text">
-                      100
-                    </td>
-                    <td className="px-3 py-1.5 text-right text-dna-green">
-                      65
-                    </td>
-                    <td className="px-3 py-1.5 text-right text-dna-red">64</td>
-                    <td className="px-3 py-1.5 text-right text-dna-amber">
-                      70
-                    </td>
-                    <td className="px-3 py-1.5 text-right text-dna-text">1</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
-            <p className="mt-2 text-[11px] text-dna-faint">
-              Known weaknesses visible in this table: 13 false MATCHes total —
-              type_difference 4, material_difference 2, pressure_difference 2,
-              and one each in actuator, angle, hardness, mesh_size and range.
-              standard_mapping is 0 correct decisions out of 2. Reported as
-              measured — no category was excluded.
+            <p className="text-xs text-dna-faint">
+              F1{" "}
+              <span className="font-mono text-dna-green">
+                {BENCHMARK_HEADLINE.f1.toFixed(3)}
+              </span>{" "}
+              with the fused signal, up from{" "}
+              <span className="font-mono">
+                {LEXICAL_BASELINE.f1.toFixed(3)}
+              </span>{" "}
+              lexical-only. The fused signal reorders candidates, which moves
+              one pair from abstention into an accepted match; the veto set is
+              identical in both runs. Figures below describe the fused
+              configuration unless stated otherwise.
             </p>
-          </div>
-        </CardBody>
-      </Card>
+
+            {/* Headline metrics */}
+            <p className="font-mono text-xs tracking-normal text-dna-faint">
+              Submitted configuration — {BENCHMARK_HEADLINE.label}
+            </p>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {[
+                {
+                  label: "F1",
+                  value: BENCHMARK_HEADLINE.f1.toFixed(3),
+                  tone: "text-dna-green",
+                },
+                {
+                  label: "Precision (MATCH)",
+                  value: BENCHMARK_HEADLINE.precision.toFixed(3),
+                  tone: "text-dna-text",
+                },
+                {
+                  label: "Recall (MATCH)",
+                  value: BENCHMARK_HEADLINE.recall.toFixed(3),
+                  tone: "text-dna-text",
+                },
+                {
+                  label: "Abstain (REVIEW)",
+                  value: `${BENCHMARK_HEADLINE.abstainPct.toFixed(1)}%`,
+                  tone: "text-dna-amber",
+                },
+              ].map((m) => (
+                <div
+                  key={m.label}
+                  className="rounded border border-dna-border bg-dna-panel2 p-3 text-center"
+                >
+                  <div className={`font-mono text-2xl font-bold ${m.tone}`}>
+                    {m.value}
+                  </div>
+                  <div className="mt-1 text-xs tracking-normal text-dna-faint">
+                    {m.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Confusion / decisions detail */}
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="rounded border border-dna-border bg-dna-panel2 p-3 text-xs text-dna-muted">
+                <p className="mb-1 font-mono text-xs tracking-normal text-dna-faint">
+                  Decision distribution (n = {BENCHMARK_HEADLINE.total})
+                </p>
+                <p className="font-mono">
+                  <span className="text-dna-green">
+                    MATCH {BENCHMARK_HEADLINE.decisions.MATCH}
+                  </span>
+                  {" · "}
+                  <span className="text-dna-red">
+                    DO_NOT_MERGE {BENCHMARK_HEADLINE.decisions.DO_NOT_MERGE}
+                  </span>
+                  {" · "}
+                  <span className="text-dna-faint">
+                    NO_MATCH {BENCHMARK_HEADLINE.decisions.NO_MATCH}
+                  </span>
+                  {" · "}
+                  <span className="text-dna-amber">
+                    REVIEW {BENCHMARK_HEADLINE.decisions.REVIEW}
+                  </span>
+                </p>
+                <p className="mt-1 font-mono">
+                  TP={BENCHMARK_HEADLINE.tp} FP={BENCHMARK_HEADLINE.fp} FN=
+                  {BENCHMARK_HEADLINE.fn} TN={BENCHMARK_HEADLINE.tn}
+                  <span className="text-dna-faint">
+                    {" "}
+                    (decided = {BENCHMARK_HEADLINE.decided})
+                  </span>
+                </p>
+                <p className="mt-1 text-xs text-dna-faint">
+                  Accuracy on decided pairs:{" "}
+                  {BENCHMARK_HEADLINE.accuracyDecided.toFixed(1)}%
+                </p>
+              </div>
+              <div className="rounded border border-dna-border bg-dna-panel2 p-3 text-xs text-dna-muted">
+                <p className="mb-1 font-mono text-xs tracking-normal text-dna-faint">
+                  Constraint-veto quality
+                </p>
+                <p className="font-mono">
+                  veto precision{" "}
+                  <span className="text-dna-text">
+                    {BENCHMARK_HEADLINE.vetoPrecisionPct.toFixed(1)}%
+                  </span>{" "}
+                  <span className="text-dna-faint">
+                    ({BENCHMARK_HEADLINE.vetoCorrect}/
+                    {BENCHMARK_HEADLINE.vetoTotal} DO_NOT_MERGE correct)
+                  </span>
+                </p>
+                <p className="mt-1 font-mono">
+                  false vetoes (true matches blocked):{" "}
+                  <span className="text-dna-text">
+                    {BENCHMARK_HEADLINE.falseVetoes}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Worked example — same confrontation moment as the Resolve page */}
+            <div>
+              <h4 className="text-sm font-semibold text-dna-text">
+                Worked example — SS304 vs SS316L (benchmark pair #2)
+              </h4>
+              <p className="mt-1 font-mono text-xs text-dna-muted">
+                A: <span className="text-dna-text">{PAIR_2_EXAMPLE.a}</span>
+              </p>
+              <p className="font-mono text-xs text-dna-muted">
+                B: <span className="text-dna-text">{PAIR_2_EXAMPLE.b}</span>
+              </p>
+              <div className="mt-2">
+                <SimilarityWarning
+                  similarity={PAIR_2_EXAMPLE.similarity}
+                  score={PAIR_2_EXAMPLE.score}
+                  constraint={PAIR_2_EXAMPLE.constraint}
+                />
+              </div>
+              <p className="mt-2 text-xs text-dna-muted">
+                <span className="text-dna-faint">Aggregate backing:</span> final
+                score{" "}
+                <span className="font-mono text-dna-text">
+                  {PAIR_2_EXAMPLE.finalScore}
+                </span>{" "}
+                with one CRITICAL grade conflict — and this is not a
+                cherry-picked anecdote: across the whole benchmark the veto
+                fired{" "}
+                <span className="font-mono text-dna-text">
+                  {BENCHMARK_HEADLINE.vetoTotal}
+                </span>{" "}
+                times,{" "}
+                <span className="font-mono text-dna-green">
+                  {BENCHMARK_HEADLINE.vetoCorrect}
+                </span>{" "}
+                of them correct (
+                <span className="font-mono">
+                  {BENCHMARK_HEADLINE.vetoPrecisionPct.toFixed(1)}%
+                </span>{" "}
+                precision), with only{" "}
+                <span className="font-mono">
+                  {BENCHMARK_HEADLINE.falseVetoes}
+                </span>{" "}
+                false vetoes. In the{" "}
+                <span className="font-mono">grade_difference</span> category
+                that produced this pair:{" "}
+                <span className="font-mono text-dna-text">
+                  10 DO_NOT_MERGE / 1 REVIEW / 0 false MATCH
+                </span>{" "}
+                over 11 non-match pairs.
+              </p>
+            </div>
+
+            {/* Per-category table */}
+            <div>
+              <h4 className="text-sm font-semibold text-dna-text">
+                Per-category decisions — 200 pairs, 28 categories
+              </h4>
+              <p className="mt-1 text-xs text-dna-faint">
+                Breakdown of the{" "}
+                <span className="font-mono text-dna-muted">
+                  {LEXICAL_BASELINE.label.toLowerCase()}
+                </span>{" "}
+                run (F1{" "}
+                <span className="font-mono">
+                  {LEXICAL_BASELINE.f1.toFixed(3)}
+                </span>
+                ). The fused run reorders candidates within the same categories
+                and does not change this table&rsquo;s totals by more than one
+                pair.
+              </p>
+              <p className="mt-1 text-xs text-dna-faint">
+                pos = ground-truth match pairs in the category; MATCH / DNM /
+                REVIEW / NO_MATCH are engine decisions. Engine error modes:
+                MATCH on pos=0 rows, DNM on pos=n rows.
+              </p>
+              <p className="mt-1 text-xs text-dna-faint">
+                The confusion matrix counts decided pairs only, so pos does not
+                equal TP + FN. Of the 100 ground-truth matches, 52 became TP and
+                11 FN while 37 were abstained to REVIEW; of the 100 non-matches,
+                54 became TN and 13 FP while 33 were abstained. Those 37 + 33 =
+                70 abstentions are exactly the REVIEW row in the distribution
+                above.
+              </p>
+              <div className="mt-2 overflow-x-auto rounded border border-dna-border">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-dna-border bg-dna-panel2 font-mono text-xs tracking-normal text-dna-faint">
+                      <th className="px-3 py-2 font-medium">Category</th>
+                      <th className="px-3 py-2 text-right font-medium">n</th>
+                      <th className="px-3 py-2 text-right font-medium">pos</th>
+                      <th className="px-3 py-2 text-right font-medium text-dna-green">
+                        MATCH
+                      </th>
+                      <th className="px-3 py-2 text-right font-medium text-dna-red">
+                        DNM
+                      </th>
+                      <th className="px-3 py-2 text-right font-medium text-dna-amber">
+                        REVIEW
+                      </th>
+                      <th className="px-3 py-2 text-right font-medium">
+                        NO_MATCH
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-mono">
+                    {BENCHMARK_CATEGORIES.map((row) => (
+                      <tr
+                        key={row.category}
+                        className="border-b border-dna-border/50"
+                      >
+                        <td className="px-3 py-1.5 text-dna-text">
+                          {row.category}
+                        </td>
+                        <td className="px-3 py-1.5 text-right text-dna-muted">
+                          {row.n}
+                        </td>
+                        <td className="px-3 py-1.5 text-right text-dna-muted">
+                          {row.pos}
+                        </td>
+                        <td className="px-3 py-1.5 text-right text-dna-text">
+                          {row.match}
+                        </td>
+                        <td className="px-3 py-1.5 text-right text-dna-text">
+                          {row.dnm}
+                        </td>
+                        <td className="px-3 py-1.5 text-right text-dna-text">
+                          {row.review}
+                        </td>
+                        <td className="px-3 py-1.5 text-right text-dna-muted">
+                          {row.noMatch}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-dna-panel2 font-medium">
+                      <td className="px-3 py-1.5 text-dna-faint">total</td>
+                      <td className="px-3 py-1.5 text-right text-dna-text">
+                        200
+                      </td>
+                      <td className="px-3 py-1.5 text-right text-dna-text">
+                        100
+                      </td>
+                      <td className="px-3 py-1.5 text-right text-dna-green">
+                        65
+                      </td>
+                      <td className="px-3 py-1.5 text-right text-dna-red">
+                        64
+                      </td>
+                      <td className="px-3 py-1.5 text-right text-dna-amber">
+                        70
+                      </td>
+                      <td className="px-3 py-1.5 text-right text-dna-text">
+                        1
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-2 text-xs text-dna-faint">
+                Known weaknesses visible in this table: 13 false MATCHes total —
+                type_difference 4, material_difference 2, pressure_difference 2,
+                and one each in actuator, angle, hardness, mesh_size and range.
+                standard_mapping is 0 correct decisions out of 2. Reported as
+                measured — no category was excluded.
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
 
       <ImpactSimulator />
       {/* What remains to be validated */}
@@ -984,7 +992,7 @@ export default function ResearchClient() {
           }
         />
         <CardBody>
-          <div className="flex flex-wrap items-center justify-center gap-1.5 py-2 font-mono text-[11px]">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 py-2 font-mono text-xs">
             {[
               "Material records",
               "Extracted attributes",
@@ -1024,7 +1032,7 @@ export default function ResearchClient() {
         <CardBody className="p-0">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-dna-border text-[11px] uppercase tracking-wider text-dna-faint">
+              <tr className="border-b border-dna-border text-xs tracking-normal text-dna-faint">
                 <th className="px-4 py-2 font-medium">Capability</th>
                 <th className="px-4 py-2 font-medium">Status</th>
               </tr>

@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeading } from "./page-heading";
+
 import { useState } from "react";
 import { Search, Download } from "lucide-react";
 import { reviewQueueStore, useReviewQueue } from "@/hooks/use-review-queue";
@@ -80,16 +82,10 @@ export function ReviewClient() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-dna-text">Human Review Queue</h1>
-        <p className="mt-1 max-w-3xl text-sm text-dna-muted">
-          Ambiguous and high-risk material identity decisions requiring human
-          validation. The <span className="text-dna-faint">Ambiguous</span> and{" "}
-          <span className="text-dna-faint">Critical Conflict</span> filters
-          select on the <span className="text-dna-faint">Recommendation</span>{" "}
-          column.
-        </p>
-      </div>
+      <PageHeading
+        title="Human Review Queue"
+        description="Review recommendations, record your engineering decision, and retain its history."
+      />
       <LocalWorkspaceNotice
         kind="reviews"
         onReset={() => {
@@ -166,7 +162,7 @@ export function ReviewClient() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[880px] text-left text-xs">
             <thead>
-              <tr className="border-b border-dna-border text-[11px] uppercase tracking-wider text-dna-faint">
+              <tr className="border-b border-dna-border text-xs tracking-normal text-dna-faint">
                 <th className="px-4 py-2 font-medium">Case</th>
                 <th className="px-2 py-2 font-medium">Source</th>
                 <th className="px-2 py-2 font-medium">Candidate</th>
@@ -258,7 +254,7 @@ export function ReviewClient() {
 
           <div className="grid gap-4 p-4 lg:grid-cols-2">
             <div className="rounded border border-dna-border bg-dna-panel2 p-3">
-              <div className="text-[11px] uppercase tracking-wider text-dna-faint">
+              <div className="text-xs tracking-normal text-dna-faint">
                 Material A — {selected.materialA.source}
               </div>
               <p className="mt-1 font-mono text-xs text-dna-text">
@@ -266,7 +262,7 @@ export function ReviewClient() {
               </p>
             </div>
             <div className="rounded border border-dna-border bg-dna-panel2 p-3">
-              <div className="text-[11px] uppercase tracking-wider text-dna-faint">
+              <div className="text-xs tracking-normal text-dna-faint">
                 Material B — {selected.materialB.source} (
                 {selected.materialB.sourceCode})
               </div>
@@ -294,7 +290,7 @@ export function ReviewClient() {
               <summary className="cursor-pointer font-medium text-dna-cyan">
                 Decision provenance & constraints
               </summary>
-              <p className="mt-3 text-[11px] leading-6 text-dna-muted">
+              <p className="mt-3 text-xs leading-6 text-dna-muted">
                 {selected.engineVersion ??
                   "Seeded demonstration case; original run provenance not attached"}
                 {selected.parserVersion
@@ -306,7 +302,7 @@ export function ReviewClient() {
               </p>
               {selected.constraints?.map((finding, index) => (
                 <p
-                  className="mt-2 text-[11px] leading-6 text-dna-muted"
+                  className="mt-2 text-xs leading-6 text-dna-muted"
                   key={`${finding.rule}-${index}`}
                 >
                   <strong>
@@ -338,11 +334,11 @@ export function ReviewClient() {
               <div className="flex-1">
                 <label
                   htmlFor="reviewer-note"
-                  className="text-[11px] text-dna-muted"
+                  className="text-xs text-dna-muted"
                 >
                   Reviewer reason{" "}
                   <span className="text-dna-muted">
-                    (required for override)
+                    (required for override or reopening)
                   </span>
                 </label>
                 <textarea
@@ -380,6 +376,28 @@ export function ReviewClient() {
                 </button>
               </div>
             </div>
+            {selected.status !== "PENDING" && (
+              <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-dna-border pt-4">
+                <button
+                  className="secondary-action"
+                  disabled={!note.trim()}
+                  onClick={() => {
+                    reviewQueueStore.reopen(selected.id, note);
+                    setActions((previous) => ({
+                      ...previous,
+                      [selected.id]: "REOPENED",
+                    }));
+                    setNote("");
+                  }}
+                >
+                  Reopen for review
+                </button>
+                <p className="text-xs text-dna-muted">
+                  Enter a reason to return this case to Pending. Its previous
+                  decision stays in the local history.
+                </p>
+              </div>
+            )}
 
             {actions[selected.id] && (
               <p className="mt-3 text-xs text-dna-muted">

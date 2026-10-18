@@ -57,7 +57,7 @@ export function ImpactSimulator() {
                 max: 100,
               },
             ].map((f) => (
-              <label key={f.label} className="text-[10px] text-dna-muted">
+              <label key={f.label} className="text-xs text-dna-muted">
                 {f.label}
                 <input
                   type="number"
@@ -75,7 +75,7 @@ export function ImpactSimulator() {
             ))}
           </div>
           <div className="rounded-xl border border-[#c7e2d5] bg-[#f0f8f3] p-5">
-            <p className="text-[10px] text-[#456856]">
+            <p className="text-xs text-[#456856]">
               Illustrative annual holding-cost opportunity
             </p>
             <p
@@ -84,14 +84,14 @@ export function ImpactSimulator() {
             >
               {money(annual)}
             </p>
-            <p className="mt-3 text-[10px] leading-6 text-[#456856]">
+            <p className="mt-3 text-xs leading-6 text-[#456856]">
               {records.toLocaleString("en-IN")} lines × {duplicatePct}%
               avoidable stock × {money(value)} per line × {carrying}% holding
               cost.
             </p>
           </div>
         </div>
-        <p className="mt-4 text-[10px] leading-6 text-dna-muted">
+        <p className="mt-4 text-xs leading-6 text-dna-muted">
           Duplicate codes alone do not prove redundant stock. This illustration
           assumes the selected stock lines are genuinely avoidable and capital
           can be released. Validate inventory, service levels, approved

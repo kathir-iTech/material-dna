@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeading } from "./page-heading";
+
 import { useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -199,14 +201,10 @@ export function MigrationClient() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-dna-text">Bulk Migration</h1>
-        <p className="mt-1 max-w-3xl text-sm text-dna-muted">
-          Import legacy records from CSV/XLSX, run every row through the
-          resolution pipeline, then approve at scale — each bulk action is
-          recorded in an audit trail and can be rolled back.
-        </p>
-      </div>
+      <PageHeading
+        title="Bulk Migration"
+        description="Import CSV or XLSX records, resolve a batch, and review or roll back decisions."
+      />
       <LocalWorkspaceNotice
         kind="migrations"
         onReset={() => {
@@ -215,7 +213,7 @@ export function MigrationClient() {
           setSelection([]);
         }}
       />
-      <p className="text-[11px] leading-6 text-dna-muted">
+      <p className="text-xs leading-6 text-dna-muted">
         Approving a row accepts its displayed recommendation. An approved
         DO_NOT_MERGE recommendation keeps the materials separate.
       </p>
@@ -415,7 +413,7 @@ export function MigrationClient() {
                     key={t.label}
                     className="rounded border border-dna-border bg-dna-panel2 px-3 py-2"
                   >
-                    <div className="text-[10px] uppercase tracking-wider text-dna-faint">
+                    <div className="text-xs tracking-normal text-dna-faint">
                       {t.label}
                     </div>
                     <div
@@ -472,7 +470,7 @@ export function MigrationClient() {
             <div className="overflow-x-auto rounded border border-dna-border">
               <table className="w-full min-w-[900px] text-left text-xs">
                 <thead>
-                  <tr className="border-b border-dna-border bg-dna-panel2 text-[11px] uppercase tracking-wider text-dna-faint">
+                  <tr className="border-b border-dna-border bg-dna-panel2 text-xs tracking-normal text-dna-faint">
                     <th className="w-8 px-3 py-2">
                       <input
                         type="checkbox"
@@ -593,7 +591,7 @@ export function MigrationClient() {
                       <span className="text-xs text-dna-text">
                         {b.fileName}
                       </span>
-                      <span className="font-mono text-[11px] text-dna-faint">
+                      <span className="font-mono text-xs text-dna-faint">
                         {b.rows.length} rows · {bCounts.MATCH}/{bCounts.REVIEW}/
                         {bCounts.DO_NOT_MERGE} m/r/d · {b.ops.length} bulk
                         actions
@@ -608,7 +606,7 @@ export function MigrationClient() {
                           onClick={() =>
                             setOpenAudit(openAudit === b.id ? null : b.id)
                           }
-                          className="rounded border border-dna-border2 px-2 py-1 text-[11px] text-dna-muted transition-colors hover:text-dna-text"
+                          className="rounded border border-dna-border2 px-2 py-1 text-xs text-dna-muted transition-colors hover:text-dna-text"
                           aria-expanded={openAudit === b.id}
                         >
                           {openAudit === b.id
@@ -618,7 +616,7 @@ export function MigrationClient() {
                         <button
                           onClick={() => migrationStore.rollbackBatch(b.id)}
                           disabled={!undoable}
-                          className="flex items-center gap-1.5 rounded border border-dna-amber/50 bg-dna-amber/10 px-2.5 py-1 text-[11px] font-medium text-dna-amber transition-colors hover:bg-dna-amber/20 disabled:cursor-not-allowed disabled:opacity-30"
+                          className="flex items-center gap-1.5 rounded border border-dna-amber/50 bg-dna-amber/10 px-2.5 py-1 text-xs font-medium text-dna-amber transition-colors hover:bg-dna-amber/20 disabled:cursor-not-allowed disabled:opacity-30"
                           aria-label={`Rollback last bulk action on ${b.id}`}
                         >
                           <Undo2 size={12} aria-hidden="true" />

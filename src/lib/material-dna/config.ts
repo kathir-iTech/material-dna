@@ -2,7 +2,7 @@
 // Prototype thresholds; must be calibrated on real CPSE data.
 export const ENGINE_VERSION = "Material DNA Engine";
 export const ENGINE_VERSION_NUMBER = "v0.1-demo";
-export const PARSER_VERSION = "v0.1";
+export const PARSER_VERSION = "v0.2-whitespace";
 export const CONSTRAINTS_VERSION = "v0.1";
 
 export const CONFIG = {
@@ -55,5 +55,5 @@ export const ATTRIBUTE_META: Record<
 } as const;
 
 export const ATTRIBUTE_META_LIST = Object.entries(ATTRIBUTE_META).map(
-  ([key, meta]) => ({ key, ...meta })
+  ([key, meta]) => ({ key, ...meta }),
 );

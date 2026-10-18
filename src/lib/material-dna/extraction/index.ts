@@ -1,8 +1,4 @@
-import type {
-  Attribute,
-  AttributeEvidence,
-  MaterialDNA,
-} from "@/types/domain";
+import type { Attribute, AttributeEvidence, MaterialDNA } from "@/types/domain";
 import { ATTRIBUTE_META } from "../config";
 
 // ---------------------------------------------------------------------------
@@ -193,7 +189,7 @@ const GRADE_STEEL: Record<string, string> = {
   "x5crni18-10": "X5CrNi18-10",
   "x5crnimo17-12-2": "X5CrNiMo17-12-2",
   "x155crvmo12-1": "X155CrVMo12-1",
-  "x210cr12": "X210Cr12",
+  x210cr12: "X210Cr12",
   // UNS numbers (SAE) for austenitic stainless grades:
   s30400: "S30400",
   s30403: "S30403",
@@ -235,13 +231,13 @@ const COATINGS: Record<string, string> = {
   zn: "Zinc Plated",
   "zinc plated": "Zinc Plated",
   "zinc coated": "Zinc Coated",
-  "zinced": "Zinc Coated",
-  "galvanized": "Galvanized",
-  "galvanised": "Galvanised",
-  "hdg": "Hot-Dip Galvanized",
+  zinced: "Zinc Coated",
+  galvanized: "Galvanized",
+  galvanised: "Galvanised",
+  hdg: "Hot-Dip Galvanized",
   "hot dipped": "Hot-Dip Galvanized",
   "hot dip": "Hot-Dip Galvanized",
-  "" : "",
+  "": "",
 };
 
 // IS 2062:2011 (BIS) clause 5: nine grades E250, E275, E300, E350, E410,
@@ -306,7 +302,7 @@ const STANDARDS: Record<string, string> = {
   "din 934": "DIN 934",
   "din 125": "DIN 125",
   "din 7980": "DIN 7980",
-  "asti": "", // guard to avoid matching "ASTM" wrongly
+  asti: "", // guard to avoid matching "ASTM" wrongly
   "astm a36": "ASTM A36",
   "astm a106": "ASTM A106",
   "astm a105": "ASTM A105",
@@ -316,7 +312,7 @@ const STANDARDS: Record<string, string> = {
   "asme b16.5": "ASME B16.5",
   "asme b16.34": "ASME B16.34",
   "ansi b16.5": "ASME B16.5",
-  "ansi": "ANSI",
+  ansi: "ANSI",
   "iso 4014": "ISO 4014",
   "iso 4017": "ISO 4017",
   "iso 4762": "ISO 4762",
@@ -331,12 +327,12 @@ const STANDARDS: Record<string, string> = {
   "en 10025": "EN 10025",
   "api 6d": "API 6D",
   "api 598": "API 598",
-  "api": "API",
+  api: "API",
   "jis g3101": "JIS G3101",
   "jis g3452": "JIS G3452",
   "bs en": "BS EN",
-  "iec": "IEC",
-  "vde": "VDE",
+  iec: "IEC",
+  vde: "VDE",
 };
 
 const CLASSES: Record<string, string> = {
@@ -383,7 +379,8 @@ const SCHEDULES: Record<string, string> = {
 /** Normalize a numeric quantity that may carry a unit, to a canonical token. */
 function extractQuantityTokens(desc: string): string[] {
   // Matches things like 2.5 SQ MM, 4 SQMM, 230 V, 415 V, 10 A, 3 CORE, 50 W, 4000 K
-  const q = /(?<![A-Z0-9])(\d+(?:\.\d+)?)\s*(SQ\s?MM|sq\s?mm|V\b|A\b|W\b|KVAR|KVA\b|HP\b|TR\b|CORE\b|Cores\b)/g;
+  const q =
+    /(?<![A-Z0-9])(\d+(?:\.\d+)?)\s*(SQ\s?MM|sq\s?mm|V\b|A\b|W\b|KVAR|KVA\b|HP\b|TR\b|CORE\b|Cores\b)/g;
   const tokens: string[] = [];
   let m: RegExpExecArray | null;
   while ((m = q.exec(desc)) !== null) {
@@ -427,7 +424,8 @@ function extractDimensions(desc: string): Attribute<string[]> {
     normalized.push(`DN ${m[1]}`);
   }
 
-  const npsRe = /\bNPS\s*([0-9]+(?:\.[0-9]+)?(?:\s?\/\s?[0-9]+)?)\b(?:\s*(?:inch|inches|"))?/g;
+  const npsRe =
+    /\bNPS\s*([0-9]+(?:\.[0-9]+)?(?:\s?\/\s?[0-9]+)?)\b(?:\s*(?:inch|inches|"))?/g;
   while ((m = npsRe.exec(desc)) !== null) {
     spans.push(m[0]);
     claimed.push([m.index, m.index + m[0].length]);
@@ -455,18 +453,21 @@ function extractDimensions(desc: string): Attribute<string[]> {
   while ((m = singleMmRe.exec(desc)) !== null) {
     // Skip dimensions that are part of a compound capture (e.g. "M10 x 50mm"
     // already contributes 50 mm via the thread token above).
-    if (claimed.some(([s, e]) => m!.index >= s && m!.index + m![0].length <= e)) continue;
+    if (claimed.some(([s, e]) => m!.index >= s && m!.index + m![0].length <= e))
+      continue;
     if (desc.slice(Math.max(0, m.index - 2), m.index).includes("×")) continue;
     spans.push(m[0]);
     normalized.push(`${m[1]} mm`);
   }
 
   // Inches like 1/2 inch, 2 inch, 3 inch, 3/4 inch
-  const inchRe = /(?<![A-Z0-9])(\d+(?:\s?[/-]\s?\d+)?|\d+(?:\.\d+)?)\s*(inch|inches|")/gi;
+  const inchRe =
+    /(?<![A-Z0-9])(\d+(?:\s?[/-]\s?\d+)?|\d+(?:\.\d+)?)\s*(inch|inches|")/gi;
   while ((m = inchRe.exec(desc)) !== null) {
     const span = m[0];
     // Skip sizes already claimed (e.g. "NPS 4 inch" claims the whole span).
-    if (claimed.some(([s, e]) => m!.index >= s && m!.index + m![0].length <= e)) continue;
+    if (claimed.some(([s, e]) => m!.index >= s && m!.index + m![0].length <= e))
+      continue;
     const inches = parseFraction(m[1]);
     if (inches === null) continue;
     const mm = inches * 25.4;
@@ -483,7 +484,13 @@ function extractDimensions(desc: string): Attribute<string[]> {
   }
 
   const unique = Array.from(new Set(normalized));
-  return makeAttribute("dimensions", unique, spans[0] ?? desc, spans[0] ?? "", unique.length > 0 || spans.length > 0 ? 0.9 : 0);
+  return makeAttribute(
+    "dimensions",
+    unique,
+    spans[0] ?? desc,
+    spans[0] ?? "",
+    unique.length > 0 || spans.length > 0 ? 0.9 : 0,
+  );
 }
 
 function parseFraction(s: string): number | null {
@@ -502,14 +509,16 @@ function makeAttribute<T>(
   value: T,
   sourceText: string,
   span: string,
-  confidence: number
+  confidence: number,
 ): Attribute<Exclude<T, null>> {
   const evidence: AttributeEvidence | null =
     span && confidence > 0
       ? {
           sourceText,
           span,
-          normalizedValue: Array.isArray(value) ? value.join(", ") : String(value ?? ""),
+          normalizedValue: Array.isArray(value)
+            ? value.join(", ")
+            : String(value ?? ""),
           confidence,
           extractor: "Schema-aware prototype parser",
         }
@@ -566,14 +575,16 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     typeValue,
     src,
     typeSpan,
-    typeValue ? 0.98 : 0
+    typeValue ? 0.98 : 0,
   );
 
   // --- material family -----------------------------------------------------
   let materialValue: string | null = null;
   let materialSpan = "";
   const lower = " " + src.toLowerCase() + " ";
-  const familyKeys = Object.keys(MATERIAL_FAMILIES).sort((a, b) => b.length - a.length);
+  const familyKeys = Object.keys(MATERIAL_FAMILIES).sort(
+    (a, b) => b.length - a.length,
+  );
   for (const key of familyKeys) {
     const m = new RegExp(`\\b${escapeRegExp(key)}\\b`, "i").exec(lower);
     if (m) {
@@ -598,7 +609,7 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     materialValue,
     src,
     materialSpan,
-    materialValue ? 0.95 : 0
+    materialValue ? 0.95 : 0,
   );
 
   // --- grade ---------------------------------------------------------------
@@ -637,7 +648,10 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     // Longest aliases first so SS316L wins over SS316.
     const aliases = Object.keys(SS_ALIASES).sort((a, b) => b.length - a.length);
     for (const alias of aliases) {
-      if (lk(alias) === lk(raw.replace(/\s/g, "")) || src.toLowerCase().includes(alias.toLowerCase())) {
+      if (
+        lk(alias) === lk(raw.replace(/\s/g, "")) ||
+        src.toLowerCase().includes(alias.toLowerCase())
+      ) {
         const g = SS_ALIASES[alias];
         if (g && gradeValue === null) {
           gradeValue = g;
@@ -648,12 +662,20 @@ export function extractMaterialDNA(description: string): MaterialDNA {
       }
     }
   }
-  const grade = makeAttribute("grade", gradeValue, src, gradeSpan, gradeValue ? 0.97 : 0);
+  const grade = makeAttribute(
+    "grade",
+    gradeValue,
+    src,
+    gradeSpan,
+    gradeValue ? 0.97 : 0,
+  );
 
   // --- standard ------------------------------------------------------------
   const standardValues: string[] = [];
   const stdSpans: string[] = [];
-  for (const key of Object.keys(STANDARDS).sort((a, b) => b.length - a.length)) {
+  for (const key of Object.keys(STANDARDS).sort(
+    (a, b) => b.length - a.length,
+  )) {
     const re = new RegExp(`\\b${escapeRegExp(key)}\\b`, "ig");
     let mm: RegExpExecArray | null;
     while ((mm = re.exec(src)) !== null) {
@@ -669,7 +691,7 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     Array.from(new Set(standardValues)),
     src,
     stdSpans.join(" "),
-    standardValues.length > 0 ? 0.96 : 0
+    standardValues.length > 0 ? 0.96 : 0,
   );
 
   // --- coating -------------------------------------------------------------
@@ -684,7 +706,13 @@ export function extractMaterialDNA(description: string): MaterialDNA {
       break;
     }
   }
-  const coating = makeAttribute("coating", coatingValue, src, coatingSpan, coatingValue ? 0.95 : 0);
+  const coating = makeAttribute(
+    "coating",
+    coatingValue,
+    src,
+    coatingSpan,
+    coatingValue ? 0.95 : 0,
+  );
 
   // --- pressure class ------------------------------------------------------
   let classValue: string | null = null;
@@ -697,12 +725,20 @@ export function extractMaterialDNA(description: string): MaterialDNA {
       break;
     }
   }
-  const classPressure = makeAttribute("classPressure", classValue, src, classSpan, classValue ? 0.96 : 0);
+  const classPressure = makeAttribute(
+    "classPressure",
+    classValue,
+    src,
+    classSpan,
+    classValue ? 0.96 : 0,
+  );
 
   // --- schedule ------------------------------------------------------------
   let schedValue: string | null = null;
   let schedSpan = "";
-  for (const key of Object.keys(SCHEDULES).sort((a, b) => b.length - a.length)) {
+  for (const key of Object.keys(SCHEDULES).sort(
+    (a, b) => b.length - a.length,
+  )) {
     const m = new RegExp(`\\b${escapeRegExp(key)}\\b`, "i").exec(src);
     if (m) {
       schedValue = SCHEDULES[key];
@@ -710,7 +746,13 @@ export function extractMaterialDNA(description: string): MaterialDNA {
       break;
     }
   }
-  const schedule = makeAttribute("schedule", schedValue, src, schedSpan, schedValue ? 0.96 : 0);
+  const schedule = makeAttribute(
+    "schedule",
+    schedValue,
+    src,
+    schedSpan,
+    schedValue ? 0.96 : 0,
+  );
 
   // --- thread --------------------------------------------------------------
   let threadValue: string | null = null;
@@ -720,7 +762,13 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     threadValue = threadM[1].toUpperCase();
     threadSpan = threadM[0];
   }
-  const thread = makeAttribute("thread", threadValue, src, threadSpan, threadValue ? 0.98 : 0);
+  const thread = makeAttribute(
+    "thread",
+    threadValue,
+    src,
+    threadSpan,
+    threadValue ? 0.98 : 0,
+  );
 
   // --- electrical ----------------------------------------------------------
   const elecSpans: string[] = [];
@@ -731,18 +779,45 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     const unit = em[2].toLowerCase().replace(/[\s.]/g, "");
     elecSpans.push(`${em[1]} ${unit}`);
   }
-  const electrical = makeAttribute("electrical", Array.from(new Set(elecSpans)), src, elecSpans.join(" "), elecSpans.length > 0 ? 0.94 : 0);
+  const electrical = makeAttribute(
+    "electrical",
+    Array.from(new Set(elecSpans)),
+    src,
+    elecSpans.join(" "),
+    elecSpans.length > 0 ? 0.94 : 0,
+  );
 
   // --- quantity ------------------------------------------------------------
   const quantityValues = extractQuantityTokens(src);
-  const quantity = makeAttribute("quantity", quantityValues, src, quantityValues.join(" "), quantityValues.length > 0 ? 0.93 : 0);
+  const quantity = makeAttribute(
+    "quantity",
+    quantityValues,
+    src,
+    quantityValues.join(" "),
+    quantityValues.length > 0 ? 0.93 : 0,
+  );
 
   const dimensions = extractDimensions(src);
 
   // --- confidence & evidence coverage --------------------------------------
-  const attrs = [materialType, material, grade, dimensions, standard, coating, classPressure, schedule, thread, electrical, quantity];
+  const attrs = [
+    materialType,
+    material,
+    grade,
+    dimensions,
+    standard,
+    coating,
+    classPressure,
+    schedule,
+    thread,
+    electrical,
+    quantity,
+  ];
   const all: number[] = attrs.map((a) => a.confidence).filter((x) => x > 0);
-  const confidence = all.length === 0 ? 0 : Math.round((all.reduce((s, x) => s + x, 0) / all.length) * 100);
+  const confidence =
+    all.length === 0
+      ? 0
+      : Math.round((all.reduce((s, x) => s + x, 0) / all.length) * 100);
 
   let covered = 0;
   let relevant = 0;
@@ -751,7 +826,8 @@ export function extractMaterialDNA(description: string): MaterialDNA {
     if (isRelevant) relevant++;
     if (isRelevant && a.confidence >= 0.7) covered++;
   }
-  const evidenceCoverage = relevant === 0 ? 0 : Math.round((covered / Math.max(relevant, 1)) * 100);
+  const evidenceCoverage =
+    relevant === 0 ? 0 : Math.round((covered / Math.max(relevant, 1)) * 100);
 
   return {
     materialType,
@@ -808,7 +884,9 @@ function scopedTypeMatch(raw: string): { value: string; span: string } | null {
   ];
   const upper = raw.toUpperCase();
   for (const [re, v] of map) {
-    const m = re.exec(upper);
+    // Catalogue exports often contain repeated spaces, tabs or line breaks.
+    // Match those as separators while retaining the exact original evidence span.
+    const m = new RegExp(re.source.replace(/ /g, "\\s+"), re.flags).exec(upper);
     if (m) return { value: v, span: raw.slice(m.index, m.index + m[0].length) };
   }
   return null;
@@ -822,7 +900,7 @@ function hasValue(a: Attribute<unknown>): boolean {
 }
 
 function escapeRegExp(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
 }
 
 export function listRelevantAttributes(dna: MaterialDNA): string[] {

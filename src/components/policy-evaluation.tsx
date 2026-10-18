@@ -41,37 +41,37 @@ export function PolicyEvaluation() {
       <CardBody className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg border border-dna-green/20 bg-dna-green/5 p-4">
-            <p className="text-[10px] text-dna-muted">
+            <p className="text-xs text-dna-muted">
               False MATCH recommendations
             </p>
             <p className="mt-2 text-3xl font-semibold text-dna-green">
               {a.fp} <span className="mx-2 text-lg text-dna-faint">→</span>{" "}
               {b.fp}
             </p>
-            <p className="mt-2 text-[10px] leading-5 text-dna-muted">
+            <p className="mt-2 text-xs leading-5 text-dna-muted">
               On this known regression set. Not a universal safety claim.
             </p>
           </div>
           <div className="rounded-lg border border-dna-border p-4">
-            <p className="text-[10px] text-dna-muted">
+            <p className="text-xs text-dna-muted">
               Automatic true-match coverage
             </p>
             <p className="mt-2 text-3xl font-semibold">
               {(b.automaticTrueMatchCoverage * 100).toFixed(0)}
               <span className="text-lg">%</span>
             </p>
-            <p className="mt-2 text-[10px] leading-5 text-dna-muted">
+            <p className="mt-2 text-xs leading-5 text-dna-muted">
               {b.tp} of 100 true matches accepted. Review workload is part of
               the trade-off.
             </p>
           </div>
           <div className="rounded-lg border border-dna-border p-4">
-            <p className="text-[10px] text-dna-muted">Abstention rate</p>
+            <p className="text-xs text-dna-muted">Abstention rate</p>
             <p className="mt-2 text-3xl font-semibold">
               {(b.abstention * 100).toFixed(0)}
               <span className="text-lg">%</span>
             </p>
-            <p className="mt-2 text-[10px] leading-5 text-dna-muted">
+            <p className="mt-2 text-xs leading-5 text-dna-muted">
               {b.counts.REVIEW} of 200 pairs routed to human review.
             </p>
           </div>

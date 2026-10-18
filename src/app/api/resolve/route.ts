@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildInputRecord } from "@/lib/material-dna/demo";
 import { resolveWithReviewPolicy } from "@/lib/material-dna/matching/review-first";
 import { materialRecords } from "@/data/demo";
+import { identityProposal } from "@/lib/material-dna/identity-proposal";
 import {
   corpusTexts,
   createEmbeddingSignal,
@@ -65,7 +66,10 @@ export async function POST(request: NextRequest) {
       body?.policy !== "submitted",
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      ...result,
+      identityProposal: identityProposal(result),
+    });
   } catch (error) {
     if (error instanceof SyntaxError)
       return NextResponse.json(

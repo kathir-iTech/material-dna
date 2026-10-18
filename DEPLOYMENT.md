@@ -59,10 +59,16 @@ CSV parsing is an RFC 4180 state machine. XLSX is read server-side by ExcelJS, d
 
 `/api/resolve` and `/api/resolve-batch` optionally load `Xenova/all-MiniLM-L6-v2` via transformers.js. The model is not bundled. It needs supported HTTPS connectivity to Hugging Face and its artifact hosts. `TRANSFORMERS_CACHE` optionally overrides `/tmp/material-dna-model-cache`; its directory must be writable.
 
-The request budget includes cold model loading and inference. Unavailable or slow models return lexical fallback; the browser Resolve flow always uses lexical scoring. API callers can select the original matching configuration with `"policy":"submitted"`; the default applies additional specification checks. A successful response does not prove embeddings were active: inspect `embeddingSimilarity` and audit events.
+The request budget includes cold model loading and each inference await. Unavailable or slow models return lexical fallback. Resolve uses lexical scoring by default; **Matching settings → Use MiniLM ranking on the server** makes an actual API request and reports the ranking that ran. The three guided examples remain lexical for repeatability. API callers can select the original matching configuration with `"policy":"submitted"`; the default applies additional specification checks. A successful response does not prove embeddings were active: inspect `embeddingSimilarity` and audit events.
 
 ## Storage and exported evidence
 
 The latest 100 review cases and 5 migration batches are saved in versioned browser-local storage. Snapshots are validated before restoration, and storage failures are surfaced. Exports provide decision reports, JSON evidence, review registers, canonical mappings and batch decisions. CSV exports neutralize formula-leading text, and printable HTML escapes source data.
 
 This is not shared institutional persistence: storage can be cleared, unavailable or modified by the browser user. There is no authenticated reviewer identity, signed audit log, SAP connector or official national coding authority. Production governance and real CPSE validation remain separate work.
+
+## Interface assets and recovery
+
+Inter is bundled in `public/fonts` with its license, so a restrictive font-service network cannot change the interface typography. Next.js disables its powered-by header and supplies nosniff, frame-denial, referrer and device-permission headers. Missing routes provide a workspace return link; the route error boundary provides a retry. These are baseline hardening measures, not a substitute for authentication, a security assessment or shared production governance.
+
+`identity-proposal-v2` displays proposed codes in Resolve, API responses and evidence exports. It includes the explicit additional specification facets and uses eight hexadecimal hash characters. The original four-character submitted generator and existing master identities remain available. A proposal is not an assigned national identifier; collision checking and an approved registry are required before issuance. See `docs/SUBMISSION_ALIGNMENT.md` for the complete fixed-PPT ledger.

@@ -45,7 +45,7 @@ export function LocalWorkspaceNotice({
               ? "Saved on this browser"
               : "Browser storage unavailable — export before leaving"}
           </strong>
-          <span className="mt-1 block text-[10px] leading-relaxed text-dna-muted">
+          <span className="mt-1 block text-xs leading-relaxed text-dna-muted">
             {kind === "reviews"
               ? "The latest 100 cases"
               : "The latest 5 batches"}{" "}

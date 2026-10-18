@@ -104,7 +104,16 @@ export async function createEmbeddingSignal(
       }
       const chunk = unique.slice(i, i + BATCH).filter((t) => !vectors.has(t));
       if (chunk.length === 0) continue;
-      const out = await ex(chunk, { pooling: "mean", normalize: true });
+      // Inference can stall too. Bound each await by the remaining total budget.
+      const remaining = budgetMs - (Date.now() - started);
+      if (remaining <= 0) return null;
+      const out = await Promise.race([
+        ex(chunk, { pooling: "mean", normalize: true }),
+        new Promise<null>((resolve) => {
+          timer = setTimeout(() => resolve(null), remaining);
+        }),
+      ]).finally(() => clearTimeout(timer));
+      if (!out) return null;
       const dim = out.dims[out.dims.length - 1];
       for (let j = 0; j < chunk.length; j++) {
         vectors.set(chunk[j], out.data.slice(j * dim, (j + 1) * dim));

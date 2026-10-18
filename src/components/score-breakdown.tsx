@@ -48,6 +48,12 @@ export function SubScoreList({
           <span className="text-dna-text">{score[key]}%</span>
         </li>
       ))}
+      {typeof score.embeddingSimilarity === "number" && (
+        <li className="flex items-center justify-between gap-3">
+          <span className="text-dna-muted">MiniLM cosine:</span>
+          <span className="text-dna-text">{score.embeddingSimilarity}%</span>
+        </li>
+      )}
       {outcome && (
         <>
           <li className="flex items-center justify-between gap-3 border-t border-dna-border pt-1">
@@ -70,10 +76,11 @@ export function SubScoreList({
  */
 export function SubScoreHelp({ className }: { className?: string }) {
   return (
-    <ul className={cn("mt-2 space-y-0.5 text-[10px] leading-3", className)}>
+    <ul className={cn("mt-2 space-y-0.5 text-xs leading-5", className)}>
       {NAMED_SUBSCORES.map(({ key, label }) => (
         <li key={key} className="text-dna-faint">
-          <span className="text-dna-muted">{label}:</span> {SCORE_DEFINITIONS[key]}
+          <span className="text-dna-muted">{label}:</span>{" "}
+          {SCORE_DEFINITIONS[key]}
         </li>
       ))}
     </ul>

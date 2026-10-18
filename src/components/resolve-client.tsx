@@ -3,16 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
-  ArrowDown,
   ArrowRight,
-  Check,
-  ClipboardList,
+  ArrowUpRight,
+  Search,
   Download,
   FileJson,
-  Fingerprint,
   FlaskConical,
   GitBranch,
-  Layers3,
   Play,
   RotateCcw,
   Send,
@@ -22,7 +19,6 @@ import {
 } from "lucide-react";
 import { demoScenarios } from "@/data/demo";
 import { useResolver } from "@/hooks/use-resolver";
-import { Badge } from "@/components/ui/badge";
 import { MaterialDNAProfile } from "@/components/material-dna-profile";
 import { CandidateTable } from "./candidate-table";
 import { ExplanationPanel } from "./explanation-panel";
@@ -32,6 +28,8 @@ import { AuditTimeline } from "./audit-timeline";
 import { OverviewStrip } from "./overview-strip";
 import { DecisionBanner } from "./decision-banner";
 import { DiscoveryDrawer } from "./discovery-drawer";
+import { PageHeading } from "./page-heading";
+import { IdentityProposal } from "./identity-proposal";
 import { RecordComparison } from "./record-comparison";
 import { isWorkspaceStorageHealthy } from "@/lib/browser-workspace";
 import { decisionHtml, downloadFile, resolutionEvidence } from "@/lib/reports";
@@ -92,69 +90,22 @@ export function ResolveClient() {
   }
   return (
     <div className="space-y-6">
-      <div className="resolve-heading">
-        <div>
-          <div className="page-eyebrow">Engineering identity / Resolve</div>
-          <h1>
-            Material intelligence<span className="text-dna-cyan">.</span>
-          </h1>
-          <p>Different descriptions. One identity. Every decision explained.</p>
-        </div>
-        <span className="version-chip">
-          <span className="status-dot" />
-          Prototype workspace
-        </span>
-      </div>
-      <section
-        className="resolve-hero"
-        aria-label="Engineering-aware matching introduction"
-      >
-        <div className="hero-copy">
-          <div className="hero-kicker">
-            <Fingerprint aria-hidden="true" size={13} />
-            Engineering before similarity
-          </div>
-          <h2>
-            Find the same material.
-            <br />
-            <em>Stop the wrong merge.</em>
-          </h2>
-          <p>
-            Turn fragmented descriptions into structured material DNA. Surface
-            the evidence. Keep critical differences apart.
-          </p>
-          <button className="hero-action" onClick={() => startStep(0)}>
-            Explore the 90-second walkthrough{" "}
-            <ArrowRight aria-hidden="true" size={14} />
-          </button>
-        </div>
-        <div
-          className="hero-visual"
-          aria-label="Example: grade 8.8 and 10.9 bolts must remain separate"
-        >
-          <div className="material-mini">
-            <span className="mini-label">SOURCE A / EXAMPLE</span>
-            <strong>HEX BOLT</strong>
-            <code>M12 × 60 · DIN 931</code>
-            <div className="mini-grade">8.8</div>
-            <span className="mini-tag">Property class</span>
-          </div>
-          <div className="veto-link">
-            <span>
-              <ShieldCheck aria-hidden="true" size={21} />
-            </span>
-            <small>MERGE BLOCKED</small>
-          </div>
-          <div className="material-mini">
-            <span className="mini-label">SOURCE B / EXAMPLE</span>
-            <strong>HEX BOLT</strong>
-            <code>M12 × 60 · DIN 931</code>
-            <div className="mini-grade">10.9</div>
-            <span className="mini-tag">Different property class</span>
-          </div>
-        </div>
-      </section>
-      <OverviewStrip />
+      <p role="status" className="sr-only">
+        {resolver.phase === "processing"
+          ? "Evaluating material. Please wait."
+          : resolver.phase === "complete"
+            ? `Resolution complete: ${result?.decision.replaceAll("_", " ")}.`
+            : "Ready to resolve a material."}
+      </p>
+      <PageHeading
+        title="Resolve a material"
+        description="Find equivalent records. Check critical differences. Keep the evidence."
+        action={
+          <span className="scope-label">
+            <ShieldCheck size={15} aria-hidden="true" /> Human approval required
+          </span>
+        }
+      />
       {showGuide && (
         <section className="demo-guide" aria-label="Guided demonstration">
           <div className="demo-guide-header">
@@ -194,24 +145,32 @@ export function ResolveClient() {
         </section>
       )}
       <div id="resolution-workbench" className="scroll-mt-6">
-        <div className="section-label">
-          <Layers3 aria-hidden="true" size={15} className="text-dna-cyan" />
-          Resolution workbench
-          <span>From description to defensible decision</span>
-        </div>
         <div className="resolve-workbench">
           <section className="workbench-card">
             <div className="workbench-title">
               <div>
-                <h2>What material are you looking at?</h2>
-                <p>
-                  Resolve against the reference corpus, or compare two
-                  descriptions directly.
-                </p>
+                <h2>Material description</h2>
+                <p>Paste a description from your material catalogue.</p>
               </div>
-              <Badge tone="cyan">CPU · deterministic</Badge>
+              <span className="input-step">01 / Input</span>
             </div>
             <div className="workbench-form">
+              <div className="input-modes" aria-label="Resolution mode">
+                <button
+                  type="button"
+                  aria-pressed={!resolver.useReference}
+                  onClick={() => resolver.setUseReference(false)}
+                >
+                  Search reference corpus
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={resolver.useReference}
+                  onClick={() => resolver.setUseReference(true)}
+                >
+                  Compare two descriptions
+                </button>
+              </div>
               <label className="field-label" htmlFor="material-input">
                 Material description
                 <span>{resolver.description.length} / 2,000</span>
@@ -221,21 +180,22 @@ export function ResolveClient() {
                 aria-label="Material description input"
                 className="material-input font-mono"
                 rows={3}
+                onKeyDown={(event) => {
+                  if (
+                    (event.ctrlKey || event.metaKey) &&
+                    event.key === "Enter" &&
+                    resolver.phase !== "processing"
+                  ) {
+                    event.preventDefault();
+                    setSelectedCandidate(null);
+                    resolver.handleResolve();
+                  }
+                }}
                 maxLength={2000}
                 value={resolver.description}
                 onChange={(e) => resolver.setDescription(e.target.value)}
                 placeholder="e.g. HEX BOLT M12 X 60 8.8 ZP DIN 931"
               />
-              <button
-                className="hero-action !mt-2 !text-[10px]"
-                onClick={() => resolver.setUseReference(!resolver.useReference)}
-                aria-pressed={resolver.useReference}
-              >
-                {resolver.useReference
-                  ? "Use the reference corpus instead"
-                  : "Compare two descriptions"}
-                <ArrowDown aria-hidden="true" size={12} />
-              </button>
               {resolver.useReference && (
                 <div className="mt-4">
                   <label className="field-label" htmlFor="reference-input">
@@ -254,15 +214,34 @@ export function ResolveClient() {
                   />
                 </div>
               )}
-              <label className="policy-toggle">
-                <input
-                  type="checkbox"
-                  checked={resolver.conservative}
-                  onChange={(e) => resolver.setConservative(e.target.checked)}
-                />
-                Additional specification checks{" "}
-                <span className="text-dna-faint">· review-first-v1</span>
-              </label>
+              <details className="resolution-settings">
+                <summary>Matching settings</summary>
+                <label className="policy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={resolver.conservative}
+                    onChange={(e) => resolver.setConservative(e.target.checked)}
+                  />
+                  Additional specification checks
+                </label>
+                <p>
+                  Checks pressure, process and other explicit specifications.
+                  Turn off to reproduce the submitted engine.
+                </p>
+                <label className="policy-toggle">
+                  <input
+                    type="checkbox"
+                    checked={resolver.denseRanking}
+                    onChange={(e) => resolver.setDenseRanking(e.target.checked)}
+                  />
+                  Use MiniLM ranking on the server
+                </label>
+                <p>
+                  Optional dense ranking. Model unavailability uses lexical
+                  fallback. Example test cases use lexical scoring for a
+                  repeatable walkthrough.
+                </p>
+              </details>
               <div className="workbench-actions">
                 <button
                   className="primary-action"
@@ -275,7 +254,7 @@ export function ResolveClient() {
                     !resolver.description.trim()
                   }
                 >
-                  <Sparkles aria-hidden="true" size={14} />
+                  <Search aria-hidden="true" size={16} />
                   {resolver.phase === "processing"
                     ? "Evaluating engineering evidence…"
                     : "Resolve Material"}
@@ -293,7 +272,7 @@ export function ResolveClient() {
                 </button>
                 <span className="workbench-hint">
                   <ShieldCheck aria-hidden="true" size={12} />
-                  Human approval required
+                  Ctrl / ⌘ + Enter
                 </span>
               </div>
               {resolver.error && (
@@ -302,11 +281,26 @@ export function ResolveClient() {
                 </p>
               )}
             </div>
-            <div className="scenario-strip">
-              {demoScenarios.map((scenario) => (
+            <div className="input-note">
+              <ShieldCheck size={14} aria-hidden="true" /> Resolution recommends
+              a relationship. It never changes your material master.
+            </div>
+          </section>
+          <aside className="example-panel" aria-label="Example test cases">
+            <div className="example-heading">
+              <span>Test the engine</span>
+              <span className="scope-label">3 examples</span>
+            </div>
+            <h2>Start with a known case</h2>
+            <p>
+              Run an example and inspect why the engine agrees, blocks, or asks
+              for review.
+            </p>
+            <div className="example-list">
+              {demoScenarios.map((scenario, index) => (
                 <button
                   key={scenario.id}
-                  className="scenario-button"
+                  className="example-button"
                   disabled={resolver.phase === "processing"}
                   onClick={() => {
                     setSelectedCandidate(null);
@@ -314,58 +308,57 @@ export function ResolveClient() {
                   }}
                   aria-label={`Run scenario: ${scenario.title}`}
                 >
-                  <span className="scenario-dot" />
-                  {scenario.title}
-                  <Play aria-hidden="true" size={9} />
+                  <span className={`example-number example-${index}`}>
+                    0{index + 1}
+                  </span>
+                  <span>
+                    <strong>{scenario.title}</strong>
+                    <small>
+                      {
+                        [
+                          "Same specifications, different wording",
+                          "Similar bolts, incompatible grades",
+                          "Incomplete engineering information",
+                        ][index]
+                      }
+                    </small>
+                  </span>
+                  <ArrowUpRight size={16} aria-hidden="true" />
                 </button>
               ))}
-              <button
-                className="scenario-button ml-auto"
-                onClick={() => setShowGuide(!showGuide)}
-                aria-label="Open suggested demo script"
-              >
-                <ClipboardList aria-hidden="true" size={11} />
-                Demo guide
-              </button>
             </div>
-          </section>
-          <aside className="evidence-aside">
-            <h3>
-              <GitBranch
-                aria-hidden="true"
-                size={14}
-                className="text-dna-cyan"
-              />
-              Inside the decision
-            </h3>
-            {[
-              ["Normalize", "Units, terms & abbreviations"],
-              ["Extract DNA", "Engineering attributes"],
-              ["Retrieve", "Find candidate records"],
-              ["Apply constraints", "Critical conflicts veto a merge"],
-              ["Explain & review", "Evidence for a human decision"],
-            ].map(([title, detail], i) => (
-              <div className="pipeline-step" key={title}>
-                <span className="pipeline-number">0{i + 1}</span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{detail}</small>
-                </div>
-              </div>
-            ))}
-            <p className="pipeline-footnote">
-              <Check aria-hidden="true" size={12} />
-              Similarity ranks. Constraints govern.
-            </p>
+            <button
+              className="walkthrough-button"
+              onClick={() => {
+                setShowGuide(!showGuide);
+              }}
+              aria-label="Open suggested demo script"
+            >
+              <Play size={14} aria-hidden="true" /> Four-step judge walkthrough{" "}
+              <ArrowRight size={14} aria-hidden="true" />
+            </button>
           </aside>
         </div>
       </div>
+      <OverviewStrip />
       {result && (
         <section
+          tabIndex={-1}
           id="resolution-results"
           className="result-section space-y-5"
           aria-label="Resolution results"
         >
+          {(resolver.description.trim() !== result.input.rawDescription ||
+            (resolver.useReference &&
+              resolver.referenceDescription.trim() !==
+                result.selectedCandidate?.targetRecord.rawDescription) ||
+            resolver.conservative !==
+              result.engineVersion.includes("review-first-v1")) && (
+            <p className="result-notice" role="status">
+              Input or matching settings changed. Resolve again to refresh this
+              decision.
+            </p>
+          )}
           <div className="section-label !mb-0">
             <ShieldCheck
               aria-hidden="true"
@@ -377,8 +370,17 @@ export function ResolveClient() {
               {resolver.durationMs} ms · {resolver.context}
             </span>
           </div>
+          <p className="ranking-mode">
+            Ranking used:{" "}
+            {typeof result.selectedCandidate?.scoreDetails
+              .embeddingSimilarity === "number"
+              ? "MiniLM + lexical signals"
+              : "Lexical signals"}
+            . Critical engineering constraints govern the recommendation.
+          </p>
           <DecisionBanner result={result} />
           <RecordComparison result={result} />
+          <IdentityProposal result={result} />
           <div className="flex flex-wrap items-center gap-2">
             <button
               className="primary-action"
@@ -469,6 +471,26 @@ export function ResolveClient() {
           />
         </section>
       )}
+      <details className="pipeline-disclosure">
+        <summary>
+          How the decision is made{" "}
+          <span>Five stages · inspectable evidence at every step</span>
+        </summary>
+        <ol>
+          {[
+            "Normalize descriptions",
+            "Extract material DNA",
+            "Retrieve candidates",
+            "Apply critical constraints",
+            "Propose a code & audit trail",
+          ].map((stage, index) => (
+            <li key={stage}>
+              <span>0{index + 1}</span>
+              {stage}
+            </li>
+          ))}
+        </ol>
+      </details>
       <div className="trust-row">
         <Link href="/graph">
           <GitBranch aria-hidden="true" size={19} />

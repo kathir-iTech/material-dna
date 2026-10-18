@@ -1,4 +1,3 @@
-import { Boxes, GitBranch, Network, ShieldCheck } from "lucide-react";
 import { datasetStats } from "@/lib/material-dna/dataset-stats";
 import { corpusClusters } from "@/lib/material-dna/clusters";
 import { materialRecords } from "@/data/demo";
@@ -7,49 +6,38 @@ export function OverviewStrip() {
   const clusters = corpusClusters();
   const items = [
     {
-      label: "Material records",
+      label: "Reference records",
       value: stats.recordCount,
-      note: "Synthetic reference corpus",
-      icon: Boxes,
-      color: "mint",
+      note: "Synthetic descriptions",
     },
     {
       label: "Source systems",
       value: new Set(materialRecords.map((r) => r.source)).size,
-      note: "Demonstration source labels",
-      icon: Network,
-      color: "blue",
+      note: "Demonstration labels",
     },
     {
       label: "Identity clusters",
       value: clusters.clusters.length,
-      note: "Submitted engine clustering",
-      icon: GitBranch,
-      color: "violet",
+      note: "Submitted engine",
     },
     {
-      label: "Unsafe links held out",
+      label: "Unsafe links blocked",
       value: clusters.vetoedProposals.length,
-      note: "High similarity, critical conflict",
-      icon: ShieldCheck,
-      color: "rose",
+      note: "Critical conflicts detected",
     },
   ];
   return (
-    <section className="metric-grid" aria-label="Reference corpus statistics">
-      {items.map(({ label, value, note, icon: Icon, color }) => (
-        <div className="metric-card" key={label}>
-          <div className="metric-label">
+    <section
+      className="corpus-summary"
+      aria-label="Reference corpus statistics"
+    >
+      {items.map(({ label, value, note }) => (
+        <div key={label}>
+          <strong>{value}</strong>
+          <span>
             {label}
-            <span className={`metric-icon ${color}`}>
-              <Icon aria-hidden="true" size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-          <div className="metric-value">
-            {value}
-            <span className="metric-rule" />
-          </div>
-          <p>{note}</p>
+            <small>{note}</small>
+          </span>
         </div>
       ))}
     </section>

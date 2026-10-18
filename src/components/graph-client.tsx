@@ -1,4 +1,6 @@
 "use client";
+
+import { PageHeading } from "./page-heading";
 import { useMemo, useState } from "react";
 import {
   ArrowUpRight,
@@ -50,21 +52,13 @@ export function GraphClient() {
   }
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="page-eyebrow">Connections / Source lineage</div>
-          <h1 className="text-3xl font-semibold tracking-tight text-dna-text">
-            Constraint-Aware Material Identity Graph
-          </h1>
-          <p className="mt-2 max-w-3xl text-xs leading-7 text-dna-muted">
-            Explore how source records connect to a proposed identity, and why
-            similar materials must sometimes stay apart.
-          </p>
-        </div>
-        <DemoBadge />
-      </div>
+      <PageHeading
+        title="Constraint-Aware Material Identity Graph"
+        description="Explore source lineage and inspect why similar materials must sometimes stay apart."
+        action={<DemoBadge />}
+      />
       <div className="flex flex-wrap gap-2">
-        <span className="py-2 text-[10px] uppercase tracking-wider text-dna-faint">
+        <span className="py-2 text-xs tracking-normal text-dna-faint">
           Canonical identity:
         </span>
         {canonicalMaterials.map((c) => (
@@ -75,7 +69,7 @@ export function GraphClient() {
               setSelectedNode("canonical");
             }}
             aria-label={`Show graph for ${c.canonicalId}`}
-            className={`rounded-lg border px-3 py-2 font-mono text-[10px] ${selectedId === c.canonicalId ? "border-dna-cyan/50 bg-dna-cyan/5 text-dna-cyan" : "border-dna-border bg-white text-dna-muted"}`}
+            className={`rounded-lg border px-3 py-2 font-mono text-xs ${selectedId === c.canonicalId ? "border-dna-cyan/50 bg-dna-cyan/5 text-dna-cyan" : "border-dna-border bg-white text-dna-muted"}`}
           >
             {c.materialType} ·{" "}
             {String(
@@ -97,7 +91,7 @@ export function GraphClient() {
               />
               Source-to-identity map
             </h2>
-            <span className="flex items-center gap-1 text-[10px] text-dna-faint">
+            <span className="flex items-center gap-1 text-xs text-dna-faint">
               <MousePointer2 aria-hidden="true" size={12} />
               Select a node
             </span>
@@ -276,7 +270,7 @@ export function GraphClient() {
               </text>
             </g>
           </svg>
-          <div className="flex flex-wrap gap-5 border-t border-dna-border px-5 py-3 text-[10px] text-dna-muted">
+          <div className="flex flex-wrap gap-5 border-t border-dna-border px-5 py-3 text-xs text-dna-muted">
             <span>
               <span className="mr-2 inline-block h-0.5 w-5 bg-[#8abca8]" />
               Demonstration legacy mapping
@@ -324,7 +318,7 @@ export function GraphClient() {
               <p className="mt-4 text-xs leading-7 text-dna-muted">
                 {mapping.sourceDescription}
               </p>
-              <p className="mt-5 text-[10px] leading-6 text-dna-faint">
+              <p className="mt-5 text-xs leading-6 text-dna-faint">
                 Mapped to the selected proposed identity in the synthetic
                 corpus.
               </p>
@@ -338,14 +332,14 @@ export function GraphClient() {
               <p className="mt-3 text-xs leading-7 text-dna-muted">
                 {canonical.normalizedDescription}
               </p>
-              <code className="mt-4 block break-all rounded-lg border border-dna-border bg-dna-panel2 p-3 text-[10px] leading-6 text-dna-cyan">
+              <code className="mt-4 block break-all rounded-lg border border-dna-border bg-dna-panel2 p-3 text-xs leading-6 text-dna-cyan">
                 {canonical.canonicalId}
               </code>
               <p className="mt-4 flex items-center gap-2 text-xs text-dna-muted">
                 <ArrowUpRight aria-hidden="true" size={14} />
                 {mappings.length} linked source records
               </p>
-              <p className="mt-4 text-[10px] leading-6 text-dna-faint">
+              <p className="mt-4 text-xs leading-6 text-dna-faint">
                 Proposed canonical representation · Not an official national
                 code.
               </p>

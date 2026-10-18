@@ -1,60 +1,58 @@
-# Material DNA workspace upgrade — verification
+# Final Material DNA workspace — verification
 
-Validated locally on 18 October 2026 against the checkout based on `198ef6d3d3b9a5df20c53a90097288de1ef93e4d`. The submitted PDF was not edited.
+Validated on 18 October 2026. This refinement follows commit `5257144`; the uploaded six-slide SIH PDF was reviewed and has not been edited. See [submission alignment](SUBMISSION_ALIGNMENT.md) for the claim-by-claim ledger.
 
-## Delivered
+## Final interface and behavior
 
-- Redesigned six-page engineering workspace with responsive navigation, readable comparison cards, semantic decision states and a four-step jury walkthrough.
-- Direct pair comparisons, explicit submitted-versus-additional-checks selection, actual computation timing, and transparent scenario-specific candidate filters.
-- Separately versioned `review-first-v1` checks for explicit pressure, angle, mesh, hardness, actuation, process, polymer, end connection, flow passage and material-condition specifications.
-- Counterfactuals retain the same reference record and update the hypothetical text/attributes. They cannot conceal an incompatibility by switching to another candidate.
-- Browser-local restoration of the latest 100 review cases and 5 migration batches; versioned decision provenance, local history, storage-failure messages and explicit unsigned/local scope.
-- Printable decision reports, evidence JSON, review registers, filtered canonical-master exports, sample CSVs and batch decisions/audit exports. HTML source text is escaped and formula-leading CSV values are neutralized.
-- Registry-distributed ExcelJS workbook support, a 3 MB upload limit compatible with base64 serverless requests, 1,000-row files and 25-row resolution chunks with completed-row progress and atomic application of results.
-- Interactive graph node inspection including computed blocked relationships; modal keyboard focus containment, Escape dismissal, focus return, skip navigation and improved contrast.
-- Reproducible CI workflow, frozen-lockfile Vercel install, documented independent-pilot protocol and an empty expert-annotation template.
-
-## Measured matching change
-
-Both columns below use lexical scoring on the same known 200-pair synthetic regression set. The additional checks were developed after inspecting errors on this set. This is not independent or held-out validation.
-
-| Measure | Submitted lexical engine | Additional checks |
-|---|---:|---:|
-| False MATCH recommendations | 13 | 0 |
-| Correct MATCH recommendations | 52 | 47 |
-| REVIEW abstentions | 70 | 74 |
-| Automatic true-match coverage | 52% | 47% |
-| Precision among MATCH recommendations | 80.0% | 100.0% |
-| F1 over decided pairs | 0.813 | 0.895 |
-
-Run `npm run evaluate:policy`. The complete results, per-pair decisions and dataset SHA-256 are committed in `benchmark/review-first-results.json`; tests recompute each published policy decision. The fixed PPT's fused F1 0.815 is preserved as the historical submitted result, with its original denominator and abstention figures shown separately.
-
-The optional embedding can affect the composite ranking score and compatible-pair threshold outcomes; it cannot override a detected critical conflict. It is not a certified equivalence decision. Parser omissions, incomplete specifications and unseen material families remain possible sources of error.
+- Task-first layout: the description, resolve action and three test cases are visible together on desktop. Oversized decorative banners and metric tiles were removed. All six pages share consistent headings, spacing, readable type and navigation.
+- Licensed Inter variable font is bundled in `public/fonts`, avoiding third-party runtime font requests. Material descriptions and code values use a separate monospace stack.
+- Full-corpus and direct-pair modes are explicit controls. Keyboard resolution works with Ctrl/Command + Enter; input changes mark an older decision as stale. Actual computation/request time and ranking mode are disclosed.
+- Relationship labels and structured code proposals are visible in Resolve and included in API/evidence exports. `identity-proposal-v2` incorporates extra explicit specifications and an eight-character hash; the submitted four-character generator and existing master identities remain unchanged. Conflicting pairs have separate previews and no proposed common code. All previews still require registry checks and human approval.
+- Repeated spaces, tabs and newlines no longer change multiword material types or hide standards. Parser `v0.2-whitespace` retains exact matched source spans; the frozen lexical benchmark and published policy outputs are unchanged.
+- Optional MiniLM ranking is available through an actual server request. Results and reports identify dense or lexical scoring. Loading and inference awaits are bounded by the total model budget; the UI can cancel or time out an outstanding request. The optional model remains unavailable in this workspace, so dense numerical performance was not freshly validated.
+- Human review supports approve, keep separate, override with a reason, and reopening a decided case with a required reason. Reopening retains the previous history and persists across reloads. Batch approvals/rejections retain LIFO rollback.
+- Browser-local storage retains the latest 100 cases and five migration batches. Version validation, corrupt-state rejection, cross-tab notifications and storage-failure messages remain in place. This is unsigned local demonstration state, not shared authenticated governance.
+- CSV and actual ExcelJS XLSX imports support 3 MB / 1,000-row files and 25-row HTTP chunks. Results apply atomically after successful completion, and progress reflects completed rows.
+- Exported HTML escapes source text; CSV neutralizes formula-leading cells. Evidence JSON and printable reports include provenance, constraints and identity proposals.
+- Missing routes provide a workspace recovery link; route errors provide retry. Responses disable the powered-by header and include nosniff, frame-denial, referrer and device-permission headers. These do not establish production security certification.
+- Removed obsolete Tailwind 3 theme configuration and the unused animated progress component. Updated documentation and production screenshots; generated caches, model artifacts and browser traces remain ignored.
 
 ## Actual checks
 
-| Check | Outcome |
-|---|---|
-| `npm ci` | Passed with the committed lockfile; no external SheetJS tarball required. |
-| `npm run lint` | Passed. |
-| Type checking | Passed directly and during the production build. |
-| Unit/API/regression tests | 188 passed across 14 files; 1 real-model test skipped because model access was unavailable. |
-| Submitted lexical golden benchmark | Reproduced exactly, 257 lines after timing normalisation. |
-| Production build | Passed; all six application pages and seven API routes generated successfully. |
-| Complete final desktop/mobile browser suite | 180 passed in one run against the corrected production build, including modal focus/Space/Escape/return and Present demo on the existing Resolve route. |
-| Accessibility | Automated WCAG A/AA-tagged scans found 0 violations on all six initial pages. These scans are not a complete accessibility certification. |
-| Functional APIs | Materials: 98 records; canonical master: 18 identities; seeded reviews: 6. Direct wafer/lug comparison returned HTTP 200 and DO_NOT_MERGE under additional checks. |
-| Root page JS | Approximately 148 kB first load in the production build. |
-| Native-model validation | Not freshly reproduced; lexical fallback remains usable. |
+| Check                                 | Result                                                                                                                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frozen dependency installation        | Previously passed with the same committed package/lockfile; this refinement adds no runtime dependency.                                                                                           |
+| Lint and TypeScript                   | Passed; also checked during the final production build.                                                                                                                                           |
+| Unit/API/regression tests             | **200 passed**, 1 optional real-model test skipped, across 15 files.                                                                                                                              |
+| Frozen lexical benchmark              | Exact reproduction of 257 lines after timing normalization.                                                                                                                                       |
+| Published review policy               | Recomputed; committed JSON unchanged.                                                                                                                                                             |
+| Production build                      | Passed; six pages, seven API routes and missing-route recovery generated.                                                                                                                         |
+| Complete desktop/mobile browser suite | **186 passed** in one complete run against the final production build (5.1 minutes), including persisted reopening, keyboard controls, real XLSX, reports and optional server-ranking provenance. |
+| Automated accessibility               | 0 WCAG A/AA/2.1AA-tagged violations on all six initial page views in the final production build. This is not complete accessibility certification.                                                |
+| Primary desktop task                  | Resolve action ends at approximately 593 px in a 1440 × 960 viewport, with the bundled font loaded.                                                                                               |
+| Missing-route/header smoke check      | Unknown route returns 404 with Return to Resolve; ordinary route returns 200; nosniff and DENY present; powered-by absent.                                                                        |
+| Root page JavaScript                  | Approximately 148 kB first load; font file approximately 48 kB.                                                                                                                                   |
+| Native model benchmark                | Not freshly reproduced; real-model test skipped, not passed.                                                                                                                                      |
 
-An earlier expanded browser run exposed two modal keyboard failures. After correcting them, the complete final suite passed all 180 tests against the production build. Lint, type checking, the 188 unit/API/regression tests (with one optional real-model test skipped), and the 257-line lexical golden benchmark also passed again. CI contains the complete suite; a remote CI result has not been claimed.
+## Matching evidence retained
 
-## Deployment and remaining gates
+Both columns use lexical scoring on the same known 200-pair synthetic regression set. The additional checks were developed after inspecting errors on that set. This is not independent or held-out validation.
 
-Git HTTPS proxy access and push permission were verified. The running proxy denies GitHub API requests despite the saved network additions. Vercel CLI has no authenticated account/project binding; an attempted secure login failed to fetch. No verified production deployment has been completed.
+| Measure                               | Submitted lexical engine | Additional checks |
+| ------------------------------------- | -----------------------: | ----------------: |
+| False MATCH recommendations           |                       13 |                 0 |
+| Correct MATCH recommendations         |                       52 |                47 |
+| REVIEW abstentions                    |                       70 |                74 |
+| Automatic true-match coverage         |                      52% |               47% |
+| Precision among MATCH recommendations |                    80.0% |            100.0% |
+| F1 over decided pairs                 |                    0.813 |             0.895 |
 
-The available production-delivery route is a normal fast-forward push to the repository's `main` branch. Vercel can deploy that push through its existing Git integration if this repository and production branch are connected in the owner's account. A successful GitHub push alone does not confirm that integration, a Vercel build, or a live deployment. The direct API and live-site connectivity checks still returned proxy CONNECT 403 on 18 October 2026.
+Run `npm run evaluate:policy`. Its fingerprinted per-pair output is in `benchmark/review-first-results.json`. The submitted fused F1 **0.815** remains separately labeled as historical; lexical fallback is not a reproduction of fused inference. Parser omissions, incomplete specifications and unseen families remain potential sources of error.
 
-The reusable cloud `install_script`, `start_skill` and required network domains were saved to the environment draft. Saving is distinct from applying runtime settings or publishing an environment. Review/save the environment settings and publish through the product when ready; Vercel application deployment is a separate operation.
+## Publication and external validation
 
-A defensible 95+ jury assessment remains unsupported by the current evidence. Independent engineering labels, an unseen source/family-disjoint evaluation, shared durable governance, authenticated approvals, an ERP integration and a verified deployment remain material gaps. See `benchmark/PILOT_PROTOCOL.md` for a concrete validation gate. No result in this upgrade establishes a selection probability or guarantees a competition score.
+Production delivery uses a normal fast-forward push to `main`, which can trigger the owner's existing Vercel Git integration. A GitHub push or successful CI run does not by itself verify a Vercel build or live deployment. Direct Vercel access has been denied by this workspace's network proxy, and no authenticated CLI project binding has been established. Deployment status must be verified separately.
+
+The development environment's reusable install/start instructions and required network domains are saved. Saving settings, applying them to a running machine, publishing an environment and deploying the application are distinct operations.
+
+A 97+ external jury score or winning probability cannot be established by these tests. Independent engineering annotation, unseen-source evaluation, operational validation, authenticated shared persistence and deployment evidence remain relevant gaps. The [pilot protocol](../benchmark/PILOT_PROTOCOL.md) and empty expert-review template provide the next validation gate; no external labels or pilot results have been invented.

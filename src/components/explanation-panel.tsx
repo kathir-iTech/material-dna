@@ -26,8 +26,14 @@ export function ExplanationPanel({
     );
   }
 
-  const isAlternateCandidate = candidate !== undefined && candidate !== result.selectedCandidate;
-  const explain: { evidence: string[]; conflicts: string[]; unknowns: string[]; summary: string } = target.explanation ?? {
+  const isAlternateCandidate =
+    candidate !== undefined && candidate !== result.selectedCandidate;
+  const explain: {
+    evidence: string[];
+    conflicts: string[];
+    unknowns: string[];
+    summary: string;
+  } = target.explanation ?? {
     evidence: [],
     conflicts: [],
     unknowns: [],
@@ -37,7 +43,11 @@ export function ExplanationPanel({
   return (
     <Card>
       <CardHeader
-        title={isAlternateCandidate ? `Why not this candidate?  ${target.targetRecord.sourceCode}` : "Why this decision?"}
+        title={
+          isAlternateCandidate
+            ? `Why not this candidate?  ${target.targetRecord.sourceCode}`
+            : "Why this decision?"
+        }
         subtitle={
           isAlternateCandidate
             ? undefined
@@ -47,16 +57,25 @@ export function ExplanationPanel({
       />
       <CardBody className="space-y-4">
         <div>
-          <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-green">
+          <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-normal text-dna-green">
             <Check size={12} aria-hidden="true" /> Matching Evidence
           </h4>
           <ul className="space-y-1">
             {explain.evidence.length === 0 && (
-              <li className="text-xs text-dna-faint">No matching attributes confirmed.</li>
+              <li className="text-xs text-dna-faint">
+                No matching attributes confirmed.
+              </li>
             )}
             {explain.evidence.map((e) => (
-              <li key={e} className="flex items-start gap-2 text-xs text-dna-text">
-                <Check size={13} className="mt-0.5 shrink-0 text-dna-green" aria-hidden="true" />
+              <li
+                key={e}
+                className="flex items-start gap-2 text-xs text-dna-text"
+              >
+                <Check
+                  size={13}
+                  className="mt-0.5 shrink-0 text-dna-green"
+                  aria-hidden="true"
+                />
                 {e}
               </li>
             ))}
@@ -64,7 +83,7 @@ export function ExplanationPanel({
         </div>
 
         <div>
-          <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-red">
+          <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-normal text-dna-red">
             <X size={12} aria-hidden="true" /> Conflicts
           </h4>
           <ul className="space-y-1">
@@ -72,7 +91,10 @@ export function ExplanationPanel({
               <li className="text-xs text-dna-faint">No conflicts detected.</li>
             )}
             {explain.conflicts.map((c) => (
-              <li key={c} className="flex items-start gap-2 text-xs text-dna-red">
+              <li
+                key={c}
+                className="flex items-start gap-2 text-xs text-dna-red"
+              >
                 <X size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
                 {c}
               </li>
@@ -81,16 +103,25 @@ export function ExplanationPanel({
         </div>
 
         <div>
-          <h4 className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-amber">
+          <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-normal text-dna-amber">
             <HelpCircle size={12} aria-hidden="true" /> Unknowns
           </h4>
           <ul className="space-y-1">
             {explain.unknowns.length === 0 && (
-              <li className="text-xs text-dna-faint">No unresolved attributes.</li>
+              <li className="text-xs text-dna-faint">
+                No unresolved attributes.
+              </li>
             )}
             {explain.unknowns.map((u) => (
-              <li key={u} className="flex items-start gap-2 text-xs text-dna-amber/80">
-                <HelpCircle size={13} className="mt-0.5 shrink-0 text-dna-amber" aria-hidden="true" />
+              <li
+                key={u}
+                className="flex items-start gap-2 text-xs text-dna-amber/80"
+              >
+                <HelpCircle
+                  size={13}
+                  className="mt-0.5 shrink-0 text-dna-amber"
+                  aria-hidden="true"
+                />
                 {u}
               </li>
             ))}
@@ -98,7 +129,7 @@ export function ExplanationPanel({
         </div>
 
         <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
-          <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-cyan">
+          <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-normal text-dna-cyan">
             <Activity size={12} aria-hidden="true" /> Score breakdown
           </div>
           <SubScoreList score={target.scoreDetails} outcome />
@@ -106,17 +137,22 @@ export function ExplanationPanel({
         </div>
 
         <div className="rounded border border-dna-border2 bg-dna-panel2 p-3">
-          <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-dna-cyan">
+          <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold tracking-normal text-dna-cyan">
             Decision <ArrowRight size={11} aria-hidden="true" />
           </div>
-          <p className="text-sm leading-relaxed text-dna-text">{explain.summary}</p>
+          <p className="text-sm leading-relaxed text-dna-text">
+            {explain.summary}
+          </p>
         </div>
 
         {!compact && (
-          <p className="text-[11px] text-dna-faint">
+          <p className="text-xs text-dna-faint">
             Constraint trace:{" "}
             <code className="font-mono">
-              {(target.ruleTrace.length > 0 ? target.ruleTrace : ["positive-match"]).join(", ")}
+              {(target.ruleTrace.length > 0
+                ? target.ruleTrace
+                : ["positive-match"]
+              ).join(", ")}
             </code>
           </p>
         )}

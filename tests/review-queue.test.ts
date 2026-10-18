@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { buildReviewCase, reviewQueueStore } from "@/hooks/use-review-queue";
 import { materialRecords, seededReviewCases } from "@/data/demo";
-import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
+import {
+  buildInputRecord,
+  resolveMaterialRecord,
+} from "@/lib/material-dna/demo";
 
 // B1 regression: Resolve and the Review page must share ONE store.
 // Before the fix, Resolve wrote to a private useState and the Review page
@@ -14,7 +17,10 @@ const SEND_INPUTS = [
 ];
 
 function sendFromResolve(input: string) {
-  const result = resolveMaterialRecord(buildInputRecord(input), materialRecords);
+  const result = resolveMaterialRecord(
+    buildInputRecord(input),
+    materialRecords,
+  );
   reviewQueueStore.enqueue(buildReviewCase(result));
 }
 
@@ -25,11 +31,13 @@ describe("B1: shared review queue store", () => {
 
   it("starts with the seeded demo cases (before anything is sent)", () => {
     expect(reviewQueueStore.getSnapshot()).toEqual(seededReviewCases);
-    expect(reviewQueueStore.getSnapshot()).toHaveLength(seededReviewCases.length);
+    expect(reviewQueueStore.getSnapshot()).toHaveLength(
+      seededReviewCases.length,
+    );
     // Every risk filter must have something to show, so the seeded set has to span
     // both the matching and the abstaining recommendation kinds.
     const recommendations = new Set(
-      seededReviewCases.map((c) => c.systemRecommendation)
+      seededReviewCases.map((c) => c.systemRecommendation),
     );
     expect(recommendations.has("DO_NOT_MERGE")).toBe(true);
     expect(recommendations.has("REVIEW")).toBe(true);
@@ -45,7 +53,9 @@ describe("B1: shared review queue store", () => {
 
     expect(queue).toHaveLength(3);
     // Newest first (prepended), but exactly the 3 sent inputs.
-    expect(queue.map((c) => c.materialA.rawDescription)).toEqual([...SEND_INPUTS].reverse());
+    expect(queue.map((c) => c.materialA.rawDescription)).toEqual(
+      [...SEND_INPUTS].reverse(),
+    );
     expect(queue.every((c) => !seededIds.includes(c.id))).toBe(true);
     expect(queue.every((c) => c.status === "PENDING")).toBe(true);
     expect(new Set(queue.map((c) => c.id)).size).toBe(3);
@@ -57,7 +67,9 @@ describe("B1: shared review queue store", () => {
 
     const queue = reviewQueueStore.getSnapshot();
     expect(queue).toHaveLength(4);
-    expect(queue[0].materialA.rawDescription).toBe("MS PLATE 12MM HOT ROLLED IS 2062");
+    expect(queue[0].materialA.rawDescription).toBe(
+      "MS PLATE 12MM HOT ROLLED IS 2062",
+    );
   });
 
   it("dispatch from the Review page mutates the same shared store", () => {
@@ -70,16 +82,48 @@ describe("B1: shared review queue store", () => {
 
     reviewQueueStore.reset();
     reviewQueueStore.enqueue(
-      buildReviewCase(resolveMaterialRecord(buildInputRecord(SEND_INPUTS[0]), materialRecords))
+      buildReviewCase(
+        resolveMaterialRecord(
+          buildInputRecord(SEND_INPUTS[0]),
+          materialRecords,
+        ),
+      ),
     );
     const id = reviewQueueStore.getSnapshot()[0].id;
     reviewQueueStore.dispatch(id, "OVERRIDDEN", "Confirmed by engineering.");
     expect(reviewQueueStore.getSnapshot()[0].status).toBe("OVERRIDDEN");
-    expect(reviewQueueStore.getSnapshot()[0].reviewerNote).toBe("Confirmed by engineering.");
+    expect(reviewQueueStore.getSnapshot()[0].reviewerNote).toBe(
+      "Confirmed by engineering.",
+    );
   });
 
   it("server snapshot stays the seeded array for hydration parity", () => {
     expect(reviewQueueStore.getServerSnapshot()).toBe(seededReviewCases);
     expect(reviewQueueStore.getSnapshot()).toBe(seededReviewCases);
+  });
+
+  it("reopens a decided case only with a reason and retains the complete decision trail", () => {
+    sendFromResolve(SEND_INPUTS[0]);
+    const id = reviewQueueStore.getSnapshot()[0].id;
+    reviewQueueStore.dispatch(id, "APPROVED", "Initial review.");
+    reviewQueueStore.reopen(id, " ");
+    expect(reviewQueueStore.getSnapshot()[0].status).toBe("APPROVED");
+    reviewQueueStore.reopen(id, "New engineering evidence.");
+    const reopened = reviewQueueStore.getSnapshot()[0];
+    expect(reopened.status).toBe("PENDING");
+    expect(reopened.reviewerDecisionAt).toBeUndefined();
+    expect(reopened.history?.map((entry) => entry.action)).toEqual([
+      "APPROVED",
+      "REOPENED",
+    ]);
+    expect(reopened.history?.[0].note).toBe("Initial review.");
+    reviewQueueStore.dispatch(
+      id,
+      "REJECTED",
+      "Preserve separate specifications.",
+    );
+    expect(
+      reviewQueueStore.getSnapshot()[0].history?.map((entry) => entry.action),
+    ).toEqual(["APPROVED", "REOPENED", "REJECTED"]);
   });
 });

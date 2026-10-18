@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   CounterfactualChange,
   CounterfactualResult,
-  ExtractionStep,
   ResolutionResult,
 } from "@/types/domain";
 import { applyCounterfactual, buildInputRecord } from "@/lib/material-dna/demo";
@@ -16,17 +15,6 @@ import {
 } from "@/hooks/use-review-queue";
 import { resolveWithReviewPolicy } from "@/lib/material-dna/matching/review-first";
 
-const STEPS: Omit<ExtractionStep, "status">[] = [
-  { index: 1, label: "Parsing material description" },
-  { index: 2, label: "Extracting engineering attributes" },
-  { index: 3, label: "Normalizing units and terminology" },
-  { index: 4, label: "Generating candidate materials" },
-  { index: 5, label: "Comparing engineering attributes" },
-  { index: 6, label: "Applying critical constraints" },
-  { index: 7, label: "Producing decision" },
-  { index: 8, label: "Building evidence trail" },
-];
-
 export function useResolver() {
   const [description, setDescription] = useState<string>(
     demoScenarios[0].input,
@@ -34,26 +22,26 @@ export function useResolver() {
   const [phase, setPhase] = useState<"idle" | "processing" | "complete">(
     "idle",
   );
-  const [steps, setSteps] = useState<ExtractionStep[]>(() =>
-    STEPS.map((s) => ({ ...s, status: "pending" as const })),
-  );
   const [result, setResult] = useState<ResolutionResult | null>(null);
   const [counterfactual, setCounterfactual] =
     useState<CounterfactualResult | null>(null);
   // Shared with the Review page via use-review-queue — not a private copy.
   const reviewQueue = useReviewQueue();
   const generation = useRef(0);
+  const requestController = useRef<AbortController | null>(null);
   const [referenceDescription, setReferenceDescription] = useState(
     "HEX BOLT M12 X 60 CLASS 10.9 ZP DIN 931",
   );
   const [useReference, setUseReference] = useState(false);
   const [conservative, setConservative] = useState(true);
+  const [denseRanking, setDenseRanking] = useState(false);
   const [durationMs, setDurationMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [context, setContext] = useState("");
   useEffect(
     () => () => {
       generation.current++;
+      requestController.current?.abort();
     },
     [],
   );
@@ -61,6 +49,7 @@ export function useResolver() {
   const runResolution = useCallback(
     async (inputText: string, scenario?: (typeof demoScenarios)[number]) => {
       const run = ++generation.current;
+      requestController.current?.abort();
       setError(null);
       if (!inputText.trim() || inputText.length > 2000) {
         setError("Enter a material description of 1–2,000 characters.");
@@ -78,12 +67,6 @@ export function useResolver() {
       setPhase("processing");
       setResult(null);
       setDurationMs(null);
-      setSteps(
-        STEPS.map((step, i) => ({
-          ...step,
-          status: i === 0 ? "active" : "pending",
-        })),
-      );
       await new Promise<void>((done) =>
         window.requestAnimationFrame(() => done()),
       );
@@ -114,12 +97,34 @@ export function useResolver() {
                 !f.excludeSourceCodes.includes(r.sourceCode)),
           );
         }
-        const computed = resolveWithReviewPolicy(
-          input,
-          corpus,
-          null,
-          conservative,
-        );
+        let computed: ResolutionResult;
+        if (denseRanking && !scenario) {
+          const controller = new AbortController();
+          requestController.current = controller;
+          const timeout = window.setTimeout(() => controller.abort(), 25000);
+          try {
+            const response = await fetch("/api/resolve", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              signal: controller.signal,
+              body: JSON.stringify({
+                description: inputText,
+                ...(useReference ? { referenceDescription } : {}),
+                policy: conservative ? "review-first" : "submitted",
+                embeddings: true,
+              }),
+            });
+            if (!response.ok)
+              throw new Error("The server could not resolve this description.");
+            computed = await response.json();
+          } finally {
+            window.clearTimeout(timeout);
+            if (requestController.current === controller)
+              requestController.current = null;
+          }
+        } else {
+          computed = resolveWithReviewPolicy(input, corpus, null, conservative);
+        }
         if (generation.current !== run) return;
         setContext(
           scenario
@@ -129,17 +134,17 @@ export function useResolver() {
               : `Full reference corpus · ${corpus.length} records`,
         );
         setDurationMs(Math.max(1, Math.round(performance.now() - started)));
-        setSteps(STEPS.map((step) => ({ ...step, status: "complete" })));
         setResult(computed);
         setPhase("complete");
       } catch {
+        if (generation.current !== run) return;
         setError(
-          "Unable to resolve this description. Check the input and try again.",
+          "Unable to complete resolution. Check the connection or turn off MiniLM ranking and try again.",
         );
         setPhase("idle");
       }
     },
-    [referenceDescription, useReference, conservative],
+    [referenceDescription, useReference, conservative, denseRanking],
   );
 
   const handleResolve = useCallback(() => {
@@ -158,12 +163,12 @@ export function useResolver() {
   );
   const reset = useCallback(() => {
     generation.current++;
+    requestController.current?.abort();
     setPhase("idle");
     setResult(null);
     setCounterfactual(null);
     setError(null);
     setDurationMs(null);
-    setSteps(STEPS.map((step) => ({ ...step, status: "pending" })));
   }, []);
 
   const sendToReview = useCallback(() => {
@@ -214,13 +219,14 @@ export function useResolver() {
       setUseReference,
       conservative,
       setConservative,
+      denseRanking,
+      setDenseRanking,
       durationMs,
       error,
       context,
       description,
       setDescription,
       phase,
-      steps,
       result,
       counterfactual,
       reviewQueue,
@@ -235,12 +241,12 @@ export function useResolver() {
       referenceDescription,
       useReference,
       conservative,
+      denseRanking,
       durationMs,
       error,
       context,
       description,
       phase,
-      steps,
       result,
       counterfactual,
       reviewQueue,
