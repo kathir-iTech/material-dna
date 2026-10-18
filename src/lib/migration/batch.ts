@@ -1,7 +1,15 @@
 import type { MigrationResolveResult } from "@/types/domain";
-import { CONSTRAINTS_VERSION, ENGINE_VERSION_NUMBER, PARSER_VERSION } from "@/lib/material-dna/config";
+import {
+  CONSTRAINTS_VERSION,
+  ENGINE_VERSION_NUMBER,
+  PARSER_VERSION,
+} from "@/lib/material-dna/config";
 import { materialRecords } from "@/data/demo";
-import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
+import { buildInputRecord } from "@/lib/material-dna/demo";
+import {
+  resolveWithReviewPolicy,
+  REVIEW_POLICY_VERSION,
+} from "@/lib/material-dna/matching/review-first";
 import type { EmbeddingSignal } from "@/lib/material-dna/matching";
 
 // ---------------------------------------------------------------------------
@@ -19,14 +27,20 @@ export interface BatchResolveInput {
 
 export function resolveBatchRows(
   inputs: BatchResolveInput[],
-  signal?: EmbeddingSignal | null
+  signal?: EmbeddingSignal | null,
+  conservative = false,
 ): {
   results: MigrationResolveResult[];
   versions: { engine: string; parser: string; constraints: string };
 } {
   const results = inputs.map((input): MigrationResolveResult => {
     const record = buildInputRecord(input.description);
-    const result = resolveMaterialRecord(record, materialRecords, signal);
+    const result = resolveWithReviewPolicy(
+      record,
+      materialRecords,
+      signal,
+      conservative,
+    );
     return {
       rowId: input.rowId,
       decision: result.decision,
@@ -40,7 +54,9 @@ export function resolveBatchRows(
   return {
     results,
     versions: {
-      engine: ENGINE_VERSION_NUMBER,
+      engine: conservative
+        ? `${ENGINE_VERSION_NUMBER} / ${REVIEW_POLICY_VERSION}`
+        : ENGINE_VERSION_NUMBER,
       parser: PARSER_VERSION,
       constraints: CONSTRAINTS_VERSION,
     },

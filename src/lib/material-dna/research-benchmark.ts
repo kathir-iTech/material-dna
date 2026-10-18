@@ -45,7 +45,12 @@ export interface BenchmarkRun {
   vetoCorrect: number;
   vetoTotal: number;
   falseVetoes: number;
-  decisions: { MATCH: number; DO_NOT_MERGE: number; NO_MATCH: number; REVIEW: number };
+  decisions: {
+    MATCH: number;
+    DO_NOT_MERGE: number;
+    NO_MATCH: number;
+    REVIEW: number;
+  };
 }
 
 /** Pre-fusion baseline: lexical similarity only, no dense retrieval. */
@@ -74,14 +79,14 @@ export const LEXICAL_BASELINE: BenchmarkRun = {
 };
 
 /**
- * The shipped configuration: lexical scoring fused with the dense-retrieval
+ * The submitted configuration: lexical scoring fused with the dense-retrieval
  * signal. This is the headline figure, matching the submitted deck.
  */
 export const FUSED_SIGNAL: BenchmarkRun = {
   id: "fused",
   label: "Fused dense-retrieval signal",
   source: "benchmark/expected-embed.txt",
-  note: "shipped configuration",
+  note: "historical submitted configuration",
   f1: 0.815,
   precision: 0.803,
   recall: 0.828,

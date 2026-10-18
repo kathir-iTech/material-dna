@@ -16,11 +16,15 @@ import {
 } from "../config";
 import { extractMaterialDNA, listUnknownAttributes } from "../extraction";
 import { normalizeDescription } from "../normalization";
-import { generateCandidates, type ScoredCandidate, type EmbeddingSignal } from "../matching";
+import {
+  generateCandidates,
+  type ScoredCandidate,
+  type EmbeddingSignal,
+} from "../matching";
 import { evaluateConstraints, criticalConflicts } from "../constraints";
 
 function nowStamp(): string {
-  return new Date().toTimeString().slice(0, 8);
+  return new Date().toISOString();
 }
 
 function makeAudit(label: string, detail?: string): AuditEvent {
@@ -32,7 +36,7 @@ export function buildInputRecord(description: string): MaterialRecord {
   const dna = extractMaterialDNA(trimmed);
   return {
     id: `INPUT-${snapshotId(trimmed)}`,
-    source: "CPSE-A",
+    source: "User Input",
     sourceCode: "INPUT-001",
     rawDescription: trimmed,
     normalizedDescription: normalizeDescription(trimmed),
@@ -56,7 +60,7 @@ function snapshotId(desc: string): string {
 export function resolveMaterialRecord(
   input: MaterialRecord,
   corpus: MaterialRecord[],
-  signal?: EmbeddingSignal | null
+  signal?: EmbeddingSignal | null,
 ): ResolutionResult {
   const audit: AuditEvent[] = [];
   audit.push(makeAudit("Resolution started", input.sourceCode));
@@ -64,19 +68,32 @@ export function resolveMaterialRecord(
   const dna = input.dna;
   const definedFields = Object.keys(dna).filter((k) => {
     const attr = dna[k as keyof MaterialDNA];
-    return typeof attr === "object" && attr !== null && "value" in attr && attr.value !== undefined;
+    return (
+      typeof attr === "object" &&
+      attr !== null &&
+      "value" in attr &&
+      attr.value !== undefined &&
+      attr.value !== null &&
+      (Array.isArray(attr.value)
+        ? attr.value.length > 0
+        : String(attr.value).trim().length > 0)
+    );
   }).length;
-  audit.push(makeAudit("Attributes extracted", `${definedFields} fields scored`));
+  audit.push(
+    makeAudit("Attributes extracted", `${definedFields} fields scored`),
+  );
 
   const activeSignal = signal ?? undefined;
   const scored = generateCandidates(input, corpus, activeSignal);
-  audit.push(makeAudit("Candidates generated", `${scored.length} candidates scored`));
+  audit.push(
+    makeAudit("Candidates generated", `${scored.length} candidates scored`),
+  );
   if (activeSignal) {
     audit.push(
       makeAudit(
         "Dense retrieval signal fused",
-        "transformers.js cosine - ranking only; critical-conflict veto unaffected"
-      )
+        "transformers.js cosine - ranking only; critical-conflict veto unaffected",
+      ),
     );
   }
 
@@ -94,9 +111,16 @@ export function resolveMaterialRecord(
   if (decision === "DO_NOT_MERGE") {
     audit.push(makeAudit("Candidate rejected", reason));
   } else if (decision === "REVIEW") {
-    audit.push(makeAudit("Case sent to human review", "Abstained on insufficient evidence"));
+    audit.push(
+      makeAudit(
+        "Case sent to human review",
+        "Abstained on insufficient evidence",
+      ),
+    );
   } else if (decision === "MATCH") {
-    audit.push(makeAudit("Match recommended", selected?.targetRecord.sourceCode));
+    audit.push(
+      makeAudit("Match recommended", selected?.targetRecord.sourceCode),
+    );
   }
 
   audit.push(makeAudit("Evidence trail built", `${input.id}`));
@@ -121,15 +145,21 @@ export function resolveMaterialRecord(
 }
 
 function stamp(): string {
-  return Date.now().toString(36).toUpperCase().slice(-6);
+  return (
+    globalThis.crypto?.randomUUID?.().slice(0, 12).toUpperCase() ??
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`.toUpperCase()
+  );
 }
 
 function riskFrom(
   dna: MaterialDNA,
   candidate: ScoredCandidate | null,
-  decision: DecisionStatus
+  decision: DecisionStatus,
 ): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
-  if (decision === "DO_NOT_MERGE" || (candidate && candidate.criticalConflicts.length > 0)) {
+  if (
+    decision === "DO_NOT_MERGE" ||
+    (candidate && candidate.criticalConflicts.length > 0)
+  ) {
     return "CRITICAL";
   }
   if (decision === "REVIEW") {
@@ -144,7 +174,10 @@ function riskFrom(
 // Review queue mutation (demo-level, in-memory)
 // ---------------------------------------------------------------------------
 
-export function createReviewCase(input: MaterialRecord, corpus: MaterialRecord[]): ReviewCase {
+export function createReviewCase(
+  input: MaterialRecord,
+  corpus: MaterialRecord[],
+): ReviewCase {
   const result = resolveMaterialRecord(input, corpus);
   const candidate = result.selectedCandidate;
   return {
@@ -167,20 +200,63 @@ export function createReviewCase(input: MaterialRecord, corpus: MaterialRecord[]
 export function applyCounterfactual(
   input: MaterialRecord,
   candidate: MaterialRecord,
-  change: CounterfactualChange
-): { left: MaterialRecord; right: MaterialRecord; constraintsActivated: string[] } {
-  const leftDNA = mutateDNA(input.dna, change, true);
-  const rightDNA = mutateDNA(candidate.dna, change, false);
-  const leftRec: MaterialRecord = { ...input, dna: leftDNA };
-  const rightRec: MaterialRecord = { ...candidate, dna: rightDNA };
-  const constraints = evaluateConstraints(leftDNA, rightDNA);
-  const activated = criticalConflicts(constraints).map((c) => c.rule);
-
-  // Force the mutated side to use the constant value for display and matching.
-  return { left: leftRec, right: rightRec, constraintsActivated: activated };
+  change: CounterfactualChange,
+): {
+  left: MaterialRecord;
+  right: MaterialRecord;
+  constraintsActivated: string[];
+} {
+  const rightDNA = mutateDNA(candidate.dna, change, true);
+  const attr = candidate.dna[change.attribute] as {
+    evidence?: { span: string } | null;
+  };
+  const original = candidate.rawDescription
+    .toLowerCase()
+    .includes(change.original.toLowerCase())
+    ? change.original
+    : attr.evidence?.span;
+  let raw = candidate.rawDescription;
+  if (original) {
+    const at = raw.toLowerCase().indexOf(original.toLowerCase());
+    if (at >= 0)
+      raw =
+        raw.slice(0, at) + change.modified + raw.slice(at + original.length);
+  }
+  const modified = rightDNA[change.attribute] as {
+    evidence?: {
+      sourceText: string;
+      span: string;
+      normalizedValue: string;
+      confidence: number;
+      extractor: string;
+    } | null;
+  };
+  modified.evidence = {
+    sourceText: raw,
+    span: change.modified,
+    normalizedValue: change.modified,
+    confidence: 0.97,
+    extractor: "counterfactual:attribute-override",
+  };
+  const rightRec: MaterialRecord = {
+    ...candidate,
+    dna: rightDNA,
+    rawDescription: raw,
+    normalizedDescription: normalizeDescription(raw),
+  };
+  const constraints = evaluateConstraints(input.dna, rightDNA);
+  return {
+    left: input,
+    right: rightRec,
+    constraintsActivated: criticalConflicts(constraints).map((c) => c.rule),
+  };
 }
 
-function mutateDNA(dna: MaterialDNA, change: CounterfactualChange, apply: boolean): MaterialDNA {
+function mutateDNA(
+  dna: MaterialDNA,
+  change: CounterfactualChange,
+  apply: boolean,
+): MaterialDNA {
   if (!apply) {
     return { ...dna };
   }
@@ -198,20 +274,27 @@ function mutateDNA(dna: MaterialDNA, change: CounterfactualChange, apply: boolea
 export function runCounterfactual(
   result: ResolutionResult,
   corpus: MaterialRecord[],
-  change: CounterfactualChange
+  change: CounterfactualChange,
 ): CounterfactualResult {
   const candidate = result.selectedCandidate?.targetRecord;
-  if (!candidate) return { before: result, after: null as unknown as ResolutionResult, changed: false, constraintsActivated: [], beforeDecision: "REVIEW", afterDecision: "REVIEW" };
+  if (!candidate)
+    return {
+      before: result,
+      after: null as unknown as ResolutionResult,
+      changed: false,
+      constraintsActivated: [],
+      beforeDecision: "REVIEW",
+      afterDecision: "REVIEW",
+    };
 
   const { left, right, constraintsActivated } = applyCounterfactual(
     result.input,
-    candidate,
-    change
+    corpus.find((r) => r.id === candidate.id) ?? candidate,
+    change,
   );
 
   // Re-score with mutated DNA using existing matching pipeline.
-  const tmpCorpus = corpus.map((r) => (r.id === right.id ? right : r));
-  const after = resolveMaterialRecord(left, tmpCorpus);
+  const after = resolveMaterialRecord(left, [right]);
 
   return {
     before: result,

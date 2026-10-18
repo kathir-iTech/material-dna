@@ -1,8 +1,14 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { ResolutionResult, ReviewCase } from "@/types/domain";
 import { seededReviewCases } from "@/data/demo";
+import {
+  isReviewSnapshot,
+  onWorkspaceChange,
+  readWorkspace,
+  writeWorkspace,
+} from "@/lib/browser-workspace";
 import { buildInputRecord } from "@/lib/material-dna/demo";
 
 // ---------------------------------------------------------------------------
@@ -20,6 +26,7 @@ let nextReviewSeq = 2000;
 const listeners = new Set<() => void>();
 
 function emit(): void {
+  writeWorkspace("reviews", cases.slice(0, 100));
   for (const l of listeners) l();
 }
 
@@ -39,27 +46,61 @@ function getServerSnapshot(): ReviewCase[] {
 }
 
 export const reviewQueueStore = {
+  hydrate(): void {
+    const saved = readWorkspace("reviews", isReviewSnapshot);
+    if (!saved) return;
+    cases = saved;
+    seededReplaced = !saved.every((c) =>
+      seededReviewCases.some((seed) => seed.id === c.id),
+    );
+    nextReviewSeq = Math.max(
+      2000,
+      ...saved
+        .map((c) => Number(c.id.replace("REVIEW-", "")) + 1)
+        .filter(Number.isFinite),
+    );
+    for (const listener of listeners) listener();
+  },
   subscribe,
   getSnapshot,
   getServerSnapshot,
 
   /** First real case drops the seeded placeholders; later cases prepend. */
   enqueue(reviewCase: ReviewCase): void {
+    if (
+      reviewCase.resolutionId &&
+      cases.some((c) => c.resolutionId === reviewCase.resolutionId)
+    )
+      return;
     cases = seededReplaced ? [reviewCase, ...cases] : [reviewCase];
     seededReplaced = true;
     emit();
   },
 
-  dispatch(id: string, action: "APPROVED" | "REJECTED" | "OVERRIDDEN", note?: string): void {
+  dispatch(
+    id: string,
+    action: "APPROVED" | "REJECTED" | "OVERRIDDEN",
+    note?: string,
+  ): void {
+    if (action === "OVERRIDDEN" && !note?.trim()) return;
     cases = cases.map((c) =>
-      c.id === id
+      c.id === id && c.status === "PENDING"
         ? {
             ...c,
             status: action,
-            reviewerNote: note && note.trim().length > 0 ? note : c.reviewerNote,
+            reviewerNote:
+              note && note.trim().length > 0 ? note : c.reviewerNote,
             reviewerDecisionAt: new Date().toISOString(),
+            history: [
+              ...(c.history ?? []),
+              {
+                at: new Date().toISOString(),
+                action,
+                note: note?.trim() || undefined,
+              },
+            ],
           }
-        : c
+        : c,
     );
     emit();
   },
@@ -79,6 +120,11 @@ export function buildReviewCase(result: ResolutionResult): ReviewCase {
   const candidate = result.selectedCandidate?.targetRecord ?? null;
   return {
     id: `REVIEW-${nextReviewSeq++}`,
+    resolutionId: result.caseId,
+    engineVersion: result.engineVersion,
+    parserVersion: result.parserVersion,
+    constraintVersion: result.constraintVersion,
+    constraints: result.selectedCandidate?.constraints ?? [],
     materialA: input,
     materialB: candidate ?? input,
     risk: result.risk,
@@ -92,9 +138,13 @@ export function buildReviewCase(result: ResolutionResult): ReviewCase {
 
 /** Shared queue state for any component (Resolve, Review, future consumers). */
 export function useReviewQueue(): ReviewCase[] {
+  useEffect(() => {
+    reviewQueueStore.hydrate();
+    return onWorkspaceChange("reviews", () => reviewQueueStore.hydrate());
+  }, []);
   return useSyncExternalStore(
     reviewQueueStore.subscribe,
     reviewQueueStore.getSnapshot,
-    reviewQueueStore.getServerSnapshot
+    reviewQueueStore.getServerSnapshot,
   );
 }

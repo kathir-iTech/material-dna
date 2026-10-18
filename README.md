@@ -20,7 +20,7 @@ Ministry of Petroleum &amp; Natural Gas
 ---
 
 **Material DNA** takes free-text industrial material descriptions from different CPSEs and legacy
-ERP exports, works out the *engineering meaning* of each one, and decides — pair by pair — whether
+ERP exports, works out the _engineering meaning_ of each one, and decides — pair by pair — whether
 they describe the same physical material or must be kept apart.
 
 It is built around one idea that generic deduplication tools get wrong:
@@ -30,11 +30,11 @@ It is built around one idea that generic deduplication tools get wrong:
 > So similarity is only ever allowed to **rank** candidates. The **decision** belongs to
 > engineering constraints.
 
-That is what the demo's second button is for — the *same* sentence, run twice:
+That is what the demo's second button is for — the _same_ sentence, run twice:
 
-| Input | Corpus candidate | Verdict |
-| --- | --- | --- |
-| `HEX BOLT M12 X 60 8.8 ZP DIN 931` | CPSE-B record, grade **8.8** | **MATCH** |
+| Input                              | Corpus candidate                  | Verdict          |
+| ---------------------------------- | --------------------------------- | ---------------- |
+| `HEX BOLT M12 X 60 8.8 ZP DIN 931` | CPSE-B record, grade **8.8**      | **MATCH**        |
 | `HEX BOLT M12 X 60 8.8 ZP DIN 931` | Legacy ERP record, grade **10.9** | **DO_NOT_MERGE** |
 
 Identical text. Different property class. Merging them would mis-specify the bolt's torque rating —
@@ -46,12 +46,12 @@ so the engine refuses, and shows the conflicting attribute as the reason.
 
 ## Screenshots
 
-| | |
-| --- | --- |
-| <img src="./docs/screenshots/02-resolve-veto.png" alt="Resolve page showing a DO NOT MERGE verdict caused by an engineering-critical grade conflict" width="100%" /> | <img src="./docs/screenshots/03-graph.png" alt="Identity graph page showing canonical identity clusters and held-out vetoed proposals" width="100%" /> |
-| **`/` · the veto.** Same input as the left neighbour, but the nearest candidate is grade 10.9 — blocked. | **`/graph` · constraint-aware clusters.** 18 identities from 98 records; 24 high-similarity pairs held out by the veto instead of merged. |
-| <img src="./docs/screenshots/04-materials.png" alt="Materials page listing canonical material identities with their linked source records" width="100%" /> | <img src="./docs/screenshots/05-review.png" alt="Review queue page with risk filters, human approval workflow, and system recommendation column" width="100%" /> |
-| **`/materials` · canonical identities** and the legacy codes each one absorbs. | **`/review` · human-in-the-loop queue.** Every AI verdict a human can approve, reject, or override — with an audit note. |
+|                                                                                                                                                                      |                                                                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="./docs/screenshots/02-resolve-veto.png" alt="Resolve page showing a DO NOT MERGE verdict caused by an engineering-critical grade conflict" width="100%" /> | <img src="./docs/screenshots/03-graph.png" alt="Identity graph page showing canonical identity clusters and held-out vetoed proposals" width="100%" />           |
+| **`/` · the veto.** Same input as the left neighbour, but the nearest candidate is grade 10.9 — blocked.                                                             | **`/graph` · constraint-aware clusters.** 18 identities from 98 records; 24 high-similarity pairs held out by the veto instead of merged.                        |
+| <img src="./docs/screenshots/04-materials.png" alt="Materials page listing canonical material identities with their linked source records" width="100%" />           | <img src="./docs/screenshots/05-review.png" alt="Review queue page with risk filters, human approval workflow, and system recommendation column" width="100%" /> |
+| **`/materials` · canonical identities** and the legacy codes each one absorbs.                                                                                       | **`/review` · human-in-the-loop queue.** Every AI verdict a human can approve, reject, or override — with an audit note.                                         |
 
 ---
 
@@ -100,13 +100,13 @@ Four verdicts — `MATCH`, `DO_NOT_MERGE`, `REVIEW`, `NO_MATCH` — from three c
   similarity fuses lexical, character-n-gram, TF-IDF and (server-side only) an optional dense
   embedding signal at weight `0.15`. An **assignment rank** orders true duplicates ahead of
   look-alikes so a near-miss grade never outranks the real match.
-- **decision** — critical-constraint evaluation runs *first and independently* of score. Any
+- **decision** — critical-constraint evaluation runs _first and independently_ of score. Any
   critical conflict (grade, dimensions, material type, electrical rating) returns `DO_NOT_MERGE`
   regardless of similarity. Thresholds: `MATCH ≥ 85`, `REVIEW ≥ 65`, `NO_MATCH` below, and fewer
   than 3 defined attributes always abstains to `REVIEW`.
 
 Clustering is **constraint-aware**: candidate edges above the review threshold are unioned, but a
-vetoed pair refuses the merge instead of merging *through* it — which is what stops a
+vetoed pair refuses the merge instead of merging _through_ it — which is what stops a
 similarity-only chain from fusing three records where the outer two are incompatible.
 
 ---
@@ -116,16 +116,16 @@ similarity-only chain from fusing three records where the outer two are incompat
 Status is against the code in this repository, not against intent. **Partial** means the
 demonstrable path works but the production requirement is not met.
 
-| # | PS26099 capability | Status | Evidence in this repo |
-| --- | --- | --- | --- |
-| 1 | AI-based matching of descriptions | **Covered** | `src/lib/material-dna/matching/` — scoring, constraint veto, assignment rank; `/api/resolve`, `/api/resolve-batch` |
-| 2 | Standardization & intelligent classification | **Partial** | Attribute + type extraction is real (`extraction/`), but there is **no** mapping to an external taxonomy (UNSPSC / MESC / NATO codification is not implemented) |
-| 3 | Duplicate / near-duplicate / equivalent detection | **Covered** | `matching/clustering.ts` — 18 identities over 98 records, 24 vetoed pairs held out, transitive chains broken by constraints |
-| 4 | Common National Material Code | **Partial** | Structured `MDNA-…` canonical IDs are generated (`canonical-id.ts`), but they are **prototype labels, not an official national code** — no gazette/NIC authority exists here |
-| 5 | CPSE code mapping & legacy migration | **Covered** | `/migrate` bulk CSV pipeline (parse → resolve → flag → approve/rollback), `legacyMappings` per canonical identity, `/api/migrate/parse` |
-| 6 | Material master dashboard & analytics | **Partial** | Corpus, cluster, conflict and benchmark statistics are computed and displayed, but only over the 98-record synthetic corpus — no persistent analytics over real data |
-| 7 | Audit trail & governance | **Partial** | Every mutation appends an `AuditEvent` pinned to engine / parser / constraint versions, rendered on `/` and `/migrate` — but state is in-memory: no persistence, no RBAC, no sign-off |
-| 8 | SAP / ERP integration | **Not built** | No connector exists. `Legacy ERP` is only a *source name* in synthetic seed data |
+| #   | PS26099 capability                                | Status        | Evidence in this repo                                                                                                                                                                                                      |
+| --- | ------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | AI-based matching of descriptions                 | **Covered**   | `src/lib/material-dna/matching/` — scoring, constraint veto, assignment rank; `/api/resolve`, `/api/resolve-batch`                                                                                                         |
+| 2   | Standardization & intelligent classification      | **Partial**   | Attribute + type extraction is real (`extraction/`), but there is **no** mapping to an external taxonomy (UNSPSC / MESC / NATO codification is not implemented)                                                            |
+| 3   | Duplicate / near-duplicate / equivalent detection | **Covered**   | `matching/clustering.ts` — 18 identities over 98 records, 24 vetoed pairs held out, transitive chains broken by constraints                                                                                                |
+| 4   | Common National Material Code                     | **Partial**   | Structured `MDNA-…` canonical IDs are generated (`canonical-id.ts`), but they are **prototype labels, not an official national code** — no gazette/NIC authority exists here                                               |
+| 5   | CPSE code mapping & legacy migration              | **Covered**   | `/migrate` bulk CSV pipeline (parse → resolve → flag → approve/rollback), `legacyMappings` per canonical identity, `/api/migrate/parse`                                                                                    |
+| 6   | Material master dashboard & analytics             | **Partial**   | Corpus, cluster, conflict and benchmark statistics are computed and displayed, but only over the 98-record synthetic corpus — no persistent analytics over real data                                                       |
+| 7   | Audit trail & governance                          | **Partial**   | Every mutation appends an `AuditEvent` pinned to engine / parser / constraint versions, rendered on `/` and `/migrate` — browser-local snapshots now survive refreshes; no shared database, RBAC or institutional sign-off |
+| 8   | SAP / ERP integration                             | **Not built** | No connector exists. `Legacy ERP` is only a _source name_ in synthetic seed data                                                                                                                                           |
 
 ---
 
@@ -139,15 +139,15 @@ Reproducible harness in [`benchmark/bench.ts`](./benchmark/bench.ts); recorded r
 [`baseline-2026-09-29.md`](./benchmark/baseline-2026-09-29.md). Pairwise: A as input, B as the sole
 candidate, confusion matrix over decided pairs (`REVIEW` counts as an abstention).
 
-| Metric | Lexical only | Dense signal fused |
-| --- | --- | --- |
-| Precision (`MATCH`) | 0.800 | 0.803 |
-| Recall (`MATCH`) | 0.825 | 0.828 |
-| **F1 (`MATCH`)** | **0.813** | **0.815** |
-| Abstentions (`REVIEW`) | 70 / 200 (35.0%) | 70 / 200 (35.0%) |
-| `DO_NOT_MERGE` verdicts | 64 | 64 (**identical set**) |
-| Veto precision (on true non-matches) | 84.4% (54 / 64) | 84.4% (54 / 64) |
-| False vetoes (true matches blocked) | 10 | 10 |
+| Metric                               | Lexical only     | Dense signal fused     |
+| ------------------------------------ | ---------------- | ---------------------- |
+| Precision (`MATCH`)                  | 0.800            | 0.803                  |
+| Recall (`MATCH`)                     | 0.825            | 0.828                  |
+| **F1 (`MATCH`)**                     | **0.813**        | **0.815**              |
+| Abstentions (`REVIEW`)               | 70 / 200 (35.0%) | 69 / 200 (34.5%)       |
+| `DO_NOT_MERGE` verdicts              | 64               | 64 (**identical set**) |
+| Veto precision (on true non-matches) | 84.4% (54 / 64)  | 84.4% (54 / 64)        |
+| False vetoes (true matches blocked)  | 10               | 10                     |
 
 The dense signal deliberately changes **ranking only**: the vetoed set and the false-veto count are
 identical in both columns. That is the design invariant, and it is asserted in
@@ -155,19 +155,19 @@ identical in both columns. That is the design invariant, and it is asserted in
 
 ### Corpus (`src/lib/material-dna/dataset-stats.ts`, `matching/clustering.ts`)
 
-| Measure | Value |
-| --- | --- |
-| Records | 98 |
-| Sources | 6 — CPSE-A 32, CPSE-B 27, CPSE-C 19, Supplier Catalog 10, Legacy ERP 9, Shop 1 |
-| Canonical identities / clusters | 18 |
-| Records placed in a cluster | 40 |
-| `MATCH` edges | 26 |
-| Held-out (vetoed) proposals | 24 |
-| Cluster size distribution | 15 pairs, 2 triples, 1 quad, **0 singletons** |
-| Candidate links (score ≥ review threshold) | 32 |
-| Critical conflicts correctly blocked | 68 |
-| Seeded review cases | 6 (4 pending) |
-| Tests | **150** across 7 files |
+| Measure                                    | Value                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------ |
+| Records                                    | 98                                                                             |
+| Sources                                    | 6 — CPSE-A 32, CPSE-B 27, CPSE-C 19, Supplier Catalog 10, Legacy ERP 9, Shop 1 |
+| Canonical identities / clusters            | 18                                                                             |
+| Records placed in a cluster                | 40                                                                             |
+| `MATCH` edges                              | 26                                                                             |
+| Held-out (vetoed) proposals                | 24                                                                             |
+| Cluster size distribution                  | 15 pairs, 2 triples, 1 quad, **0 singletons**                                  |
+| Candidate links (score ≥ review threshold) | 32                                                                             |
+| Critical conflicts correctly blocked       | 68                                                                             |
+| Seeded review cases                        | 6 (4 pending)                                                                  |
+| Tests                                      | **188 passed, 1 model test skipped** across 14 files                           |
 
 > **Benchmark input.** The 200 labelled pairs are committed at
 > [`benchmark/data/material-pairs-labeled.csv`](./benchmark/data/material-pairs-labeled.csv), so the
@@ -179,33 +179,58 @@ identical in both columns. That is the design invariant, and it is asserted in
 
 ## Stack
 
-Everything here is real and in use — no service is listed that the app does not actually run.
+The following components are used by the prototype. Historical submitted metrics and new development comparisons are identified separately.
 
-| Layer | Choice | Note |
-| --- | --- | --- |
-| Framework | Next.js 15.5 (App Router) · React 19 | 6 pages, 7 API routes; static where possible |
-| Language | TypeScript 5.7, `strict` | `npm run typecheck` is clean |
-| Styling | Tailwind CSS 4 + `lucide-react` | No component library |
-| Retrieval | Own TF-IDF + character-n-gram, optional `@xenova/transformers` embeddings | Embeddings are **server-side only**, weight `0.15`, ranking-only |
-| Constraints | Hand-authored critical-attribute rules | Grade, dimensions, material type, electrical rating |
-| Spreadsheet I/O | SheetJS `xlsx` | Client-side CSV/XLSX import for `/migrate` |
-| Tests | Vitest 3 (150 tests, 7 files) | `npm test` |
-| Lint / types | ESLint 9 (`next lint`) · `tsc --noEmit` | Both clean |
-| Deploy | Vercel | `DEPLOYMENT.md` |
-| Database / auth / queue | **none** | Deliberately — see Limitations |
+| Layer                   | Choice                                                                    | Note                                                             |
+| ----------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Framework               | Next.js 15.5 (App Router) · React 19                                      | 6 pages, 7 API routes; static where possible                     |
+| Language                | TypeScript 5.7, `strict`                                                  | `npm run typecheck` is clean                                     |
+| Styling                 | Tailwind CSS 4 + `lucide-react`                                           | No component library                                             |
+| Retrieval               | Own TF-IDF + character-n-gram, optional `@xenova/transformers` embeddings | Embeddings are **server-side only**, weight `0.15`, ranking-only |
+| Constraints             | Hand-authored critical-attribute rules                                    | Grade, dimensions, material type, electrical rating              |
+| Spreadsheet I/O         | ExcelJS                                                                   | Server-side CSV/XLSX import for `/migrate`                       |
+| Tests                   | Vitest 3 (unit, API and regression suites)                                | `npm test`                                                       |
+| Lint / types            | ESLint 9 · `tsc --noEmit`                                                 | Both validated during development                                |
+| Deploy                  | Vercel                                                                    | `DEPLOYMENT.md`                                                  |
+| Database / auth / queue | **none**                                                                  | Deliberately — see Limitations                                   |
+
+See [the independent pilot protocol](./benchmark/PILOT_PROTOCOL.md) for the evidence needed before production-accuracy claims.
+
+## Workspace upgrade after the submitted PPT
+
+The application now provides a redesigned engineering workspace, a four-step jury walkthrough,
+direct pair comparison, interactive source/blocked-candidate graph inspection, browser-local
+review and batch restoration, and downloadable evidence and CSV registers. A local pilot-value
+calculator makes assumptions explicit; its output is illustrative, not measured savings.
+
+The original engine and recorded F1 0.813 lexical / 0.815 fused results remain identifiable.
+The optional **review-first-v1** layer adds explicit pressure, angle, mesh, hardness, actuation,
+manufacturing-process, composition, connection and flow-passage checks. On the same known
+200-pair synthetic regression set, lexical false MATCH recommendations changed from **13 to 0**,
+while automatic true-match coverage fell from **52% to 47%** and REVIEW increased from 70 to 74.
+Conditional F1 is **0.895**. This is **not independent validation**: the checks were developed after
+inspecting this dataset, and uncovered specifications can still cause errors.
+
+Run `npm run evaluate:policy` to reproduce the complete comparison and dataset fingerprint in
+[`benchmark/review-first-results.json`](./benchmark/review-first-results.json). Tests verify each
+published policy decision. The browser Resolve page enables this layer by default; the switch
+retains access to the submitted engine. API callers can pass `"policy":"submitted"`.
+
+CSV/XLSX imports use ExcelJS and no longer require the external SheetJS tarball. See
+[DEPLOYMENT.md](./DEPLOYMENT.md) for complete local validation, storage scope and Vercel deployment.
 
 ## Quick start
 
 ```bash
-npm install
+npm ci
 npm run dev            # http://localhost:3000
 ```
 
-Verification (all four were run against this tree):
+Verification:
 
 ```bash
-npm test               # 150 passed (7 files)
-npm run lint           # No ESLint warnings or errors
+npm test               # unit and regression tests (model test can skip offline)
+npm run lint           # ESLint source, tests, scripts and benchmark
 npm run typecheck      # tsc --noEmit, clean
 npm run build          # production build, 7 prerendered routes + 7 API routes
 ```
@@ -227,7 +252,7 @@ app/
       config.ts grade-equivalence.ts canonical-id.ts units.ts
       dataset-stats.ts clusters.ts
     types/domain.ts             shared domain model
-  tests/                        7 files, 150 tests
+  tests/                        unit, API and regression suites
   benchmark/                    labelled 200-pair CSV, harness, recorded reference outputs
   scripts/                      postinstall prune + Vercel output helpers
 ```
@@ -236,32 +261,32 @@ app/
 
 All seven endpoints, with the page that exercises each one:
 
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/api/resolve` | `POST` | Resolve one pair — the pipeline behind `/` |
-| `/api/resolve-batch` | `POST` | Resolve a parsed CSV batch — the pipeline behind `/migrate` |
-| `/api/migrate/parse` | `POST` | Validate and stage an uploaded CSV before batch resolve |
-| `/api/materials` | `GET` | Canonical identity list — feeds `/materials` and `/graph` |
-| `/api/materials/[id]` | `GET` | One identity with its linked legacy records and sources |
-| `/api/canonical` | `GET` | Canonical graph and per-identity lineage — feeds `/graph` |
-| `/api/reviews` | `GET` | Seeded review queue snapshot — feeds `/review` |
+| Endpoint              | Method | Purpose                                                     |
+| --------------------- | ------ | ----------------------------------------------------------- |
+| `/api/resolve`        | `POST` | Resolve one pair — the pipeline behind `/`                  |
+| `/api/resolve-batch`  | `POST` | Resolve a parsed CSV batch — the pipeline behind `/migrate` |
+| `/api/migrate/parse`  | `POST` | Validate and stage an uploaded CSV before batch resolve     |
+| `/api/materials`      | `GET`  | Canonical identity list — feeds `/materials` and `/graph`   |
+| `/api/materials/[id]` | `GET`  | One identity with its linked legacy records and sources     |
+| `/api/canonical`      | `GET`  | Canonical graph and per-identity lineage — feeds `/graph`   |
+| `/api/reviews`        | `GET`  | Seeded review queue snapshot — feeds `/review`              |
 
 ---
 
-## Limitations — what is *not* here
+## Limitations — what is _not_ here
 
 Stated plainly, because a judge should not have to discover these by reading the source.
 
 - **No SAP/ERP integration.** PS26099 capability 8 is not implemented at all. `Legacy ERP` is a
-  source *label* in seed data, not a connector.
-- **No database, auth, or persistence.** Review queue and migration state are in-memory module
-  state. **A page refresh loses every decision.** There is no multi-user story, no RBAC, no
-  sign-off, and the audit trail cannot be replayed after a restart.
+  source _label_ in seed data, not a connector.
+- **No shared database or authentication.** The latest 100 review cases and 5 migration batches
+  survive refreshes in browser-local storage when available. This is user-editable local demo
+  state, not multi-user governance, enforced RBAC or a signed institutional audit trail.
 - **The corpus is synthetic.** 98 hand-written descriptions. **No real CPSE or MESC data has been
   used**, so the benchmark measures the engine against labels derived from the same synthetic
   generator — treat F1 0.813 as an engineering regression baseline, not as real-world accuracy.
-- **The 200-pair benchmark is not reproducible from a fresh clone** without supplying the labelled
-  CSV yourself (see the caveat above).
+- **The committed 200-pair benchmark is reproducible**, but is a development regression set,
+  not an independently labelled or source-disjoint evaluation.
 - **No external taxonomy.** Canonical IDs are internal labels; there is no UNSPSC / MESC / NATO
   mapping and no official national code authority.
 - **Scoring is hand-tuned, not learned.** Thresholds and weights are fixed constants in

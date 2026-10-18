@@ -1,9 +1,13 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import type { MigrationParseError } from "@/types/domain";
-import { MAX_BATCH_ROWS, MAX_DESCRIPTION_LENGTH, MAX_FILE_BYTES } from "./limits";
+import {
+  MAX_BATCH_ROWS,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_FILE_BYTES,
+} from "./limits";
 
 // ---------------------------------------------------------------------------
-// File parsing for bulk migration. Server-side only (imports `xlsx`); used by
+// File parsing for bulk migration. Server-side only (imports `exceljs`); used by
 // /api/migrate/parse. Supports the two formats a real migration lands on:
 //   - .csv   (RFC 4180: quotes, escaped quotes, embedded commas/newlines, BOM)
 //   - .xlsx  (first worksheet, first row treated as the header)
@@ -108,7 +112,7 @@ function isBlankRow(cells: string[]): boolean {
 
 /** Shared row extraction for both formats. `matrix` row index = file row - 1. */
 export function rowsFromMatrix(matrix: string[][]): MigrationFileResult {
-  const headerIndex = matrix.findIndex((r) => !isBlankRow(r));
+  const headerIndex = matrix.findIndex((r) => r && !isBlankRow(r));
   if (headerIndex === -1) {
     return { ok: false, error: "File contains no rows." };
   }
@@ -175,10 +179,10 @@ function isXlsxBuffer(buf: Buffer): boolean {
   );
 }
 
-export function parseMigrationFile(
+export async function parseMigrationFile(
   fileName: string,
-  content: Buffer
-): MigrationFileResult {
+  content: Buffer,
+): Promise<MigrationFileResult> {
   if (content.length === 0) {
     return { ok: false, error: "File is empty." };
   }
@@ -194,20 +198,22 @@ export function parseMigrationFile(
 
   if (looksLikeXlsx) {
     try {
-      const wb = XLSX.read(content, { type: "buffer" });
-      const sheetName = wb.SheetNames[0];
-      if (!sheetName) {
-        return { ok: false, error: "Workbook has no worksheets." };
-      }
-      const matrix = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[sheetName], {
-        header: 1,
-        raw: false,
-        defval: "",
-        blankrows: true,
-      });
-      return rowsFromMatrix(
-        matrix.map((r) => (Array.isArray(r) ? r.map((c) => String(c ?? "")) : []))
+      const wb = new ExcelJS.Workbook();
+      await wb.xlsx.load(
+        content as unknown as Parameters<typeof wb.xlsx.load>[0],
       );
+      const sheet = wb.worksheets[0];
+      if (!sheet) return { ok: false, error: "Workbook has no worksheets." };
+      const matrix: string[][] = [];
+      // Preserve original row positions, including leading and internal blanks.
+      sheet.eachRow({ includeEmpty: true }, (row, number) => {
+        const cells: string[] = [];
+        row.eachCell({ includeEmpty: true }, (cell, column) => {
+          cells[column - 1] = cell.text;
+        });
+        matrix[number - 1] = cells;
+      });
+      return rowsFromMatrix(matrix);
     } catch {
       return { ok: false, error: "Not a readable .xlsx workbook." };
     }

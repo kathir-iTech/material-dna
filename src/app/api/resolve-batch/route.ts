@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resolveBatchRows, type BatchResolveInput } from "@/lib/migration/batch";
-import { MAX_BATCH_ROWS, MAX_DESCRIPTION_LENGTH } from "@/lib/migration/limits";
-import { corpusTexts, createEmbeddingSignal } from "@/lib/material-dna/matching/embeddings";
+import {
+  resolveBatchRows,
+  type BatchResolveInput,
+} from "@/lib/migration/batch";
+import {
+  MAX_RESOLVE_CHUNK_ROWS,
+  MAX_DESCRIPTION_LENGTH,
+} from "@/lib/migration/limits";
+import {
+  corpusTexts,
+  createEmbeddingSignal,
+} from "@/lib/material-dna/matching/embeddings";
 import { materialRecords } from "@/data/demo";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,13 +24,15 @@ export async function POST(request: NextRequest) {
     if (!rawRows || rawRows.length === 0) {
       return NextResponse.json(
         { error: "rows is required and must be a non-empty array." },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    if (rawRows.length > MAX_BATCH_ROWS) {
+    if (rawRows.length > MAX_RESOLVE_CHUNK_ROWS) {
       return NextResponse.json(
-        { error: `At most ${MAX_BATCH_ROWS} rows per batch.` },
-        { status: 400 }
+        {
+          error: `At most ${MAX_RESOLVE_CHUNK_ROWS} rows per request. Split larger batches into chunks.`,
+        },
+        { status: 400 },
       );
     }
 
@@ -39,7 +51,7 @@ export async function POST(request: NextRequest) {
           {
             error: `Row ${i + 1}: description must be 1-${MAX_DESCRIPTION_LENGTH} characters.`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
       inputs.push({ rowId, description });
@@ -47,16 +59,29 @@ export async function POST(request: NextRequest) {
 
     // Dense-retrieval signal over every unique description + the corpus;
     // budgeted so a big batch degrades to lexical-only instead of timing out.
-    const signal = await createEmbeddingSignal([
-      ...inputs.map((i) => i.description),
-      ...corpusTexts(materialRecords),
-    ]);
-    const { results, versions } = resolveBatchRows(inputs, signal);
+    const signal =
+      body?.embeddings === false
+        ? null
+        : await createEmbeddingSignal([
+            ...inputs.map((i) => i.description),
+            ...corpusTexts(materialRecords),
+          ]);
+    const { results, versions } = resolveBatchRows(
+      inputs,
+      signal,
+      body?.policy !== "submitted",
+    );
+    versions.engine += signal ? " / dense-ranking" : " / lexical-ranking";
     return NextResponse.json({ results, versions });
-  } catch {
+  } catch (error) {
+    if (error instanceof SyntaxError)
+      return NextResponse.json(
+        { error: "Request body must be valid JSON." },
+        { status: 400 },
+      );
     return NextResponse.json(
       { error: "Unable to resolve batch." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,43 +1,98 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
 import { canonicalMaterials } from "@/data/demo";
 import { Badge, DemoBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import type { CanonicalMaterial } from "@/types/domain";
+import { downloadFile, toCsv } from "@/lib/reports";
 import { cn } from "@/lib/utils";
 
 export function MaterialsClient() {
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(canonicalMaterials[0]?.canonicalId ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(
+    canonicalMaterials[0]?.canonicalId ?? null,
+  );
 
   const q = query.trim().toLowerCase();
   const filtered = q
     ? canonicalMaterials.filter((c) =>
-        [c.canonicalId, c.materialType, c.normalizedIdentity, ...c.legacyMappings.map((m) => m.legacyCode)]
+        [
+          c.canonicalId,
+          c.materialType,
+          c.normalizedIdentity,
+          ...c.legacyMappings.map((m) => m.legacyCode),
+        ]
           .join(" ")
           .toLowerCase()
-          .includes(q)
+          .includes(q),
       )
     : canonicalMaterials;
 
-  const selected = canonicalMaterials.find((c) => c.canonicalId === selectedId) ?? null;
+  const selected =
+    canonicalMaterials.find((c) => c.canonicalId === selectedId) ?? null;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-dna-text">Canonical Materials</h1>
+          <h1 className="text-xl font-bold text-dna-text">
+            Canonical Materials
+          </h1>
           <p className="mt-1 max-w-3xl text-sm text-dna-muted">
-            Proposed canonical identities linking equivalent source records across CPSEs.
+            Proposed canonical identities linking equivalent source records
+            across CPSEs.
           </p>
         </div>
         <DemoBadge />
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-dna-muted">
+          {filtered.length} identities ·{" "}
+          {filtered.reduce((sum, c) => sum + c.legacyMappings.length, 0)} linked
+          source records
+        </p>
+        <button
+          className="secondary-action"
+          onClick={() =>
+            downloadFile(
+              "material-dna-canonical-master.csv",
+              toCsv([
+                [
+                  "proposed_id",
+                  "material_type",
+                  "description",
+                  "source",
+                  "legacy_code",
+                  "source_description",
+                ],
+                ...filtered.flatMap((c) =>
+                  c.legacyMappings.map((m) => [
+                    c.canonicalId,
+                    c.materialType,
+                    c.normalizedDescription,
+                    m.source,
+                    m.legacyCode,
+                    m.sourceDescription,
+                  ]),
+                ),
+              ]),
+              "text/csv",
+            )
+          }
+        >
+          <Download aria-hidden="true" size={13} />
+          Export filtered master
+        </button>
+      </div>
       <div className="flex items-center gap-2 rounded border border-dna-border bg-dna-panel px-2.5 py-2">
-        <Search size={14} className="shrink-0 text-dna-faint" aria-hidden="true" />
+        <Search
+          size={14}
+          className="shrink-0 text-dna-faint"
+          aria-hidden="true"
+        />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -48,7 +103,9 @@ export function MaterialsClient() {
       </div>
 
       {filtered.length === 0 && (
-        <Card className="p-8 text-center text-sm text-dna-faint">No matching materials.</Card>
+        <Card className="p-8 text-center text-sm text-dna-faint">
+          No matching materials.
+        </Card>
       )}
 
       <Card className="overflow-hidden">
@@ -58,7 +115,9 @@ export function MaterialsClient() {
               <tr className="border-b border-dna-border text-[11px] uppercase tracking-wider text-dna-faint">
                 <th className="px-4 py-2 font-medium">Canonical ID</th>
                 <th className="px-2 py-2 font-medium">Material Type</th>
-                <th className="px-2 py-2 font-medium">Normalized Description</th>
+                <th className="px-2 py-2 font-medium">
+                  Normalized Description
+                </th>
                 <th className="px-2 py-2 font-medium">Attributes</th>
                 <th className="px-2 py-2 font-medium">Linked Legacy Codes</th>
                 <th className="px-2 py-2 font-medium">Sources</th>
@@ -72,23 +131,31 @@ export function MaterialsClient() {
                   tabIndex={0}
                   role="button"
                   onClick={() => setSelectedId(c.canonicalId)}
-                  onKeyDown={(e) => e.key === "Enter" && setSelectedId(c.canonicalId)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && setSelectedId(c.canonicalId)
+                  }
                   className={cn(
                     "cursor-pointer border-b border-dna-border/50 hover:bg-dna-panel2",
-                    selectedId === c.canonicalId && "bg-dna-cyan/5"
+                    selectedId === c.canonicalId && "bg-dna-cyan/5",
                   )}
                   aria-label={`Open canonical material ${c.canonicalId}`}
                 >
-                  <td className="px-4 py-2 font-mono text-dna-cyan">{c.canonicalId}</td>
+                  <td className="px-4 py-2 font-mono text-dna-cyan">
+                    {c.canonicalId}
+                  </td>
                   <td className="px-2 py-2 text-dna-text">{c.materialType}</td>
-                  <td className="max-w-64 truncate px-2 py-2 font-mono text-dna-muted">{c.normalizedIdentity}</td>
+                  <td className="max-w-64 truncate px-2 py-2 font-mono text-dna-muted">
+                    {c.normalizedIdentity}
+                  </td>
                   <td className="px-2 py-2 font-mono text-dna-muted">
                     {compactAttributes(c)}
                   </td>
                   <td className="px-2 py-2 font-mono text-dna-muted">
                     {c.legacyMappings.length} mappings
                   </td>
-                  <td className="px-2 py-2 text-dna-muted">{c.sources.join(", ")}</td>
+                  <td className="px-2 py-2 text-dna-muted">
+                    {c.sources.join(", ")}
+                  </td>
                   <td className="px-4 py-2">
                     <Badge tone="green">{c.status}</Badge>
                   </td>
@@ -99,9 +166,7 @@ export function MaterialsClient() {
         </div>
       </Card>
 
-      {selected && (
-        <CanonicalDetail canonical={selected} />
-      )}
+      {selected && <CanonicalDetail canonical={selected} />}
     </div>
   );
 }
@@ -131,9 +196,13 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
     <Card>
       <div className="border-b border-dna-border px-4 py-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-sm font-semibold text-dna-cyan">{canonical.canonicalId}</h2>
+          <h2 className="text-sm font-semibold text-dna-cyan">
+            {canonical.canonicalId}
+          </h2>
           <Badge tone="green">{canonical.status}</Badge>
-          <span className="font-mono text-[11px] text-dna-faint">Governed {canonical.governedAt}</span>
+          <span className="font-mono text-[11px] text-dna-faint">
+            Governed {canonical.governedAt}
+          </span>
         </div>
         <p className="mt-2 max-w-2xl font-mono text-sm text-dna-text">
           {canonical.normalizedDescription}
@@ -151,12 +220,19 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
           </h3>
           <div className="space-y-2">
             {canonical.legacyMappings.map((m) => (
-              <div key={m.legacyCode} className="rounded border border-dna-border bg-dna-panel2 px-3 py-2">
+              <div
+                key={m.legacyCode}
+                className="rounded border border-dna-border bg-dna-panel2 px-3 py-2"
+              >
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-dna-muted">{m.source}</span>
-                  <code className="font-mono text-dna-cyan">{m.legacyCode}</code>
+                  <code className="font-mono text-dna-cyan">
+                    {m.legacyCode}
+                  </code>
                 </div>
-                <p className="mt-1 font-mono text-[11px] text-dna-faint">&quot;{m.sourceDescription}&quot;</p>
+                <p className="mt-1 font-mono text-[11px] text-dna-faint">
+                  &quot;{m.sourceDescription}&quot;
+                </p>
               </div>
             ))}
           </div>
@@ -180,7 +256,7 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
                     "rounded border px-2 py-1 text-[11px] transition-colors",
                     openSection === t.id
                       ? "border-dna-cyan/60 bg-dna-cyan/10 text-dna-cyan"
-                      : "border-dna-border2 text-dna-muted"
+                      : "border-dna-border2 text-dna-muted",
                   )}
                   aria-label={`Show ${t.label}`}
                 >
@@ -193,10 +269,15 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
           {openSection === "provenance" ? (
             <div className="space-y-2">
               {canonical.legacyMappings.map((m, i) => (
-                <div key={i} className="rounded border border-dna-border bg-dna-panel2 px-3 py-2 text-xs">
+                <div
+                  key={i}
+                  className="rounded border border-dna-border bg-dna-panel2 px-3 py-2 text-xs"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-dna-muted">Source: {m.source}</span>
-                    <span className="font-mono text-dna-faint">Material DNA Parser v0.1</span>
+                    <span className="font-mono text-dna-faint">
+                      Material DNA Parser v0.1
+                    </span>
                   </div>
                   <p className="mt-1 font-mono text-[11px] text-dna-faint">
                     &quot;{m.sourceDescription}&quot;
@@ -209,12 +290,22 @@ function CanonicalDetail({ canonical }: { canonical: CanonicalMaterial }) {
               {Object.entries(dna)
                 .filter(([k]) => k !== "confidence" && k !== "evidenceCoverage")
                 .map(([k, attr]) => {
-                  const a = attr as { value?: string | string[] | null; confidence?: number; evidence?: { span?: string } | null };
+                  const a = attr as {
+                    value?: string | string[] | null;
+                    confidence?: number;
+                    evidence?: { span?: string } | null;
+                  };
                   const v = a.value;
-                  const has = v !== null && v !== undefined && (Array.isArray(v) ? v.length > 0 : String(v).length > 0);
+                  const has =
+                    v !== null &&
+                    v !== undefined &&
+                    (Array.isArray(v) ? v.length > 0 : String(v).length > 0);
                   if (!has) return null;
                   return (
-                    <div key={k} className="rounded border border-dna-border bg-dna-panel2 px-3 py-2 text-xs">
+                    <div
+                      key={k}
+                      className="rounded border border-dna-border bg-dna-panel2 px-3 py-2 text-xs"
+                    >
                       <div className="flex items-center justify-between">
                         <span className="text-dna-muted">{k}</span>
                         <span className="font-mono text-[11px] text-dna-cyan">

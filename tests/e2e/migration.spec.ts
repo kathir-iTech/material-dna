@@ -19,7 +19,9 @@ const ROWS = 4;
 
 /** The batch heading the migration page renders for an accepted file. */
 function batchHeading(page: Page, name: string): Locator {
-  return page.getByRole("heading", { name: new RegExp(name.replace(".", "\\.")) });
+  return page.getByRole("heading", {
+    name: new RegExp(name.replace(".", "\\.")),
+  });
 }
 
 /**
@@ -31,7 +33,12 @@ function batchHeading(page: Page, name: string): Locator {
  * interaction deterministic. The reaction differs per file, so callers declare
  * which one they expect — an accepted batch heading, or the parse error.
  */
-async function upload(page: Page, name: string, body: string, settled: Locator) {
+async function upload(
+  page: Page,
+  name: string,
+  body: string,
+  settled: Locator,
+) {
   await expect(async () => {
     await page.getByLabel("Upload migration file").setInputFiles({
       name,
@@ -45,8 +52,12 @@ async function upload(page: Page, name: string, body: string, settled: Locator) 
 /** Uploads VALID_CSV and runs the pipeline; resolve hits the embedding API, so cold start is slow. */
 async function importAndResolve(page: Page, name: string) {
   await upload(page, name, VALID_CSV, batchHeading(page, name));
-  await page.getByRole("button", { name: `Run batch resolve (${ROWS} rows)` }).click();
-  await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 150_000 });
+  await page
+    .getByRole("button", { name: `Run batch resolve (${ROWS} rows)` })
+    .click();
+  await expect(page.locator("tbody tr").first()).toBeVisible({
+    timeout: 150_000,
+  });
 }
 
 test.describe("Bulk migration — file contract", () => {
@@ -54,29 +65,48 @@ test.describe("Bulk migration — file contract", () => {
     const errors = trackPageErrors(page);
     await gotoClean(page, "/migrate");
     await expect(
-      page.getByText(/First row must be a header with a 'description' column/i)
+      page.getByText(/First row must be a header with a 'description' column/i),
     ).toBeVisible();
     await expect(page.getByText("No batches imported yet.")).toBeVisible();
-    await expect(page.getByText(/max 5 MB, 1000 rows/i)).toBeVisible();
-    await expect(page.getByText(/held in memory only/i)).toBeVisible();
+    await expect(page.getByText(/max 3 MB, 1000 rows/i)).toBeVisible();
+    await expect(page.getByText(/Saved on this browser/i)).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 
-  test("malformed CSV is rejected with an actionable error, not a crash", async ({ page }) => {
+  test("malformed CSV is rejected with an actionable error, not a crash", async ({
+    page,
+  }) => {
     await gotoClean(page, "/migrate");
-    await upload(page, "malformed.csv", MALFORMED_CSV, page.getByText(NO_DESCRIPTION_ERROR));
+    await upload(
+      page,
+      "malformed.csv",
+      MALFORMED_CSV,
+      page.getByText(NO_DESCRIPTION_ERROR),
+    );
 
     await expect(page.getByText(NO_DESCRIPTION_ERROR)).toBeVisible();
     // No batch may be created from an unusable file.
     await expect(page.getByText("No batches imported yet.")).toBeVisible();
   });
 
-  test("the parse error clears once a valid file is supplied", async ({ page }) => {
+  test("the parse error clears once a valid file is supplied", async ({
+    page,
+  }) => {
     await gotoClean(page, "/migrate");
-    await upload(page, "malformed.csv", MALFORMED_CSV, page.getByText(NO_DESCRIPTION_ERROR));
+    await upload(
+      page,
+      "malformed.csv",
+      MALFORMED_CSV,
+      page.getByText(NO_DESCRIPTION_ERROR),
+    );
     await expect(page.getByText(NO_DESCRIPTION_ERROR)).toBeVisible();
 
-    await upload(page, "recovered.csv", VALID_CSV, batchHeading(page, "recovered.csv"));
+    await upload(
+      page,
+      "recovered.csv",
+      VALID_CSV,
+      batchHeading(page, "recovered.csv"),
+    );
     await expect(page.getByText(NO_DESCRIPTION_ERROR)).toHaveCount(0);
     await expect(batchHeading(page, "recovered.csv")).toBeVisible();
   });
@@ -85,22 +115,35 @@ test.describe("Bulk migration — file contract", () => {
 test.describe("Bulk migration — import and resolve", () => {
   test.slow();
 
-  test("valid CSV stages every row and exposes the result filters", async ({ page }) => {
+  test("valid CSV stages every row and exposes the result filters", async ({
+    page,
+  }) => {
     await gotoClean(page, "/migrate");
-    await upload(page, "staged.csv", VALID_CSV, batchHeading(page, "staged.csv"));
+    await upload(
+      page,
+      "staged.csv",
+      VALID_CSV,
+      batchHeading(page, "staged.csv"),
+    );
 
     await expect(page.getByText("No batches imported yet.")).toHaveCount(0);
-    await expect(page.getByText(new RegExp(`${ROWS} rows · imported`))).toBeVisible();
+    await expect(
+      page.getByText(new RegExp(`${ROWS} rows · imported`)),
+    ).toBeVisible();
 
     for (const f of ["All", "MATCH", "REVIEW", "DO_NOT_MERGE", "Pending"]) {
-      await expect(page.getByRole("button", { name: `Filter: ${f}` })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: `Filter: ${f}` }),
+      ).toBeVisible();
     }
     await expect(
-      page.getByRole("button", { name: `Run batch resolve (${ROWS} rows)` })
+      page.getByRole("button", { name: `Run batch resolve (${ROWS} rows)` }),
     ).toBeVisible();
   });
 
-  test("resolve vetoes the 8.8 / 10.9 bolt pair instead of merging it", async ({ page }) => {
+  test("resolve vetoes the 8.8 / 10.9 bolt pair instead of merging it", async ({
+    page,
+  }) => {
     await gotoClean(page, "/migrate");
     await importAndResolve(page, "veto.csv");
 
@@ -120,32 +163,48 @@ test.describe("Bulk migration — import and resolve", () => {
     await gotoClean(page, "/migrate");
     await importAndResolve(page, "bulk-approve.csv");
 
-    await typeInto(page.getByLabel("Audit note for bulk action"), "E2E bulk approval");
+    await typeInto(
+      page.getByLabel("Audit note for bulk action"),
+      "E2E bulk approval",
+    );
     await page.getByLabel("Select all pending rows").click();
-    await page.getByRole("button", { name: `Approve selected (${ROWS})` }).click();
+    await page
+      .getByRole("button", { name: `Approve selected (${ROWS})` })
+      .click();
 
     // Nothing left pending, everything approved.
     await page.getByRole("button", { name: "Filter: Pending" }).click();
     await expect(page.getByText("No rows match this filter.")).toBeVisible();
     await page.getByRole("button", { name: "Filter: All" }).click();
     await expect(page.locator("tbody tr")).toHaveCount(ROWS);
-    await expect(page.getByText("APPROVED", { exact: true }).first()).toBeVisible();
+    await expect(
+      page.getByText("APPROVED", { exact: true }).first(),
+    ).toBeVisible();
 
     // The bulk action is auditable.
     await page.getByRole("button", { name: "Audit trail" }).first().click();
     await expect(page.getByText(/bulk/i).first()).toBeVisible();
   });
 
-  test("rollback (LIFO) restores the most recent bulk action", async ({ page }) => {
+  test("rollback (LIFO) restores the most recent bulk action", async ({
+    page,
+  }) => {
     await gotoClean(page, "/migrate");
     await importAndResolve(page, "rollback.csv");
 
-    const rollback = page.getByRole("button", { name: /Rollback last bulk action on/i }).first();
+    const rollback = page
+      .getByRole("button", { name: /Rollback last bulk action on/i })
+      .first();
     await expect(rollback).toBeDisabled();
 
-    await typeInto(page.getByLabel("Audit note for bulk action"), "E2E rollback subject");
+    await typeInto(
+      page.getByLabel("Audit note for bulk action"),
+      "E2E rollback subject",
+    );
     await page.getByLabel("Select all pending rows").click();
-    await page.getByRole("button", { name: `Approve selected (${ROWS})` }).click();
+    await page
+      .getByRole("button", { name: `Approve selected (${ROWS})` })
+      .click();
     await expect(rollback).toBeEnabled();
 
     await rollback.click();
@@ -161,19 +220,34 @@ test.describe("Bulk migration — import and resolve", () => {
     await importAndResolve(page, "bulk-reject.csv");
 
     await page.getByLabel("Select all pending rows").click();
-    await page.getByRole("button", { name: `Reject selected (${ROWS})` }).click();
-    await expect(page.getByText("REJECTED", { exact: true }).first()).toBeVisible();
+    await page
+      .getByRole("button", { name: `Reject selected (${ROWS})` })
+      .click();
+    await expect(
+      page.getByText("REJECTED", { exact: true }).first(),
+    ).toBeVisible();
   });
 
-  test("bulk buttons stay disabled until rows are selected", async ({ page }) => {
+  test("bulk buttons stay disabled until rows are selected", async ({
+    page,
+  }) => {
     await gotoClean(page, "/migrate");
     await importAndResolve(page, "selection.csv");
 
-    await expect(page.getByRole("button", { name: /^Approve selected \(0\)$/ })).toBeDisabled();
-    await expect(page.getByRole("button", { name: /^Reject selected \(0\)$/ })).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: /^Approve selected \(0\)$/ }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: /^Reject selected \(0\)$/ }),
+    ).toBeDisabled();
 
     // `row` is the 1-based CSV line number, so data starts at line 2 (line 1 is the header).
-    await page.getByLabel(/^Select row \d+$/).first().click();
-    await expect(page.getByRole("button", { name: "Approve selected (1)" })).toBeEnabled();
+    await page
+      .getByLabel(/^Select row \d+$/)
+      .first()
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Approve selected (1)" }),
+    ).toBeEnabled();
   });
 });

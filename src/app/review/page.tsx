@@ -6,7 +6,7 @@ export default function ReviewPage() {
   return (
     <>
       <TopNav />
-      <main className="mx-auto max-w-7xl px-4 py-6">
+      <main id="main-content" tabIndex={-1} className="workspace-main">
         <ReviewClient />
       </main>
       <Footer />

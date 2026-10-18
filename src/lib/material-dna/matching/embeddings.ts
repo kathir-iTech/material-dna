@@ -24,7 +24,7 @@ const BATCH = 16;
 
 type Extractor = (
   texts: string[],
-  opts: { pooling: "mean"; normalize: boolean }
+  opts: { pooling: "mean"; normalize: boolean },
 ) => Promise<{ data: Float32Array; dims: number[] }>;
 
 let extractor: Extractor | null = null;
@@ -48,13 +48,16 @@ async function getExtractor(): Promise<Extractor | null> {
       env.cacheDir =
         process.env.TRANSFORMERS_CACHE ??
         path.join(os.tmpdir(), "material-dna-model-cache");
-      extractor = (await pipeline("feature-extraction", MODEL_ID)) as unknown as Extractor;
+      extractor = (await pipeline(
+        "feature-extraction",
+        MODEL_ID,
+      )) as unknown as Extractor;
       return extractor;
     } catch (e) {
       disabled = true;
       console.warn(
         "[embeddings] dense-retrieval signal disabled (falling back to lexical-only scoring):",
-        e instanceof Error ? e.message : e
+        e instanceof Error ? e.message : e,
       );
       return null;
     }
@@ -75,18 +78,28 @@ function dot(a: Float32Array, b: Float32Array): number {
  */
 export async function createEmbeddingSignal(
   texts: string[],
-  opts: { budgetMs?: number } = {}
+  opts: { budgetMs?: number } = {},
 ): Promise<EmbeddingSignal | null> {
   const started = Date.now();
   const budgetMs = opts.budgetMs ?? 8000;
-  const ex = await getExtractor();
+  // The request budget includes model loading as well as inference. A cold
+  // remote model must not hold an otherwise usable lexical request open.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const ex = await Promise.race([
+    getExtractor(),
+    new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), budgetMs);
+    }),
+  ]).finally(() => clearTimeout(timer));
   if (!ex) return null;
 
   const unique = [...new Set(texts.filter((t) => t.length > 0))];
   try {
     for (let i = 0; i < unique.length; i += BATCH) {
       if (Date.now() - started > budgetMs) {
-        console.warn("[embeddings] budget exceeded; using lexical-only scoring.");
+        console.warn(
+          "[embeddings] budget exceeded; using lexical-only scoring.",
+        );
         return null;
       }
       const chunk = unique.slice(i, i + BATCH).filter((t) => !vectors.has(t));
@@ -101,7 +114,7 @@ export async function createEmbeddingSignal(
     disabled = true;
     console.warn(
       "[embeddings] embedding failed; disabling dense-retrieval signal:",
-      e instanceof Error ? e.message : e
+      e instanceof Error ? e.message : e,
     );
     return null;
   }

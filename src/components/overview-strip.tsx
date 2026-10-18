@@ -1,25 +1,57 @@
+import { Boxes, GitBranch, Network, ShieldCheck } from "lucide-react";
 import { datasetStats } from "@/lib/material-dna/dataset-stats";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-
+import { corpusClusters } from "@/lib/material-dna/clusters";
+import { materialRecords } from "@/data/demo";
 export function OverviewStrip() {
   const stats = datasetStats();
+  const clusters = corpusClusters();
   const items = [
-    { label: "Material records in demo", value: stats.recordCount },
-    { label: "Candidate matches", value: stats.candidateLinks },
-    { label: "Reviews pending", value: stats.reviewsPending },
-    { label: "Critical conflicts among candidates", value: stats.criticalConflicts },
-    { label: "Canonical identities", value: stats.canonicalCount },
+    {
+      label: "Material records",
+      value: stats.recordCount,
+      note: "Synthetic reference corpus",
+      icon: Boxes,
+      color: "mint",
+    },
+    {
+      label: "Source systems",
+      value: new Set(materialRecords.map((r) => r.source)).size,
+      note: "Demonstration source labels",
+      icon: Network,
+      color: "blue",
+    },
+    {
+      label: "Identity clusters",
+      value: clusters.clusters.length,
+      note: "Submitted engine clustering",
+      icon: GitBranch,
+      color: "violet",
+    },
+    {
+      label: "Unsafe links held out",
+      value: clusters.vetoedProposals.length,
+      note: "High similarity, critical conflict",
+      icon: ShieldCheck,
+      color: "rose",
+    },
   ];
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {items.map((item) => (
-        <Card key={item.label} className="flex flex-col px-3 py-2">
-          <span className="font-mono text-lg font-semibold text-dna-text">{item.value}</span>
-          <span className="text-[11px] text-dna-muted">{item.label}</span>
-        </Card>
+    <section className="metric-grid" aria-label="Reference corpus statistics">
+      {items.map(({ label, value, note, icon: Icon, color }) => (
+        <div className="metric-card" key={label}>
+          <div className="metric-label">
+            {label}
+            <span className={`metric-icon ${color}`}>
+              <Icon aria-hidden="true" size={18} strokeWidth={1.7} />
+            </span>
+          </div>
+          <div className="metric-value">
+            {value}
+            <span className="metric-rule" />
+          </div>
+          <p>{note}</p>
+        </div>
       ))}
-      <Badge tone="purple" className="self-center">DEMONSTRATION DATA</Badge>
-    </div>
+    </section>
   );
 }

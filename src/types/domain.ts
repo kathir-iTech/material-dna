@@ -5,6 +5,8 @@ export type ConstraintStatus = "PASS" | "WARNING" | "CONFLICT" | "UNKNOWN";
 export type ConstraintSeverity = "INFO" | "WARNING" | "CRITICAL";
 
 export type SourceName =
+  | "User Input"
+  | "Reference"
   | "CPSE-A"
   | "CPSE-B"
   | "CPSE-C"
@@ -124,6 +126,16 @@ export interface AuditEvent {
 }
 
 export interface ReviewCase {
+  engineVersion?: string;
+  parserVersion?: string;
+  constraintVersion?: string;
+  constraints?: ConstraintResult[];
+  resolutionId?: string;
+  history?: {
+    at: string;
+    action: "APPROVED" | "REJECTED" | "OVERRIDDEN";
+    note?: string;
+  }[];
   id: string;
   materialA: MaterialRecord;
   materialB: MaterialRecord;

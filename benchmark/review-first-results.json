@@ -1,0 +1,2567 @@
+{
+  "schemaVersion": 1,
+  "policy": "review-first-v1",
+  "dataset": "benchmark/data/material-pairs-labeled.csv",
+  "datasetSha256": "55748313d1ac6f6c1b8e43f08bb2309b8eb7d129463563cd864afc4a60134c16",
+  "scope": "Development comparison on the same synthetic regression set; not independent validation or a holdout. Lexical scoring only; no dense model.",
+  "submittedLexical": {
+    "total": 200,
+    "counts": {
+      "MATCH": 65,
+      "DO_NOT_MERGE": 64,
+      "REVIEW": 70,
+      "NO_MATCH": 1
+    },
+    "tp": 52,
+    "fp": 13,
+    "fn": 11,
+    "tn": 54,
+    "precision": 0.8,
+    "recall": 0.8253968253968254,
+    "f1": 0.8125,
+    "automaticTrueMatchCoverage": 0.52,
+    "abstention": 0.35,
+    "errors": [
+      {
+        "id": "14",
+        "a": "Butterfly valve 150mm wafer type EPDM seat",
+        "b": "Butterfly valve 150mm lug type EPDM seat",
+        "label": 0,
+        "category": "type_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "52",
+        "a": "FRP pipe 100mm class 3 pressure",
+        "b": "FRP pipe 100mm class 5 pressure",
+        "label": 0,
+        "category": "pressure_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "70",
+        "a": "Plug valve 2 inch SS304 full bore",
+        "b": "Plug valve 2 inch SS304 reduced bore",
+        "label": 0,
+        "category": "type_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "90",
+        "a": "Check valve 100mm wafer type cast iron",
+        "b": "Check valve 100mm flanged type cast iron",
+        "label": 0,
+        "category": "type_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "94",
+        "a": "Butt weld elbow 90 deg 100mm SS304",
+        "b": "Butt weld elbow 45 deg 100mm SS304",
+        "label": 0,
+        "category": "angle_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "102",
+        "a": "EPDM rubber sheet 3mm thick black",
+        "b": "Nitrile rubber sheet 3mm thick black",
+        "label": 0,
+        "category": "material_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "112",
+        "a": "Pressure gauge 0-100 bar SS304 100mm dial",
+        "b": "Pressure gauge 0-160 bar SS304 100mm dial",
+        "label": 0,
+        "category": "range_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "118",
+        "a": "Stainless steel wire mesh 40 mesh SS304",
+        "b": "Stainless steel wire mesh 60 mesh SS304",
+        "label": 0,
+        "category": "mesh_size_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "122",
+        "a": "Limit switch roller lever IP65 10A 240V",
+        "b": "Limit switch plunger type IP65 10A 240V",
+        "label": 0,
+        "category": "actuator_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "138",
+        "a": "Rubber hose 1 inch 200 bar hydraulic",
+        "b": "Rubber hose 1 inch 350 bar hydraulic",
+        "label": 0,
+        "category": "pressure_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "152",
+        "a": "PVC ball valve 25mm full port",
+        "b": "PVC ball valve 25mm standard port",
+        "label": 0,
+        "category": "type_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "160",
+        "a": "PTFE rod 30mm diameter virgin",
+        "b": "PTFE rod 30mm diameter filled",
+        "label": 0,
+        "category": "material_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      },
+      {
+        "id": "182",
+        "a": "Silicone rubber sheet 60 shore A 2mm",
+        "b": "Silicone rubber sheet 70 shore A 2mm",
+        "label": 0,
+        "category": "hardness_difference",
+        "decision": "MATCH",
+        "reason": "Textual and structured attributes agree; no engineering-critical conflict."
+      }
+    ],
+    "results": [
+      {
+        "id": "1",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "2",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "3",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "4",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "5",
+        "category": "standard_mapping",
+        "label": 1,
+        "decision": "NO_MATCH"
+      },
+      {
+        "id": "6",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "7",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "8",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "9",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "10",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "11",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "12",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "13",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "14",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "15",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "16",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "17",
+        "category": "manufacturer_variation",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "18",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "19",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "20",
+        "category": "material_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "21",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "22",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "23",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "24",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "25",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "26",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "27",
+        "category": "standard_mapping",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "28",
+        "category": "pressure_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "29",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "30",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "31",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "32",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "33",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "34",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "35",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "36",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "37",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "38",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "39",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "40",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "41",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "42",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "43",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "44",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "45",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "46",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "47",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "48",
+        "category": "voltage_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "49",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "50",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "51",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "52",
+        "category": "pressure_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "53",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "54",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "55",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "56",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "57",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "58",
+        "category": "voltage_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "59",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "60",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "61",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "62",
+        "category": "viscosity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "63",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "64",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "65",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "66",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "67",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "68",
+        "category": "viscosity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "69",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "70",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "71",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "72",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "73",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "74",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "75",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "76",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "77",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "78",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "79",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "80",
+        "category": "capacitance_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "81",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "82",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "83",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "84",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "85",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "86",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "87",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "88",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "89",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "90",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "91",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "92",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "93",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "94",
+        "category": "angle_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "95",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "96",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "97",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "98",
+        "category": "sensing_distance",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "99",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "100",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "101",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "102",
+        "category": "material_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "103",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "104",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "105",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "106",
+        "category": "actuator_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "107",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "108",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "109",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "110",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "111",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "112",
+        "category": "range_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "113",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "114",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "115",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "116",
+        "category": "section_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "117",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "118",
+        "category": "mesh_size_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "119",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "120",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "121",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "122",
+        "category": "actuator_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "123",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "124",
+        "category": "electrode_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "125",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "126",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "127",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "128",
+        "category": "capacity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "129",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "130",
+        "category": "grit_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "131",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "132",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "133",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "134",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "135",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "136",
+        "category": "capacity_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "137",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "138",
+        "category": "pressure_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "139",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "140",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "141",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "142",
+        "category": "wattage_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "143",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "144",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "145",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "146",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "147",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "148",
+        "category": "drive_size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "149",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "150",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "151",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "152",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "153",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "154",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "155",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "156",
+        "category": "current_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "157",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "158",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "159",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "160",
+        "category": "material_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "161",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "162",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "163",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "164",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "165",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "166",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "167",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "168",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "169",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "170",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "171",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "172",
+        "category": "capacity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "173",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "174",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "175",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "176",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "177",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "178",
+        "category": "filtration_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "179",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "180",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "181",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "182",
+        "category": "hardness_difference",
+        "label": 0,
+        "decision": "MATCH"
+      },
+      {
+        "id": "183",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "184",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "185",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "186",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "187",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "188",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "189",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "190",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "191",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "192",
+        "category": "coating_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "193",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "194",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "195",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "196",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "197",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "198",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "199",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "200",
+        "category": "current_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      }
+    ]
+  },
+  "reviewFirst": {
+    "total": 200,
+    "counts": {
+      "MATCH": 47,
+      "DO_NOT_MERGE": 78,
+      "REVIEW": 74,
+      "NO_MATCH": 1
+    },
+    "tp": 47,
+    "fp": 0,
+    "fn": 11,
+    "tn": 68,
+    "precision": 1,
+    "recall": 0.8103448275862069,
+    "f1": 0.8952380952380952,
+    "automaticTrueMatchCoverage": 0.47,
+    "abstention": 0.37,
+    "errors": [],
+    "results": [
+      {
+        "id": "1",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "2",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "3",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "4",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "5",
+        "category": "standard_mapping",
+        "label": 1,
+        "decision": "NO_MATCH"
+      },
+      {
+        "id": "6",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "7",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "8",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "9",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "10",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "11",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "12",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "13",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "14",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "15",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "16",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "17",
+        "category": "manufacturer_variation",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "18",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "19",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "20",
+        "category": "material_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "21",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "22",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "23",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "24",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "25",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "26",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "27",
+        "category": "standard_mapping",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "28",
+        "category": "pressure_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "29",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "30",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "31",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "32",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "33",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "34",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "35",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "36",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "37",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "38",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "39",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "40",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "41",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "42",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "43",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "44",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "45",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "46",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "47",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "48",
+        "category": "voltage_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "49",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "50",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "51",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "52",
+        "category": "pressure_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "53",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "54",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "55",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "56",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "57",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "58",
+        "category": "voltage_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "59",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "60",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "61",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "62",
+        "category": "viscosity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "63",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "64",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "65",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "66",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "67",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "68",
+        "category": "viscosity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "69",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "70",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "71",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "72",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "73",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "74",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "75",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "76",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "77",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "78",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "79",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "80",
+        "category": "capacitance_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "81",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "82",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "83",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "84",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "85",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "86",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "87",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "88",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "89",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "90",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "91",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "92",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "93",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "94",
+        "category": "angle_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "95",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "96",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "97",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "98",
+        "category": "sensing_distance",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "99",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "100",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "101",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "102",
+        "category": "material_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "103",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "104",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "105",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "106",
+        "category": "actuator_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "107",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "108",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "109",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "110",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "111",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "112",
+        "category": "range_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "113",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "114",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "115",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "116",
+        "category": "section_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "117",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "118",
+        "category": "mesh_size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "119",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "120",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "121",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "122",
+        "category": "actuator_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "123",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "124",
+        "category": "electrode_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "125",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "126",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "127",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "128",
+        "category": "capacity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "129",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "130",
+        "category": "grit_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "131",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "132",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "133",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "134",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "135",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "136",
+        "category": "capacity_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "137",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "138",
+        "category": "pressure_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "139",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "140",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "141",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "142",
+        "category": "wattage_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "143",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "144",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "145",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "146",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "147",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "148",
+        "category": "drive_size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "149",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "150",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "151",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "152",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "153",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "154",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "155",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "156",
+        "category": "current_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "157",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "158",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "159",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "160",
+        "category": "material_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "161",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "162",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "163",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "164",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "165",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "166",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "167",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "168",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "169",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "170",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "171",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "172",
+        "category": "capacity_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "173",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "174",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "175",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "176",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "177",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "178",
+        "category": "filtration_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "179",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "180",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "181",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "182",
+        "category": "hardness_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "183",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "184",
+        "category": "type_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "185",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "186",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "187",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "188",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "189",
+        "category": "abbreviated_vs_full",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "190",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "191",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "192",
+        "category": "coating_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "193",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "194",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "195",
+        "category": "unit_normalization",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "196",
+        "category": "grade_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      },
+      {
+        "id": "197",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "198",
+        "category": "size_difference",
+        "label": 0,
+        "decision": "REVIEW"
+      },
+      {
+        "id": "199",
+        "category": "word_reorder",
+        "label": 1,
+        "decision": "MATCH"
+      },
+      {
+        "id": "200",
+        "category": "current_difference",
+        "label": 0,
+        "decision": "DO_NOT_MERGE"
+      }
+    ]
+  }
+}

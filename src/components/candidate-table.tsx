@@ -19,7 +19,9 @@ export function CandidateTable({
   return (
     <Card>
       <div className="flex items-center justify-between border-b border-dna-border px-4 py-3">
-        <h3 className="text-sm font-semibold text-dna-text">Candidate Materials</h3>
+        <h3 className="text-sm font-semibold text-dna-text">
+          Candidate Materials
+        </h3>
         <span className="text-[11px] text-dna-faint">
           Prototype similarity score — click a row to inspect
         </span>
@@ -31,7 +33,10 @@ export function CandidateTable({
               <th className="px-4 py-2 font-medium">Material ID</th>
               <th className="px-2 py-2 font-medium">Description</th>
               <th className="px-2 py-2 font-medium">Similarity</th>
-              <th className="px-2 py-2 font-medium" title={SCORE_DEFINITIONS.attributeAgreement}>
+              <th
+                className="px-2 py-2 font-medium"
+                title={SCORE_DEFINITIONS.attributeAgreement}
+              >
                 Attribute agreement
               </th>
               <th className="px-2 py-2 font-medium">Conflicts</th>
@@ -53,17 +58,28 @@ export function CandidateTable({
                     onInspect(c);
                   }}
                   onKeyDown={(e) => {
+                    if (e.key === " ") e.preventDefault();
                     if (e.key === "Enter") {
+                      e.preventDefault();
+                      onSelect(c);
+                      onInspect(c);
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    if (e.key === " ") {
+                      e.preventDefault();
                       onSelect(c);
                       onInspect(c);
                     }
                   }}
                   className={cn(
                     "cursor-pointer border-b border-dna-border/50 transition-colors hover:bg-dna-panel2",
-                    isSelected && "bg-dna-cyan/5"
+                    isSelected && "bg-dna-cyan/5",
                   )}
                 >
-                  <td className="px-4 py-2 font-mono text-dna-cyan">{c.targetRecord.sourceCode}</td>
+                  <td className="px-4 py-2 font-mono text-dna-cyan">
+                    {c.targetRecord.sourceCode}
+                  </td>
                   <td className="max-w-72 truncate px-2 py-2 text-dna-text">
                     {c.targetRecord.rawDescription}
                   </td>
@@ -83,10 +99,14 @@ export function CandidateTable({
                       </div>
                     </div>
                   </td>
-                  <td className="px-2 py-2 font-mono text-dna-muted">{c.attributeScore}%</td>
+                  <td className="px-2 py-2 font-mono text-dna-muted">
+                    {c.attributeScore}%
+                  </td>
                   <td className="px-2 py-2 font-mono">
                     {c.criticalConflicts.length > 0 ? (
-                      <span className="text-dna-red">{c.criticalConflicts.length}</span>
+                      <span className="text-dna-red">
+                        {c.criticalConflicts.length}
+                      </span>
                     ) : (
                       <span className="text-dna-green">0</span>
                     )}
@@ -95,7 +115,11 @@ export function CandidateTable({
                     <DecisionBadge decision={c.decision} size="sm" />
                   </td>
                   <td className="px-4 py-2 text-right">
-                    <Eye size={14} className="inline text-dna-faint" aria-hidden />
+                    <Eye
+                      aria-hidden="true"
+                      size={14}
+                      className="inline text-dna-faint"
+                    />
                   </td>
                 </tr>
               );

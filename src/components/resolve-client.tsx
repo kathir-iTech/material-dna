@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
-import { Play, RotateCcw, Send, ClipboardList } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  ArrowDown,
+  ArrowRight,
+  Check,
+  ClipboardList,
+  Download,
+  FileJson,
+  Fingerprint,
+  FlaskConical,
+  GitBranch,
+  Layers3,
+  Play,
+  RotateCcw,
+  Send,
+  ShieldCheck,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { demoScenarios } from "@/data/demo";
 import { useResolver } from "@/hooks/use-resolver";
-import { Badge, DemoBadge } from "@/components/ui/badge";
-import { Card, CardHeader, CardBody } from "@/components/ui/card";
-import { ProcessingSteps } from "@/components/processing-steps";
+import { Badge } from "@/components/ui/badge";
 import { MaterialDNAProfile } from "@/components/material-dna-profile";
 import { CandidateTable } from "./candidate-table";
 import { ExplanationPanel } from "./explanation-panel";
@@ -16,170 +32,479 @@ import { AuditTimeline } from "./audit-timeline";
 import { OverviewStrip } from "./overview-strip";
 import { DecisionBanner } from "./decision-banner";
 import { DiscoveryDrawer } from "./discovery-drawer";
+import { RecordComparison } from "./record-comparison";
+import { isWorkspaceStorageHealthy } from "@/lib/browser-workspace";
+import { decisionHtml, downloadFile, resolutionEvidence } from "@/lib/reports";
 import type { ScoredCandidate } from "@/lib/material-dna/matching";
 
+const GUIDE = [
+  {
+    title: "01 · Find a duplicate",
+    text: "Two descriptions agree on the engineering attributes. Inspect the source and selected reference, then check the recommendation.",
+  },
+  {
+    title: "02 · Challenge the match",
+    text: "The same input is compared against a scenario-specific reference set containing a different grade. Similar text does not make 8.8 and 10.9 interchangeable. Try the counterfactual below.",
+  },
+  {
+    title: "03 · Know when to abstain",
+    text: "A vague description does not establish identity. The engine asks for human engineering review instead of filling in missing facts.",
+  },
+  {
+    title: "04 · Keep the evidence",
+    text: "Send the case to the review queue, record a human decision, and export its evidence. Reviews are saved on this browser; shared institutional governance remains future work.",
+  },
+];
 export function ResolveClient() {
   const resolver = useResolver();
-  const [selectedCandidate, setSelectedCandidate] = useState<ScoredCandidate | null>(null);
-  const [drawerCandidate, setDrawerCandidate] = useState<ScoredCandidate | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
-
+  const [selectedCandidate, setSelectedCandidate] =
+    useState<ScoredCandidate | null>(null);
+  const [drawerCandidate, setDrawerCandidate] =
+    useState<ScoredCandidate | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
+  const [guideStep, setGuideStep] = useState(0);
+  const [storageWarning, setStorageWarning] = useState(false);
+  const [sentCase, setSentCase] = useState<string | null>(null);
   const result = resolver.result;
   const topCandidate = result?.selectedCandidate ?? null;
-
+  useEffect(() => {
+    setShowGuide(
+      new URLSearchParams(window.location.search).get("demo") === "1",
+    );
+    const present = () => setShowGuide(true);
+    window.addEventListener("material-dna:present", present);
+    return () => window.removeEventListener("material-dna:present", present);
+  }, []);
+  useEffect(() => {
+    if (result)
+      document
+        .getElementById("resolution-results")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [result]);
+  function startStep(index: number) {
+    setGuideStep(index);
+    setShowGuide(true);
+    setSelectedCandidate(null);
+    if (index < 3) resolver.handleScenario(demoScenarios[index].id);
+    document
+      .getElementById("resolution-workbench")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   return (
     <div className="space-y-6">
-      {/* Hero */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-dna-text">
-            Material DNA Control Room
+      <div className="resolve-heading">
+        <div>
+          <div className="page-eyebrow">Engineering identity / Resolve</div>
+          <h1>
+            Material intelligence<span className="text-dna-cyan">.</span>
           </h1>
-          <Badge tone="blue">Prototype</Badge>
-          <Badge tone="purple">Demo Mode</Badge>
+          <p>Different descriptions. One identity. Every decision explained.</p>
         </div>
-        <p className="max-w-3xl text-sm text-dna-muted">
-          Resolve heterogeneous material descriptions using semantic similarity
-          <span className="text-dna-text"> + </span>
-          <span className="text-dna-cyan">engineering constraints</span>.
-          Similarity is proposed; constraints govern; evidence explains; humans resolve ambiguity.
-        </p>
+        <span className="version-chip">
+          <span className="status-dot" />
+          Prototype workspace
+        </span>
       </div>
-
-      <OverviewStrip />
-
-      {/* Input */}
-      <Card>
-        <CardHeader
-          title="Resolve a material description"
-          subtitle="Enter any description below or run one of the demo scenarios."
-          right={<DemoBadge />}
-        />
-        <CardBody className="space-y-4">
-          <div className="flex flex-col gap-3 lg:flex-row">
-            <textarea
-              value={resolver.description}
-              onChange={(e) => resolver.setDescription(e.target.value)}
-              placeholder="e.g. HEX BOLT M12 X 60 8.8 ZP DIN 931"
-              rows={3}
-              className="flex-1 resize-none rounded border border-dna-border bg-dna-panel2 px-3 py-2 font-mono text-sm text-dna-text placeholder:text-dna-faint"
-              aria-label="Material description input"
-            />
-            <div className="flex flex-col gap-2 lg:w-64">
-              <button
-                onClick={resolver.handleResolve}
-                disabled={resolver.phase === "processing" || resolver.description.trim().length === 0}
-                className="inline-flex items-center justify-center gap-2 rounded border border-dna-cyan/50 bg-dna-cyan/10 px-4 py-2.5 text-sm font-semibold text-dna-cyan transition-colors hover:bg-dna-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Play size={15} aria-hidden="true" />
-                Resolve Material
-              </button>
-              {resolver.result && (
-                <button
-                  onClick={resolver.sendToReview}
-                  className="inline-flex items-center justify-center gap-2 rounded border border-dna-amber/40 bg-dna-amber/10 px-4 py-2 text-xs font-medium text-dna-amber transition-colors hover:bg-dna-amber/20"
-                >
-                  <Send size={13} aria-hidden="true" />
-                  Send to Review Queue
-                </button>
-              )}
-            </div>
+      <section
+        className="resolve-hero"
+        aria-label="Engineering-aware matching introduction"
+      >
+        <div className="hero-copy">
+          <div className="hero-kicker">
+            <Fingerprint aria-hidden="true" size={13} />
+            Engineering before similarity
           </div>
-
-          <div className="flex flex-wrap gap-2">
-            {demoScenarios.map((scenario) => (
+          <h2>
+            Find the same material.
+            <br />
+            <em>Stop the wrong merge.</em>
+          </h2>
+          <p>
+            Turn fragmented descriptions into structured material DNA. Surface
+            the evidence. Keep critical differences apart.
+          </p>
+          <button className="hero-action" onClick={() => startStep(0)}>
+            Explore the 90-second walkthrough{" "}
+            <ArrowRight aria-hidden="true" size={14} />
+          </button>
+        </div>
+        <div
+          className="hero-visual"
+          aria-label="Example: grade 8.8 and 10.9 bolts must remain separate"
+        >
+          <div className="material-mini">
+            <span className="mini-label">SOURCE A / EXAMPLE</span>
+            <strong>HEX BOLT</strong>
+            <code>M12 × 60 · DIN 931</code>
+            <div className="mini-grade">8.8</div>
+            <span className="mini-tag">Property class</span>
+          </div>
+          <div className="veto-link">
+            <span>
+              <ShieldCheck aria-hidden="true" size={21} />
+            </span>
+            <small>MERGE BLOCKED</small>
+          </div>
+          <div className="material-mini">
+            <span className="mini-label">SOURCE B / EXAMPLE</span>
+            <strong>HEX BOLT</strong>
+            <code>M12 × 60 · DIN 931</code>
+            <div className="mini-grade">10.9</div>
+            <span className="mini-tag">Different property class</span>
+          </div>
+        </div>
+      </section>
+      <OverviewStrip />
+      {showGuide && (
+        <section className="demo-guide" aria-label="Guided demonstration">
+          <div className="demo-guide-header">
+            <strong>
+              <Sparkles
+                aria-hidden="true"
+                size={15}
+                className="mr-2 inline text-dna-cyan"
+              />
+              Your engineering proof, in four steps
+            </strong>
+            <button
+              className="secondary-action"
+              onClick={() => setShowGuide(false)}
+              aria-label="Close guided demonstration"
+            >
+              <X aria-hidden="true" size={13} />
+            </button>
+          </div>
+          <p>{GUIDE[guideStep].text}</p>
+          <div className="demo-steps">
+            {GUIDE.map((step, index) => (
               <button
-                key={scenario.id}
-                onClick={() => resolver.handleScenario(scenario.id)}
-                className="rounded border border-dna-border2 px-2.5 py-1.5 text-xs text-dna-muted transition-colors hover:border-dna-cyan/50 hover:text-dna-text"
-                aria-label={`Run scenario: ${scenario.title}`}
+                key={step.title}
+                onClick={() => startStep(index)}
+                aria-current={index === guideStep ? "step" : undefined}
               >
-                {scenario.title}
+                {step.title}
               </button>
             ))}
-            <button
-              onClick={resolver.reset}
-              className="ml-auto inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs text-dna-faint transition-colors hover:text-dna-text"
-            >
-              <RotateCcw size={12} aria-hidden="true" /> Reset
-            </button>
-            <button
-              onClick={() => setShowHelp(true)}
-              className="inline-flex items-center gap-1.5 rounded border border-dna-border2 px-2.5 py-1.5 text-xs text-dna-muted hover:text-dna-text"
-              aria-label="Open suggested demo script"
-            >
-              <ClipboardList size={12} aria-hidden="true" /> Suggested Demo
-            </button>
           </div>
-
-          {resolver.phase === "processing" && (
-            <div className="rounded border border-dna-cyan/30 bg-dna-panel p-4">
-              <ProcessingSteps steps={resolver.steps} />
-            </div>
+          {guideStep === 3 && (
+            <Link href="/review" className="hero-action">
+              Open review workspace <ArrowRight aria-hidden="true" size={13} />
+            </Link>
           )}
-        </CardBody>
-      </Card>
-
+        </section>
+      )}
+      <div id="resolution-workbench" className="scroll-mt-6">
+        <div className="section-label">
+          <Layers3 aria-hidden="true" size={15} className="text-dna-cyan" />
+          Resolution workbench
+          <span>From description to defensible decision</span>
+        </div>
+        <div className="resolve-workbench">
+          <section className="workbench-card">
+            <div className="workbench-title">
+              <div>
+                <h2>What material are you looking at?</h2>
+                <p>
+                  Resolve against the reference corpus, or compare two
+                  descriptions directly.
+                </p>
+              </div>
+              <Badge tone="cyan">CPU · deterministic</Badge>
+            </div>
+            <div className="workbench-form">
+              <label className="field-label" htmlFor="material-input">
+                Material description
+                <span>{resolver.description.length} / 2,000</span>
+              </label>
+              <textarea
+                id="material-input"
+                aria-label="Material description input"
+                className="material-input font-mono"
+                rows={3}
+                maxLength={2000}
+                value={resolver.description}
+                onChange={(e) => resolver.setDescription(e.target.value)}
+                placeholder="e.g. HEX BOLT M12 X 60 8.8 ZP DIN 931"
+              />
+              <button
+                className="hero-action !mt-2 !text-[10px]"
+                onClick={() => resolver.setUseReference(!resolver.useReference)}
+                aria-pressed={resolver.useReference}
+              >
+                {resolver.useReference
+                  ? "Use the reference corpus instead"
+                  : "Compare two descriptions"}
+                <ArrowDown aria-hidden="true" size={12} />
+              </button>
+              {resolver.useReference && (
+                <div className="mt-4">
+                  <label className="field-label" htmlFor="reference-input">
+                    Reference description
+                  </label>
+                  <textarea
+                    id="reference-input"
+                    aria-label="Reference description input"
+                    className="material-input font-mono"
+                    rows={2}
+                    maxLength={2000}
+                    value={resolver.referenceDescription}
+                    onChange={(e) =>
+                      resolver.setReferenceDescription(e.target.value)
+                    }
+                  />
+                </div>
+              )}
+              <label className="policy-toggle">
+                <input
+                  type="checkbox"
+                  checked={resolver.conservative}
+                  onChange={(e) => resolver.setConservative(e.target.checked)}
+                />
+                Additional specification checks{" "}
+                <span className="text-dna-faint">· review-first-v1</span>
+              </label>
+              <div className="workbench-actions">
+                <button
+                  className="primary-action"
+                  onClick={() => {
+                    setSelectedCandidate(null);
+                    resolver.handleResolve();
+                  }}
+                  disabled={
+                    resolver.phase === "processing" ||
+                    !resolver.description.trim()
+                  }
+                >
+                  <Sparkles aria-hidden="true" size={14} />
+                  {resolver.phase === "processing"
+                    ? "Evaluating engineering evidence…"
+                    : "Resolve Material"}
+                  <ArrowRight aria-hidden="true" size={13} />
+                </button>
+                <button
+                  className="secondary-action"
+                  onClick={() => {
+                    resolver.reset();
+                    setSelectedCandidate(null);
+                  }}
+                >
+                  <RotateCcw aria-hidden="true" size={12} />
+                  Reset
+                </button>
+                <span className="workbench-hint">
+                  <ShieldCheck aria-hidden="true" size={12} />
+                  Human approval required
+                </span>
+              </div>
+              {resolver.error && (
+                <p className="mt-3 text-xs text-dna-red" role="alert">
+                  {resolver.error}
+                </p>
+              )}
+            </div>
+            <div className="scenario-strip">
+              {demoScenarios.map((scenario) => (
+                <button
+                  key={scenario.id}
+                  className="scenario-button"
+                  disabled={resolver.phase === "processing"}
+                  onClick={() => {
+                    setSelectedCandidate(null);
+                    resolver.handleScenario(scenario.id);
+                  }}
+                  aria-label={`Run scenario: ${scenario.title}`}
+                >
+                  <span className="scenario-dot" />
+                  {scenario.title}
+                  <Play aria-hidden="true" size={9} />
+                </button>
+              ))}
+              <button
+                className="scenario-button ml-auto"
+                onClick={() => setShowGuide(!showGuide)}
+                aria-label="Open suggested demo script"
+              >
+                <ClipboardList aria-hidden="true" size={11} />
+                Demo guide
+              </button>
+            </div>
+          </section>
+          <aside className="evidence-aside">
+            <h3>
+              <GitBranch
+                aria-hidden="true"
+                size={14}
+                className="text-dna-cyan"
+              />
+              Inside the decision
+            </h3>
+            {[
+              ["Normalize", "Units, terms & abbreviations"],
+              ["Extract DNA", "Engineering attributes"],
+              ["Retrieve", "Find candidate records"],
+              ["Apply constraints", "Critical conflicts veto a merge"],
+              ["Explain & review", "Evidence for a human decision"],
+            ].map(([title, detail], i) => (
+              <div className="pipeline-step" key={title}>
+                <span className="pipeline-number">0{i + 1}</span>
+                <div>
+                  <strong>{title}</strong>
+                  <small>{detail}</small>
+                </div>
+              </div>
+            ))}
+            <p className="pipeline-footnote">
+              <Check aria-hidden="true" size={12} />
+              Similarity ranks. Constraints govern.
+            </p>
+          </aside>
+        </div>
+      </div>
       {result && (
-        <>
+        <section
+          id="resolution-results"
+          className="result-section space-y-5"
+          aria-label="Resolution results"
+        >
+          <div className="section-label !mb-0">
+            <ShieldCheck
+              aria-hidden="true"
+              size={15}
+              className="text-dna-cyan"
+            />
+            Decision & evidence
+            <span>
+              {resolver.durationMs} ms · {resolver.context}
+            </span>
+          </div>
           <DecisionBanner result={result} />
-
-          {/* Similarity != Equivalence highlight */}
-          {result.decision === "DO_NOT_MERGE" && result.selectedCandidate && (
-            <SimilarityWarning
-              similarity={result.selectedCandidate.similarityScore}
-              score={result.selectedCandidate.scoreDetails}
-              constraint={
-                result.selectedCandidate.criticalConflicts[0] ?? null
+          <RecordComparison result={result} />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              className="primary-action"
+              disabled={sentCase === result.caseId}
+              onClick={() => {
+                resolver.sendToReview();
+                setSentCase(result.caseId);
+                setStorageWarning(!isWorkspaceStorageHealthy());
+              }}
+            >
+              <Send aria-hidden="true" size={13} />
+              {sentCase === result.caseId
+                ? "Sent to Review Queue"
+                : "Send to Review Queue"}
+            </button>
+            <button
+              className="secondary-action"
+              onClick={() =>
+                downloadFile(
+                  `${result.caseId}-evidence.html`,
+                  decisionHtml(result),
+                  "text/html",
+                )
               }
+            >
+              <Download aria-hidden="true" size={13} />
+              Export decision report
+            </button>
+            <button
+              className="secondary-action"
+              onClick={() =>
+                downloadFile(
+                  `${result.caseId}-evidence.json`,
+                  JSON.stringify(resolutionEvidence(result), null, 2),
+                )
+              }
+            >
+              <FileJson aria-hidden="true" size={13} />
+              Evidence JSON
+            </button>
+            {sentCase === result.caseId && (
+              <Link className="hero-action !mt-0" href="/review">
+                Review this case <ArrowRight aria-hidden="true" size={12} />
+              </Link>
+            )}
+          </div>
+          {storageWarning && (
+            <p
+              role="alert"
+              className="rounded-lg border border-dna-amber/30 bg-dna-amber/5 p-3 text-xs text-dna-amber"
+            >
+              The case is in the review queue, but browser storage is
+              unavailable. Export your evidence before leaving or refreshing.
+            </p>
+          )}
+          {result.decision === "DO_NOT_MERGE" && topCandidate && (
+            <SimilarityWarning
+              similarity={topCandidate.similarityScore}
+              score={topCandidate.scoreDetails}
+              constraint={topCandidate.criticalConflicts[0] ?? null}
             />
           )}
-
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-5 xl:grid-cols-2">
             <MaterialDNAProfile dna={result.dna} />
             <ExplanationPanel result={result} />
           </div>
-
           <CandidateTable
             candidates={result.candidates.slice(0, 5)}
             selectedId={topCandidate?.targetRecord.sourceCode ?? null}
-            onSelect={(c) => setSelectedCandidate(c)}
-            onInspect={(c) => setDrawerCandidate(c)}
+            onSelect={setSelectedCandidate}
+            onInspect={setDrawerCandidate}
           />
-
-          {selectedCandidate && topCandidate && (
-            <ExplanationPanel result={result} candidate={selectedCandidate} compact />
+          {selectedCandidate && (
+            <ExplanationPanel
+              result={result}
+              candidate={selectedCandidate}
+              compact
+            />
           )}
-
           <CounterfactualPanel resolver={resolver} />
-
-          <AuditTimeline events={result.auditEvents} versions={{ engine: result.engineVersion, parser: result.parserVersion, constraints: result.constraintVersion }} />
-        </>
+          <AuditTimeline
+            events={result.auditEvents}
+            versions={{
+              engine: result.engineVersion,
+              parser: result.parserVersion,
+              constraints: result.constraintVersion,
+            }}
+          />
+        </section>
       )}
-
+      <div className="trust-row">
+        <Link href="/graph">
+          <GitBranch aria-hidden="true" size={19} />
+          <div>
+            <strong>Identity, with lineage</strong>
+            <p>
+              Follow source codes into proposed identities. Inspect links the
+              constraints refuse.
+            </p>
+          </div>
+        </Link>
+        <Link href="/research">
+          <FlaskConical aria-hidden="true" size={19} />
+          <div>
+            <strong>Evidence you can interrogate</strong>
+            <p>
+              See the submitted benchmark, its abstentions, and the errors still
+              to solve.
+            </p>
+          </div>
+        </Link>
+        <Link href="/review">
+          <ShieldCheck aria-hidden="true" size={19} />
+          <div>
+            <strong>A human stays in control</strong>
+            <p>
+              Approve, reject, or challenge a recommendation with a recorded
+              engineering note.
+            </p>
+          </div>
+        </Link>
+      </div>
       <DiscoveryDrawer
         candidate={drawerCandidate}
         onClose={() => setDrawerCandidate(null)}
       />
-
-      {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="Suggested demo script">
-          <div className="w-full max-w-lg rounded-md border border-dna-border bg-dna-panel p-5 shadow-xl">
-            <h2 className="text-sm font-semibold text-dna-text">Suggested 60-second Demo</h2>
-            <div className="mt-3 space-y-3 text-sm text-dna-muted">
-              <p><span className="font-mono text-dna-green">1 — Match</span> We first show that semantic and structured agreement can establish a likely duplicate.</p>
-              <p><span className="font-mono text-dna-red">2 — Near Match</span> Now we change only one engineering-critical attribute. Grade: 8.8 → 10.9. The descriptions remain highly similar, but the constraint engine blocks the merge.</p>
-              <p><span className="font-mono text-dna-amber">3 — Abstain</span> Finally, remove enough information that the system cannot safely decide. Instead of hallucinating identity, it abstains and routes the case to human review.</p>
-            </div>
-            <button
-              onClick={() => setShowHelp(false)}
-              className="mt-5 w-full rounded border border-dna-border2 py-2 text-sm text-dna-muted hover:text-dna-text"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

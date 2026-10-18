@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import {
   parseCsv,
   parseMigrationFile,
@@ -10,9 +10,14 @@ import { MAX_BATCH_ROWS, MAX_DESCRIPTION_LENGTH } from "@/lib/migration/limits";
 import { resolveBatchRows } from "@/lib/migration/batch";
 import { migrationStore } from "@/hooks/use-migration";
 import { materialRecords } from "@/data/demo";
-import { buildInputRecord, resolveMaterialRecord } from "@/lib/material-dna/demo";
+import {
+  buildInputRecord,
+  resolveMaterialRecord,
+} from "@/lib/material-dna/demo";
 
-function ok(result: MigrationFileResult): Extract<MigrationFileResult, { ok: true }> {
+function ok(
+  result: MigrationFileResult,
+): Extract<MigrationFileResult, { ok: true }> {
   if (!result.ok) throw new Error(`expected ok, got: ${result.error}`);
   return result;
 }
@@ -31,7 +36,9 @@ describe("parseCsv", () => {
   });
 
   it("keeps commas and escaped quotes inside quoted fields", () => {
-    const rows = parseCsv('"Pipe, carbon, seamless",CPSE-A\n"He said ""SS304""",');
+    const rows = parseCsv(
+      '"Pipe, carbon, seamless",CPSE-A\n"He said ""SS304""",',
+    );
     expect(rows[0]).toEqual(["Pipe, carbon, seamless", "CPSE-A"]);
     expect(rows[1]).toEqual(['He said "SS304"', ""]);
   });
@@ -58,7 +65,7 @@ describe("rowsFromMatrix", () => {
         ["Material Description", "Source"],
         ["MS plate 10mm", "CPSE-A"],
         ["Bolt M12", ""],
-      ])
+      ]),
     );
     expect(res.rows).toEqual([
       { row: 2, source: "CPSE-A", description: "MS plate 10mm" },
@@ -69,13 +76,16 @@ describe("rowsFromMatrix", () => {
 
   it("accepts header aliases with underscores/case variants", () => {
     const res = ok(
-      rowsFromMatrix([["Raw_Description"], ["Cable 2.5sq mm 3C"]])
+      rowsFromMatrix([["Raw_Description"], ["Cable 2.5sq mm 3C"]]),
     );
     expect(res.rows[0].description).toBe("Cable 2.5sq mm 3C");
   });
 
   it("rejects files with no description column", () => {
-    const res = rowsFromMatrix([["sku", "qty"], ["A1", "4"]]);
+    const res = rowsFromMatrix([
+      ["sku", "qty"],
+      ["A1", "4"],
+    ]);
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toMatch(/description column/);
   });
@@ -88,9 +98,11 @@ describe("rowsFromMatrix", () => {
         ["   "],
         ["Steel bar"],
         ["", "CPSE-B"],
-      ])
+      ]),
     );
-    expect(res.rows).toEqual([{ row: 4, source: "", description: "Steel bar" }]);
+    expect(res.rows).toEqual([
+      { row: 4, source: "", description: "Steel bar" },
+    ]);
     expect(res.errors).toEqual([
       { row: 5, error: "Empty description — row skipped." },
     ]);
@@ -102,7 +114,7 @@ describe("rowsFromMatrix", () => {
         ["description"],
         ["x".repeat(MAX_DESCRIPTION_LENGTH + 1)],
         ["ok"],
-      ])
+      ]),
     );
     expect(res.rows).toHaveLength(1);
     expect(res.errors[0].row).toBe(2);
@@ -127,46 +139,65 @@ describe("rowsFromMatrix", () => {
 // File-level parsing (CSV + XLSX roundtrip)
 // ---------------------------------------------------------------------------
 
-describe("parseMigrationFile", () => {
-  it("parses a CSV file end to end", () => {
-    const csv = 'description,source\n"Seamless pipe, 4 inch, A106 GR B",CPSE-B\nBolt M12x80 8.8,Legacy ERP\n';
-    const res = ok(parseMigrationFile("legacy.csv", Buffer.from(csv, "utf8")));
+describe("parseMigrationFile", async () => {
+  it("parses a CSV file end to end", async () => {
+    const csv =
+      'description,source\n"Seamless pipe, 4 inch, A106 GR B",CPSE-B\nBolt M12x80 8.8,Legacy ERP\n';
+    const res = ok(
+      await parseMigrationFile("legacy.csv", Buffer.from(csv, "utf8")),
+    );
     expect(res.rows).toEqual([
-      { row: 2, source: "CPSE-B", description: "Seamless pipe, 4 inch, A106 GR B" },
+      {
+        row: 2,
+        source: "CPSE-B",
+        description: "Seamless pipe, 4 inch, A106 GR B",
+      },
       { row: 3, source: "Legacy ERP", description: "Bolt M12x80 8.8" },
     ]);
   });
 
-  it("round-trips an .xlsx workbook", () => {
-    const ws = XLSX.utils.aoa_to_sheet([
+  it("round-trips an .xlsx workbook", async () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Migration");
+    ws.addRows([
       ["description", "source"],
       ["MS PIPE 4 INCH SEAMLESS, A106 GR B", "CPSE-B"],
       ["BOLT M12X80 8.8 ZP", "Supplier Catalog"],
     ]);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Migration");
-    const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
+    const buf = Buffer.from(await wb.xlsx.writeBuffer());
 
-    const res = ok(parseMigrationFile("legacy.xlsx", buf));
+    const res = ok(await parseMigrationFile("legacy.xlsx", buf));
     expect(res.rows).toEqual([
-      { row: 2, source: "CPSE-B", description: "MS PIPE 4 INCH SEAMLESS, A106 GR B" },
+      {
+        row: 2,
+        source: "CPSE-B",
+        description: "MS PIPE 4 INCH SEAMLESS, A106 GR B",
+      },
       { row: 3, source: "Supplier Catalog", description: "BOLT M12X80 8.8 ZP" },
     ]);
   });
 
-  it("rejects a .xlsx extension whose content is not a workbook", () => {
-    const res = parseMigrationFile("legacy.xlsx", Buffer.from("description\nx"));
+  it("rejects a .xlsx extension whose content is not a workbook", async () => {
+    const res = await parseMigrationFile(
+      "legacy.xlsx",
+      Buffer.from("description\nx"),
+    );
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toMatch(/not a valid \.xlsx/);
   });
 
-  it("rejects empty and oversized files", () => {
-    expect(parseMigrationFile("a.csv", Buffer.alloc(0)).ok).toBe(false);
-    expect(parseMigrationFile("a.csv", Buffer.alloc(6 * 1024 * 1024)).ok).toBe(false);
+  it("rejects empty and oversized files", async () => {
+    expect((await parseMigrationFile("a.csv", Buffer.alloc(0))).ok).toBe(false);
+    expect(
+      (await parseMigrationFile("a.csv", Buffer.alloc(6 * 1024 * 1024))).ok,
+    ).toBe(false);
   });
 
-  it("rejects binary content masquerading as CSV", () => {
-    const res = parseMigrationFile("weird.csv", Buffer.from([0x64, 0x00, 0x01]));
+  it("rejects binary content masquerading as CSV", async () => {
+    const res = await parseMigrationFile(
+      "weird.csv",
+      Buffer.from([0x64, 0x00, 0x01]),
+    );
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toMatch(/Unsupported file format/);
   });
@@ -184,7 +215,7 @@ describe("resolveBatchRows", () => {
       "TOTALLY UNKNOWN ITEM 99",
     ];
     const { results, versions } = resolveBatchRows(
-      descriptions.map((description, i) => ({ rowId: `R${i}`, description }))
+      descriptions.map((description, i) => ({ rowId: `R${i}`, description })),
     );
 
     expect(results).toHaveLength(descriptions.length);
@@ -195,14 +226,14 @@ describe("resolveBatchRows", () => {
     descriptions.forEach((description, i) => {
       const direct = resolveMaterialRecord(
         buildInputRecord(description),
-        materialRecords
+        materialRecords,
       );
       expect(results[i].rowId).toBe(`R${i}`);
       expect(results[i].decision).toBe(direct.decision);
       expect(results[i].risk).toBe(direct.risk);
       expect(results[i].confidence).toBe(direct.evidenceCoverage);
       expect(results[i].candidateCode).toBe(
-        direct.selectedCandidate?.targetRecord.sourceCode ?? null
+        direct.selectedCandidate?.targetRecord.sourceCode ?? null,
       );
     });
   });
@@ -221,10 +252,18 @@ describe("migrationStore", () => {
     return migrationStore.importBatch(
       "legacy.csv",
       [
-        { row: 2, source: "CPSE-A", description: materialRecords[0].rawDescription },
-        { row: 3, source: "CPSE-B", description: materialRecords[1].rawDescription },
+        {
+          row: 2,
+          source: "CPSE-A",
+          description: materialRecords[0].rawDescription,
+        },
+        {
+          row: 3,
+          source: "CPSE-B",
+          description: materialRecords[1].rawDescription,
+        },
       ],
-      [{ row: 4, error: "Empty description — row skipped." }]
+      [{ row: 4, error: "Empty description — row skipped." }],
     );
   }
 
@@ -232,7 +271,7 @@ describe("migrationStore", () => {
     const batchId = importTwoRows();
     const batch = migrationStore.getSnapshot().find((b) => b.id === batchId)!;
     const { results, versions } = resolveBatchRows(
-      batch.rows.map((r) => ({ rowId: r.id, description: r.description }))
+      batch.rows.map((r) => ({ rowId: r.id, description: r.description })),
     );
     migrationStore.applyResults(batchId, results, versions);
     return { batchId };
@@ -243,11 +282,14 @@ describe("migrationStore", () => {
     const batch = migrationStore.getSnapshot()[0];
     expect(batch.id).toBe(id);
     expect(batch.status).toBe("IMPORTED");
-    expect(batch.rows.map((r) => r.status)).toEqual(["UNRESOLVED", "UNRESOLVED"]);
+    expect(batch.rows.map((r) => r.status)).toEqual([
+      "UNRESOLVED",
+      "UNRESOLVED",
+    ]);
     expect(batch.rows[0].id).toBe(`${id}-R2`);
     expect(batch.auditEvents.map((e) => e.label)).toContain("Batch imported");
     expect(batch.auditEvents.map((e) => e.label)).toContain(
-      "Rows rejected by validation"
+      "Rows rejected by validation",
     );
   });
 
@@ -261,7 +303,9 @@ describe("migrationStore", () => {
       expect(row.confidence).toBeGreaterThanOrEqual(0);
     }
     expect(batch.auditEvents.map((e) => e.label)).toContain("Batch resolved");
-    expect(batch.auditEvents.map((e) => e.label)).toContain("Versions recorded");
+    expect(batch.auditEvents.map((e) => e.label)).toContain(
+      "Versions recorded",
+    );
   });
 
   it("bulkDecide approves selected rows, records an op with prior status, and audits it", () => {
@@ -273,7 +317,7 @@ describe("migrationStore", () => {
       batchId,
       [first],
       "APPROVED",
-      "checked against PO"
+      "checked against PO",
     );
     expect(changed).toBe(1);
 
@@ -294,11 +338,19 @@ describe("migrationStore", () => {
 
     expect(migrationStore.bulkDecide(batchId, [], "APPROVED")).toBe(0);
     expect(
-      migrationStore.bulkDecide(batchId, batch.rows.map((r) => r.id), "APPROVED")
+      migrationStore.bulkDecide(
+        batchId,
+        batch.rows.map((r) => r.id),
+        "APPROVED",
+      ),
     ).toBe(2);
     // Second attempt: everything already APPROVED -> no change, no new op.
     expect(
-      migrationStore.bulkDecide(batchId, batch.rows.map((r) => r.id), "REJECTED")
+      migrationStore.bulkDecide(
+        batchId,
+        batch.rows.map((r) => r.id),
+        "REJECTED",
+      ),
     ).toBe(0);
     const after = migrationStore.getSnapshot().find((b) => b.id === batchId)!;
     expect(after.ops).toHaveLength(1);
@@ -307,7 +359,10 @@ describe("migrationStore", () => {
 
   it("rollbackBatch undoes the most recent op (LIFO) and audits it", () => {
     const { batchId } = resolvedBatch();
-    const ids = migrationStore.getSnapshot().find((b) => b.id === batchId)!.rows.map((r) => r.id);
+    const ids = migrationStore
+      .getSnapshot()
+      .find((b) => b.id === batchId)!
+      .rows.map((r) => r.id);
 
     migrationStore.bulkDecide(batchId, [ids[0]], "APPROVED");
     migrationStore.bulkDecide(batchId, [ids[1]], "REJECTED", "wrong spec");
@@ -331,7 +386,11 @@ describe("migrationStore", () => {
 
   it("batches prepend newest-first and ids are unique across imports", () => {
     const a = importTwoRows();
-    const b = migrationStore.importBatch("other.csv", [{ row: 2, source: "", description: "x" }], []);
+    const b = migrationStore.importBatch(
+      "other.csv",
+      [{ row: 2, source: "", description: "x" }],
+      [],
+    );
     const all = migrationStore.getSnapshot();
     expect(all.map((x) => x.id)).toEqual([b, a]);
     expect(new Set(all.map((x) => x.id)).size).toBe(all.length);

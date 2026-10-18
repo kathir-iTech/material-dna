@@ -1,7 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm install --no-audit --no-fund && node scripts/prune-node-modules.mjs",
+  "installCommand": "npm ci --no-audit --no-fund",
   "buildCommand": "npm run build",
-  "regions": ["iad1"]
+  "regions": [
+    "iad1"
+  ]
 }

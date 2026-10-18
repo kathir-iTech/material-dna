@@ -2,81 +2,175 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dna, Presentation } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import {
+  ArrowUpRight,
+  Boxes,
+  ChevronRight,
+  Dna,
+  FileSpreadsheet,
+  FlaskConical,
+  GitBranch,
+  Layers3,
+  ScanLine,
+  Search,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 const NAV = [
-  { href: "/", label: "Resolve", exact: true },
-  { href: "/review", label: "Review Queue" },
-  { href: "/migrate", label: "Bulk Migration" },
-  { href: "/materials", label: "Materials" },
-  { href: "/graph", label: "Identity Graph" },
-  { href: "/research", label: "Research" },
+  {
+    href: "/",
+    label: "Resolve",
+    detail: "Material intelligence",
+    icon: ScanLine,
+  },
+  {
+    href: "/materials",
+    label: "Materials",
+    detail: "Canonical master",
+    icon: Boxes,
+  },
+  {
+    href: "/graph",
+    label: "Identity Graph",
+    detail: "Connections & lineage",
+    icon: GitBranch,
+  },
+  {
+    href: "/review",
+    label: "Review Queue",
+    detail: "Human governance",
+    icon: ShieldCheck,
+  },
+  {
+    href: "/migrate",
+    label: "Bulk Migration",
+    detail: "Legacy onboarding",
+    icon: FileSpreadsheet,
+  },
+  {
+    href: "/research",
+    label: "Research",
+    detail: "Evidence & evaluation",
+    icon: FlaskConical,
+  },
 ];
 
-export function TopNav({ presentation }: { presentation?: boolean }) {
+export function TopNav({ presentation = false }: { presentation?: boolean }) {
   const pathname = usePathname();
-
-  const isActive = (href: string, exact?: boolean) =>
-    exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
-
+  const current = NAV.find((n) => n.href === pathname) ?? NAV[0];
   return (
-    <header className="sticky top-0 z-40 border-b border-dna-border bg-dna-bg/90 backdrop-blur">
-      {/* min-w-0 + overflow-x-auto on the nav keeps the six links scrollable
-          inside the bar on narrow screens instead of widening the document. */}
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
+    <>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <aside className="workspace-nav">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-2"
+          className="workspace-brand"
           aria-label="Material DNA home"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded border border-dna-cyan/40 bg-dna-cyan/10 text-dna-cyan">
-            <Dna size={16} aria-hidden="true" />
+          <span className="brand-mark">
+            <Dna size={25} strokeWidth={1.7} aria-hidden="true" />
           </span>
-          <span className="text-sm font-semibold tracking-tight text-dna-text">
-            MATERIAL <span className="text-dna-cyan">DNA</span>
-          </span>
-          <span className="hidden font-mono text-[10px] uppercase tracking-widest text-dna-faint sm:inline">
-            Engineering Material Identity
+          <span>
+            <strong>
+              material<span>dna</span>
+              <i>.</i>
+            </strong>
+            <small>ENGINEERING IDENTITY</small>
           </span>
         </Link>
-
+        <div className="workspace-switch">
+          <span className="workspace-switch-icon">
+            <Layers3 aria-hidden="true" size={17} />
+          </span>
+          <span>
+            National Material Master<small>Prototype workspace</small>
+          </span>
+          <ChevronRight aria-hidden="true" size={13} />
+        </div>
+        <p className="nav-section">WORKSPACE</p>
         {!presentation && (
-          <nav
-            className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto overscroll-x-contain"
-            aria-label="Primary"
-          >
-            {NAV.map((item) => {
-              const active = isActive(item.href, item.exact);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={[
-                    "inline-flex min-h-9 shrink-0 items-center whitespace-nowrap rounded px-2.5 text-xs font-medium transition-colors",
-                    active
-                      ? "bg-dna-cyan/10 text-dna-cyan"
-                      : "text-dna-muted hover:bg-dna-panel hover:text-dna-text",
-                  ].join(" ")}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+          <nav aria-label="Primary">
+            {NAV.map(({ href, label, detail, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-label={label}
+                aria-current={pathname === href ? "page" : undefined}
+                className={`workspace-nav-link ${pathname === href ? "is-active" : ""}`}
+              >
+                <Icon aria-hidden="true" size={19} strokeWidth={1.7} />
+                <span>
+                  {label}
+                  <small>{detail}</small>
+                </span>
+                {pathname === href && <span className="nav-active-dot" />}
+              </Link>
+            ))}
           </nav>
         )}
-
-        <div className="flex shrink-0 items-center gap-2">
-          {!presentation && (
-            <Badge tone="blue">
-              <Presentation size={11} aria-hidden="true" />
-              Prototype
-            </Badge>
-          )}
-          <Badge tone="purple">Demo Mode</Badge>
+        <div className="nav-bottom">
+          <div className="nav-principle">
+            <ShieldCheck aria-hidden="true" size={21} />
+            <strong>
+              Similarity is a signal.
+              <br />
+              Engineering decides.
+            </strong>
+            <p>Every recommendation comes with evidence.</p>
+          </div>
+          <a
+            href="https://github.com/kathir-iTech/material-dna"
+            target="_blank"
+            rel="noreferrer"
+            className="nav-source"
+          >
+            Explore the source <ArrowUpRight aria-hidden="true" size={15} />
+          </a>
+          <div className="nav-team">
+            <span>Z6</span>
+            <div>
+              ZYN6<small>SIH 2026 · PS26099</small>
+            </div>
+            <span className="status-dot" />
+          </div>
         </div>
-      </div>
-    </header>
+      </aside>
+      <header className="workspace-topbar">
+        <div className="breadcrumb">
+          <span>Workspace</span>
+          <ChevronRight aria-hidden="true" size={13} />
+          <strong>{current.label}</strong>
+        </div>
+        <div className="topbar-actions">
+          <Link href="/materials" className="workspace-search">
+            <Search aria-hidden="true" size={15} />
+            <span>Find a material</span>
+          </Link>
+          <span className="topbar-prototype">
+            <span className="status-dot" />
+            Prototype
+          </span>
+          <Link
+            href="/?demo=1"
+            className="present-button"
+            onClick={(event) => {
+              if (
+                !event.metaKey &&
+                !event.ctrlKey &&
+                !event.shiftKey &&
+                !event.altKey
+              )
+                window.dispatchEvent(new Event("material-dna:present"));
+            }}
+          >
+            <Sparkles aria-hidden="true" size={15} />
+            Present demo
+          </Link>
+        </div>
+      </header>
+    </>
   );
 }

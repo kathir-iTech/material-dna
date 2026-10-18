@@ -8,7 +8,7 @@ import {
   Play,
   Undo2,
   Upload,
-  TriangleAlert,
+  Download,
 } from "lucide-react";
 import {
   countDecisions,
@@ -19,14 +19,25 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { DecisionBadge, RiskBadge } from "@/components/ui/status";
 import { AuditTimeline } from "@/components/audit-timeline";
-import { CONSTRAINTS_VERSION, ENGINE_VERSION_NUMBER, PARSER_VERSION } from "@/lib/material-dna/config";
+import {
+  CONSTRAINTS_VERSION,
+  ENGINE_VERSION_NUMBER,
+  PARSER_VERSION,
+} from "@/lib/material-dna/config";
 import type { MigrationBatch, MigrationRow } from "@/types/domain";
+import { resolveInChunks } from "@/lib/migration/client";
+import { MAX_FILE_BYTES } from "@/lib/migration/limits";
+import { LocalWorkspaceNotice } from "./local-workspace-notice";
+import { downloadFile, migrationCsv } from "@/lib/reports";
 import { cn, formatTimestampUtc } from "@/lib/utils";
 
 const FILTERS = ["All", "MATCH", "REVIEW", "DO_NOT_MERGE", "Pending"] as const;
 type Filter = (typeof FILTERS)[number];
 
-const ROW_TONES: Record<MigrationRow["status"], "neutral" | "amber" | "green" | "red"> = {
+const ROW_TONES: Record<
+  MigrationRow["status"],
+  "neutral" | "amber" | "green" | "red"
+> = {
   UNRESOLVED: "neutral",
   PENDING: "amber",
   APPROVED: "green",
@@ -51,6 +62,7 @@ function bufferToBase64(buf: ArrayBuffer): string {
 
 export function MigrationClient() {
   const batches = useMigrationBatches();
+  const [completedRows, setCompletedRows] = useState(0);
   const [busy, setBusy] = useState<"parse" | "resolve" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -77,6 +89,12 @@ export function MigrationClient() {
 
   async function handleFile(file: File): Promise<void> {
     setError(null);
+    if (file.size > MAX_FILE_BYTES) {
+      setError(
+        "File larger than 3 MB. Split the catalogue into smaller files.",
+      );
+      return;
+    }
     setBusy("parse");
     try {
       const base64 = bufferToBase64(await file.arrayBuffer());
@@ -91,7 +109,7 @@ export function MigrationClient() {
         data.fileName,
         data.rows,
         data.errors,
-        data.truncated
+        data.truncated,
       );
       setActiveId(id);
       setSelection([]);
@@ -107,19 +125,30 @@ export function MigrationClient() {
     setError(null);
     setBusy("resolve");
     try {
-      const res = await fetch("/api/resolve-batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          rows: batch.rows.map((r) => ({
-            rowId: r.id,
-            description: r.description,
-          })),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Unable to resolve batch.");
-      migrationStore.applyResults(batch.id, data.results, data.versions);
+      setCompletedRows(0);
+      const { results, versions } = await resolveInChunks(
+        batch.rows.map((row) => ({
+          rowId: row.id,
+          description: row.description,
+        })),
+        async (rows) => {
+          const res = await fetch("/api/resolve-batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rows, embeddings: false }),
+            signal: AbortSignal.timeout(60_000),
+          });
+          const data = await res.json();
+          if (!res.ok)
+            throw new Error(
+              data.error ??
+                "Unable to resolve batch. No batch decisions were applied.",
+            );
+          return data;
+        },
+        setCompletedRows,
+      );
+      migrationStore.applyResults(batch.id, results, versions);
       setSelection([]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to resolve batch.");
@@ -134,7 +163,7 @@ export function MigrationClient() {
       active.id,
       selectedPending.map((r) => r.id),
       action,
-      note || undefined
+      note || undefined,
     );
     setSelection([]);
     setNote("");
@@ -142,7 +171,7 @@ export function MigrationClient() {
 
   function toggleRow(id: string): void {
     setSelection((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   }
 
@@ -160,7 +189,9 @@ export function MigrationClient() {
 
   const counts = active ? countDecisions(active.rows) : null;
   const decided = active
-    ? active.rows.filter((r) => r.status === "APPROVED" || r.status === "REJECTED").length
+    ? active.rows.filter(
+        (r) => r.status === "APPROVED" || r.status === "REJECTED",
+      ).length
     : 0;
   const pending = active
     ? active.rows.filter((r) => r.status === "PENDING").length
@@ -175,33 +206,103 @@ export function MigrationClient() {
           resolution pipeline, then approve at scale — each bulk action is
           recorded in an audit trail and can be rolled back.
         </p>
-        <p className="mt-2 inline-flex items-center gap-1.5 rounded border border-dna-amber/40 bg-dna-amber/10 px-2 py-1 text-xs text-dna-amber">
-          <TriangleAlert size={12} aria-hidden="true" />
-          Demo state is held in memory only — uploaded batches and their audit trail are lost on
-          page refresh.
-        </p>
+      </div>
+      <LocalWorkspaceNotice
+        kind="migrations"
+        onReset={() => {
+          migrationStore.reset();
+          setActiveId(null);
+          setSelection([]);
+        }}
+      />
+      <p className="text-[11px] leading-6 text-dna-muted">
+        Approving a row accepts its displayed recommendation. An approved
+        DO_NOT_MERGE recommendation keeps the materials separate.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          className="secondary-action"
+          onClick={() =>
+            downloadFile(
+              "material-dna-sample.csv",
+              "description,source\nHEX BOLT M12 X 60 8.8 ZP DIN 931,CPSE-A\nSS304 PIPE 50MM OD X 3MM WALL,CPSE-B\nBOLT,Legacy ERP\n",
+              "text/csv",
+            )
+          }
+        >
+          <Download aria-hidden="true" size={13} />
+          Download sample CSV
+        </button>
+        {active && (
+          <>
+            <button
+              className="secondary-action"
+              onClick={() =>
+                downloadFile(
+                  `${active.id}-decisions.csv`,
+                  migrationCsv(active),
+                  "text/csv",
+                )
+              }
+            >
+              Export batch decisions
+            </button>
+            <button
+              className="secondary-action"
+              onClick={() =>
+                downloadFile(
+                  `${active.id}-audit.json`,
+                  JSON.stringify(
+                    {
+                      schemaVersion: 1,
+                      scope: "Local, unsigned batch history",
+                      exportedAt: new Date().toISOString(),
+                      batch: active,
+                    },
+                    null,
+                    2,
+                  ),
+                )
+              }
+            >
+              Export batch audit
+            </button>
+          </>
+        )}
       </div>
 
       <Card>
         <CardHeader
           title="1 · Upload source file"
           subtitle="CSV or XLSX. First row must be a header with a 'description' column; an optional 'source' column is honoured."
-          right={<FileSpreadsheet size={15} className="text-dna-cyan" aria-hidden="true" />}
+          right={
+            <FileSpreadsheet
+              size={15}
+              className="text-dna-cyan"
+              aria-hidden="true"
+            />
+          }
         />
         <CardBody>
           <label
             className={cn(
               "flex cursor-pointer flex-col items-center justify-center gap-2 rounded border border-dashed border-dna-border2 px-4 py-8 text-center transition-colors hover:border-dna-cyan/60 hover:bg-dna-panel2",
-              busy === "parse" && "pointer-events-none opacity-60"
+              busy === "parse" && "pointer-events-none opacity-60",
             )}
           >
             {busy === "parse" ? (
-              <Loader2 size={18} className="animate-spin text-dna-cyan" aria-hidden="true" />
+              <Loader2
+                size={18}
+                className="animate-spin text-dna-cyan"
+                aria-hidden="true"
+              />
             ) : (
               <Upload size={18} className="text-dna-faint" aria-hidden="true" />
             )}
             <span className="text-xs text-dna-muted">
-              {busy === "parse" ? "Parsing file…" : "Choose a .csv or .xlsx file (max 5 MB, 1000 rows)"}
+              {busy === "parse"
+                ? "Parsing file…"
+                : "Choose a .csv or .xlsx file (max 3 MB, 1000 rows)"}
             </span>
             <input
               type="file"
@@ -217,7 +318,11 @@ export function MigrationClient() {
           </label>
           {error && (
             <div className="mt-3 flex items-start gap-2 rounded border border-dna-red/40 bg-dna-red/10 px-3 py-2 text-xs text-dna-red">
-              <AlertTriangle size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <AlertTriangle
+                size={13}
+                className="mt-0.5 shrink-0"
+                aria-hidden="true"
+              />
               <span>{error}</span>
             </div>
           )}
@@ -237,11 +342,17 @@ export function MigrationClient() {
                   className="flex items-center gap-1.5 rounded border border-dna-cyan/50 bg-dna-cyan/10 px-3 py-1.5 text-xs font-medium text-dna-cyan transition-colors hover:bg-dna-cyan/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {busy === "resolve" ? (
-                    <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+                    <Loader2
+                      size={13}
+                      className="animate-spin"
+                      aria-hidden="true"
+                    />
                   ) : (
                     <Play size={13} aria-hidden="true" />
                   )}
-                  Run batch resolve ({active.rows.length} rows)
+                  {busy === "resolve"
+                    ? `Resolving ${completedRows}/${active.rows.length} rows…`
+                    : `Run batch resolve (${active.rows.length} rows)`}
                 </button>
               ) : (
                 <Badge tone="cyan">RESOLVED</Badge>
@@ -277,10 +388,26 @@ export function MigrationClient() {
             {counts && (
               <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                 {[
-                  { label: "Rows", value: active.rows.length, tone: "text-dna-text" },
-                  { label: "Match", value: counts.MATCH, tone: "text-dna-green" },
-                  { label: "Review", value: counts.REVIEW, tone: "text-dna-amber" },
-                  { label: "Do not merge", value: counts.DO_NOT_MERGE, tone: "text-dna-red" },
+                  {
+                    label: "Rows",
+                    value: active.rows.length,
+                    tone: "text-dna-text",
+                  },
+                  {
+                    label: "Match",
+                    value: counts.MATCH,
+                    tone: "text-dna-green",
+                  },
+                  {
+                    label: "Review",
+                    value: counts.REVIEW,
+                    tone: "text-dna-amber",
+                  },
+                  {
+                    label: "Do not merge",
+                    value: counts.DO_NOT_MERGE,
+                    tone: "text-dna-red",
+                  },
                   { label: "Pending", value: pending, tone: "text-dna-cyan" },
                   { label: "Decided", value: decided, tone: "text-dna-text" },
                 ].map((t) => (
@@ -291,7 +418,9 @@ export function MigrationClient() {
                     <div className="text-[10px] uppercase tracking-wider text-dna-faint">
                       {t.label}
                     </div>
-                    <div className={cn("font-mono text-lg font-semibold", t.tone)}>
+                    <div
+                      className={cn("font-mono text-lg font-semibold", t.tone)}
+                    >
                       {t.value}
                     </div>
                   </div>
@@ -308,7 +437,7 @@ export function MigrationClient() {
                     "inline-flex min-h-9 items-center rounded border px-2.5 text-xs transition-colors",
                     filter === f
                       ? "border-dna-cyan/60 bg-dna-cyan/10 text-dna-cyan"
-                      : "border-dna-border2 text-dna-muted hover:text-dna-text"
+                      : "border-dna-border2 text-dna-muted hover:text-dna-text",
                   )}
                   aria-label={`Filter: ${f}`}
                 >
@@ -371,7 +500,10 @@ export function MigrationClient() {
                 <tbody>
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={9} className="px-4 py-6 text-center text-dna-faint">
+                      <td
+                        colSpan={9}
+                        className="px-4 py-6 text-center text-dna-faint"
+                      >
                         No rows match this filter.
                       </td>
                     </tr>
@@ -383,7 +515,7 @@ export function MigrationClient() {
                         key={r.id}
                         className={cn(
                           "border-b border-dna-border/50",
-                          selectedSet.has(r.id) && "bg-dna-cyan/5"
+                          selectedSet.has(r.id) && "bg-dna-cyan/5",
                         )}
                       >
                         <td className="px-3 py-2">
@@ -395,7 +527,9 @@ export function MigrationClient() {
                             aria-label={`Select row ${r.row}`}
                           />
                         </td>
-                        <td className="px-3 py-2 font-mono text-dna-faint">{r.row}</td>
+                        <td className="px-3 py-2 font-mono text-dna-faint">
+                          {r.row}
+                        </td>
                         <td className="px-3 py-2">{r.source || "—"}</td>
                         <td className="max-w-72 truncate px-3 py-2 font-mono text-dna-text">
                           {r.description}
@@ -408,10 +542,16 @@ export function MigrationClient() {
                           )}
                         </td>
                         <td className="px-3 py-2">
-                          {r.risk ? <RiskBadge risk={r.risk} /> : <span className="text-dna-faint">—</span>}
+                          {r.risk ? (
+                            <RiskBadge risk={r.risk} />
+                          ) : (
+                            <span className="text-dna-faint">—</span>
+                          )}
                         </td>
                         <td className="px-3 py-2 font-mono text-dna-muted">
-                          {r.confidence !== undefined ? `${r.confidence}%` : "—"}
+                          {r.confidence !== undefined
+                            ? `${r.confidence}%`
+                            : "—"}
                         </td>
                         <td className="px-3 py-2 font-mono text-dna-cyan">
                           {r.candidateCode ?? "—"}
@@ -447,13 +587,20 @@ export function MigrationClient() {
                 return (
                   <li key={b.id} className="px-4 py-3">
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="font-mono text-xs text-dna-cyan">{b.id}</span>
-                      <span className="text-xs text-dna-text">{b.fileName}</span>
-                      <span className="font-mono text-[11px] text-dna-faint">
-                        {b.rows.length} rows · {bCounts.MATCH}/{bCounts.REVIEW}/{bCounts.DO_NOT_MERGE} m/r/d ·{" "}
-                        {b.ops.length} bulk actions
+                      <span className="font-mono text-xs text-dna-cyan">
+                        {b.id}
                       </span>
-                      <Badge tone={b.status === "RESOLVED" ? "cyan" : "neutral"}>
+                      <span className="text-xs text-dna-text">
+                        {b.fileName}
+                      </span>
+                      <span className="font-mono text-[11px] text-dna-faint">
+                        {b.rows.length} rows · {bCounts.MATCH}/{bCounts.REVIEW}/
+                        {bCounts.DO_NOT_MERGE} m/r/d · {b.ops.length} bulk
+                        actions
+                      </span>
+                      <Badge
+                        tone={b.status === "RESOLVED" ? "cyan" : "neutral"}
+                      >
                         {b.status}
                       </Badge>
                       <div className="ml-auto flex items-center gap-2">
@@ -464,7 +611,9 @@ export function MigrationClient() {
                           className="rounded border border-dna-border2 px-2 py-1 text-[11px] text-dna-muted transition-colors hover:text-dna-text"
                           aria-expanded={openAudit === b.id}
                         >
-                          {openAudit === b.id ? "Hide audit trail" : "Audit trail"}
+                          {openAudit === b.id
+                            ? "Hide audit trail"
+                            : "Audit trail"}
                         </button>
                         <button
                           onClick={() => migrationStore.rollbackBatch(b.id)}
@@ -479,7 +628,10 @@ export function MigrationClient() {
                     </div>
                     {openAudit === b.id && (
                       <div className="mt-3">
-                        <AuditTimeline events={b.auditEvents} versions={AUDIT_VERSIONS} />
+                        <AuditTimeline
+                          events={b.auditEvents}
+                          versions={AUDIT_VERSIONS}
+                        />
                       </div>
                     )}
                   </li>

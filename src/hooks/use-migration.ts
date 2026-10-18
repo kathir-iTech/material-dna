@@ -1,6 +1,12 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import {
+  isMigrationSnapshot,
+  onWorkspaceChange,
+  readWorkspace,
+  writeWorkspace,
+} from "@/lib/browser-workspace";
 import type {
   AuditEvent,
   MigrationBatch,
@@ -29,6 +35,7 @@ let opSeq = 1;
 const listeners = new Set<() => void>();
 
 function emit(): void {
+  writeWorkspace("migrations", batches.slice(0, 5));
   for (const l of listeners) l();
 }
 
@@ -44,7 +51,7 @@ function nowIso(): string {
 }
 
 function nowStamp(): string {
-  return new Date().toTimeString().slice(0, 8);
+  return new Date().toISOString();
 }
 
 function makeAudit(label: string, detail?: string): AuditEvent {
@@ -58,6 +65,25 @@ export interface ImportRowInput {
 }
 
 export const migrationStore = {
+  hydrate(): void {
+    const saved = readWorkspace("migrations", isMigrationSnapshot);
+    if (!saved) return;
+    batches = saved;
+    batchSeq = Math.max(
+      1,
+      ...saved
+        .map((b) => Number(b.id.replace("MIG-", "")) + 1)
+        .filter(Number.isFinite),
+    );
+    opSeq = Math.max(
+      1,
+      ...saved
+        .flatMap((b) => b.ops)
+        .map((op) => Number(op.id.replace("OP-", "")) + 1)
+        .filter(Number.isFinite),
+    );
+    for (const listener of listeners) listener();
+  },
   subscribe,
   getSnapshot: (): MigrationBatch[] => batches,
   getServerSnapshot: (): MigrationBatch[] => EMPTY_BATCHES,
@@ -67,7 +93,7 @@ export const migrationStore = {
     fileName: string,
     rows: ImportRowInput[],
     errors: MigrationParseError[],
-    truncated = false
+    truncated = false,
   ): string {
     const id = `MIG-${String(batchSeq++).padStart(3, "0")}`;
     const auditEvents: AuditEvent[] = [
@@ -75,12 +101,15 @@ export const migrationStore = {
     ];
     if (truncated) {
       auditEvents.push(
-        makeAudit("Rows truncated at batch limit", `first ${rows.length} rows kept`)
+        makeAudit(
+          "Rows truncated at batch limit",
+          `first ${rows.length} rows kept`,
+        ),
       );
     }
     if (errors.length > 0) {
       auditEvents.push(
-        makeAudit("Rows rejected by validation", `${errors.length} rows`)
+        makeAudit("Rows rejected by validation", `${errors.length} rows`),
       );
     }
 
@@ -96,7 +125,7 @@ export const migrationStore = {
           source: r.source,
           description: r.description,
           status: "UNRESOLVED",
-        })
+        }),
       ),
       errors,
       ops: [],
@@ -112,7 +141,7 @@ export const migrationStore = {
   applyResults(
     batchId: string,
     results: MigrationResolveResult[],
-    versions: { engine: string; parser: string; constraints: string }
+    versions: { engine: string; parser: string; constraints: string },
   ): number {
     const byRowId = new Map(results.map((r) => [r.rowId, r]));
     let updated = 0;
@@ -142,11 +171,11 @@ export const migrationStore = {
           ...b.auditEvents,
           makeAudit(
             "Batch resolved",
-            `${updated} rows · ${counts.MATCH} match, ${counts.REVIEW} review, ${counts.DO_NOT_MERGE} do-not-merge · engine ${versions.engine}`
+            `${updated} rows · ${counts.MATCH} match, ${counts.REVIEW} review, ${counts.DO_NOT_MERGE} do-not-merge · engine ${versions.engine}`,
           ),
           makeAudit(
             "Versions recorded",
-            `parser ${versions.parser} · constraints ${versions.constraints}`
+            `parser ${versions.parser} · constraints ${versions.constraints}`,
           ),
         ],
       };
@@ -165,7 +194,7 @@ export const migrationStore = {
     batchId: string,
     rowIds: string[],
     action: "APPROVED" | "REJECTED",
-    note?: string
+    note?: string,
   ): number {
     const wanted = new Set(rowIds);
     const prev: Record<string, MigrationRowStatus> = {};
@@ -198,7 +227,7 @@ export const migrationStore = {
           ...b.auditEvents,
           makeAudit(
             `Bulk ${action}`,
-            `${changed} rows${op.note ? ` — ${op.note}` : ""}`
+            `${changed} rows${op.note ? ` — ${op.note}` : ""}`,
           ),
         ],
       };
@@ -229,7 +258,9 @@ export const migrationStore = {
 
       const op = b.ops[opIdx];
       const rows = b.rows.map((row) => {
-        const back = op.prev[row.id];
+        const back = Object.hasOwn(op.prev, row.id)
+          ? op.prev[row.id]
+          : undefined;
         if (back && row.status === op.action) {
           restored++;
           return { ...row, status: back };
@@ -239,7 +270,7 @@ export const migrationStore = {
       if (restored === 0) return b;
 
       const ops = b.ops.map((o, i) =>
-        i === opIdx ? { ...o, rolledBack: true } : o
+        i === opIdx ? { ...o, rolledBack: true } : o,
       );
       return {
         ...b,
@@ -249,7 +280,7 @@ export const migrationStore = {
           ...b.auditEvents,
           makeAudit(
             "Bulk action rolled back",
-            `${restored} rows restored to ${Object.values(op.prev)[0] ?? "prior status"} (${op.action} undone)`
+            `${restored} rows restored to ${Object.values(op.prev)[0] ?? "prior status"} (${op.action} undone)`,
           ),
         ],
       };
@@ -269,7 +300,7 @@ export const migrationStore = {
 };
 
 export function countDecisions(
-  rows: MigrationRow[]
+  rows: MigrationRow[],
 ): Record<"MATCH" | "REVIEW" | "DO_NOT_MERGE" | "NO_MATCH", number> {
   const counts = { MATCH: 0, REVIEW: 0, DO_NOT_MERGE: 0, NO_MATCH: 0 };
   for (const row of rows) {
@@ -280,9 +311,13 @@ export function countDecisions(
 
 /** Shared migration state for any component (bulk review screen, tests). */
 export function useMigrationBatches(): MigrationBatch[] {
+  useEffect(() => {
+    migrationStore.hydrate();
+    return onWorkspaceChange("migrations", () => migrationStore.hydrate());
+  }, []);
   return useSyncExternalStore(
     migrationStore.subscribe,
     migrationStore.getSnapshot,
-    migrationStore.getServerSnapshot
+    migrationStore.getServerSnapshot,
   );
 }

@@ -10,8 +10,8 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-md border border-dna-border bg-dna-panel",
-        className
+        "surface-card rounded-xl border border-dna-border bg-dna-panel",
+        className,
       )}
     >
       {children}
@@ -29,9 +29,11 @@ export function CardHeader({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-dna-border px-4 py-3">
+    <div className="flex items-start justify-between gap-3 border-b border-dna-border px-5 py-4">
       <div>
-        <h3 className="text-sm font-semibold tracking-tight text-dna-text">{title}</h3>
+        <h3 className="text-sm font-semibold tracking-tight text-dna-text">
+          {title}
+        </h3>
         {subtitle ? (
           <p className="mt-0.5 text-xs text-dna-muted">{subtitle}</p>
         ) : null}
@@ -48,5 +50,5 @@ export function CardBody({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={cn("px-4 py-3", className)}>{children}</div>;
+  return <div className={cn("px-5 py-4", className)}>{children}</div>;
 }
