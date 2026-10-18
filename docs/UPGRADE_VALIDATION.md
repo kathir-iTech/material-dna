@@ -41,18 +41,19 @@ The optional embedding can affect the composite ranking score and compatible-pai
 | Unit/API/regression tests | 188 passed across 14 files; 1 real-model test skipped because model access was unavailable. |
 | Submitted lexical golden benchmark | Reproduced exactly, 257 lines after timing normalisation. |
 | Production build | Passed; all six application pages and seven API routes generated successfully. |
-| Existing desktop/mobile browser checks | 176 passed against a production build. |
-| Final keyboard/presentation follow-up | 4 passed against the corrected production build: modal focus/Space/Escape/return and Present demo on the existing Resolve route, on desktop and mobile. |
+| Complete final desktop/mobile browser suite | 180 passed in one run against the corrected production build, including modal focus/Space/Escape/return and Present demo on the existing Resolve route. |
 | Accessibility | Automated WCAG A/AA-tagged scans found 0 violations on all six initial pages. These scans are not a complete accessibility certification. |
 | Functional APIs | Materials: 98 records; canonical master: 18 identities; seeded reviews: 6. Direct wafer/lug comparison returned HTTP 200 and DO_NOT_MERGE under additional checks. |
 | Root page JS | Approximately 148 kB first load in the production build. |
 | Native-model validation | Not freshly reproduced; lexical fallback remains usable. |
 
-The expanded full browser run exposed the two modal keyboard failures; those were diagnosed and corrected, and both device variants passed in the final targeted follow-up. The full expanded suite was not repeated after that final focused correction. CI contains the complete suite for the pushed version; a remote CI result has not been claimed.
+An earlier expanded browser run exposed two modal keyboard failures. After correcting them, the complete final suite passed all 180 tests against the production build. Lint, type checking, the 188 unit/API/regression tests (with one optional real-model test skipped), and the 257-line lexical golden benchmark also passed again. CI contains the complete suite; a remote CI result has not been claimed.
 
 ## Deployment and remaining gates
 
 Git HTTPS proxy access and push permission were verified. The running proxy denies GitHub API requests despite the saved network additions. Vercel CLI has no authenticated account/project binding; an attempted secure login failed to fetch. No verified production deployment has been completed.
+
+The available production-delivery route is a normal fast-forward push to the repository's `main` branch. Vercel can deploy that push through its existing Git integration if this repository and production branch are connected in the owner's account. A successful GitHub push alone does not confirm that integration, a Vercel build, or a live deployment. The direct API and live-site connectivity checks still returned proxy CONNECT 403 on 18 October 2026.
 
 The reusable cloud `install_script`, `start_skill` and required network domains were saved to the environment draft. Saving is distinct from applying runtime settings or publishing an environment. Review/save the environment settings and publish through the product when ready; Vercel application deployment is a separate operation.
 
